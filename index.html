@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tempus by Abella - Wealth Management</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #000000;
+            background-image: radial-gradient(circle at 50% -20%, rgba(30, 30, 35, 0.4) 0%, transparent 60%);
+            background-attachment: fixed;
+        }
+        .apple-card {
+            background: rgba(10, 10, 12, 0.9);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .apple-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -10px rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        .apple-button { transition: transform 0.1s ease; }
+        .apple-button:active { transform: scale(0.96); }
+        .tab-content { animation: fadeIn 0.4s ease forwards; }
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000000; }
+        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+        
+        /* Barra de progreso */
+        .progress-bar-bg { background-color: #27272a; border-radius: 999px; height: 12px; width: 100%; overflow: hidden; }
+        .progress-bar-fill { background-color: #ffffff; height: 100%; transition: width 0.3s ease-out; }
+    </style>
+</head>
+<body class="text-zinc-100 min-h-screen selection:bg-white selection:text-black">
+
+    <header class="sticky top-0 z-50 backdrop-blur-2xl bg-black/90 border-b border-zinc-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-11 h-11 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13h2v8H3v-8zm4-6h2v14H7V7zm4-4h2v18h-2V3zm4 8h2v10h-2V11zm4 4h2v6h-2v-6z"></path></svg>
+                </div>
+                <div>
+                    <span class="text-xl font-bold tracking-widest text-white uppercase">Tempus</span>
+                    <span class="block text-[10px] text-zinc-500 tracking-widest uppercase">By Abella</span>
+                </div>
+            </div>
+            <nav class="flex space-x-1 bg-zinc-950 p-1.5 rounded-2xl border border-zinc-800">
+                <button onclick="switchTab('resumen')" id="btn-resumen" class="apple-button px-5 py-2.5 rounded-xl text-sm font-semibold bg-white text-black shadow-md">Resumen</button>
+                <button onclick="switchTab('flujo')" id="btn-flujo" class="apple-button px-5 py-2.5 rounded-xl text-sm font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900">Flujo de Caja</button>
+                <button onclick="switchTab('inversiones')" id="btn-inversiones" class="apple-button px-5 py-2.5 rounded-xl text-sm font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900">Inversiones</button>
+                <button onclick="switchTab('estrategia')" id="btn-estrategia" class="apple-button px-5 py-2.5 rounded-xl text-sm font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900">Estrategia</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- RESUMEN -->
+        <section id="tab-resumen" class="tab-content space-y-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-white">Panel General</h1>
+                    <p class="text-zinc-400 mt-1">Control de patrimonio, liquidez y métricas clave.</p>
+                </div>
+                <div class="flex gap-4">
+                    <div class="apple-card p-5 rounded-2xl flex flex-col justify-center">
+                        <span class="text-xs font-bold uppercase tracking-wider text-zinc-400">Tasa de Ahorro Mensual</span>
+                        <div id="kpi-ahorro" class="text-2xl font-bold text-white mt-1">0,0%</div>
+                    </div>
+                    <div class="apple-card bg-zinc-950 border border-zinc-800 p-5 rounded-2xl shadow-xl flex items-center justify-between gap-6">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-zinc-400">Patrimonio Neto Total</span>
+                            <div id="kpi-patrimonio" class="text-3xl font-bold text-white mt-1">0,00 €</div>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center text-white">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <div class="apple-card p-5 rounded-2xl">
+                    <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Liquidez (Banco)</span>
+                    <div id="kpi-liquidez" class="text-2xl font-bold text-white mt-2">0,00 €</div>
+                </div>
+                <div class="apple-card p-5 rounded-2xl">
+                    <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Flujo de Caja Neto</span>
+                    <div id="kpi-flujo" class="text-2xl font-bold text-white mt-2">0,00 €</div>
+                </div>
+                <div class="apple-card p-5 rounded-2xl relative">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Valor Cartera</span>
+                        <span id="kpi-roi-badge" class="text-xs font-semibold px-2 py-1 rounded bg-zinc-900 border border-zinc-700 text-white">ROI: 0%</span>
+                    </div>
+                    <div id="kpi-cartera" class="text-2xl font-bold text-white mt-2">0,00 €</div>
+                </div>
+            </div>
+
+            <!-- Gráficas Estadísticas -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="apple-card p-6 rounded-3xl flex flex-col justify-between">
+                    <div class="flex items-start justify-between gap-4 mb-4">
+                        <h2 class="text-lg font-bold text-white">Análisis de Gastos</h2>
+                        <div id="gastos-legend-menu" class="bg-black border border-zinc-800 rounded-xl p-2.5 text-xs space-y-1.5 min-w-[160px] shadow-xl"></div>
+                    </div>
+                    <div class="h-64 flex items-center justify-center relative">
+                        <canvas id="gastosChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="apple-card p-6 rounded-3xl flex flex-col justify-between">
+                    <div class="flex items-start justify-between gap-4 mb-4">
+                        <h2 class="text-lg font-bold text-white">Distribución de Cartera</h2>
+                        <div id="cartera-legend-menu" class="bg-black border border-zinc-800 rounded-xl p-2.5 text-xs space-y-1.5 min-w-[160px] shadow-xl"></div>
+                    </div>
+                    <div class="h-64 flex items-center justify-center relative">
+                        <canvas id="carteraChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CALENDARIO Y LÍNEA DE TIEMPO -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-4">
+                <div class="apple-card p-6 rounded-3xl flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 id="calendar-month-year" class="text-md font-bold text-white capitalize">Octubre 2026</h3>
+                        <div class="flex space-x-1.5">
+                            <button onclick="changeMonth(-1)" class="w-7 h-7 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white flex items-center justify-center text-xs apple-button font-bold border border-zinc-700">‹</button>
+                            <button onclick="changeMonth(1)" class="w-7 h-7 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white flex items-center justify-center text-xs apple-button font-bold border border-zinc-700">›</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-7 text-center text-xs font-semibold text-zinc-500 mb-2">
+                        <span>Lu</span><span>Ma</span><span>Mi</span><span>Ju</span><span>Vi</span><span>Sá</span><span>Do</span>
+                    </div>
+                    <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center text-sm"></div>
+                </div>
+
+                <div class="lg:col-span-2 apple-card p-6 rounded-3xl flex flex-col justify-between">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <h2 class="text-lg font-bold text-white">Evolución Anual (Mensualizado)</h2>
+                    </div>
+                    <div class="h-64 flex items-center justify-center relative">
+                        <canvas id="timelineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FLUJO DE CAJA -->
+        <section id="tab-flujo" class="tab-content hidden space-y-8">
+            <h1 class="text-3xl font-bold text-white">Flujo de Caja</h1>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="apple-card p-6 rounded-3xl h-fit">
+                    <h2 class="text-lg font-bold text-white mb-4">Nueva Transacción</h2>
+                    <form id="transaction-form" onsubmit="handleTransactionSubmit(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Tipo</label>
+                            <select id="tx-type" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500">
+                                <option value="ingreso">Ingreso (Verde)</option>
+                                <option value="gasto">Gasto (Rojo)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Concepto</label>
+                            <input type="text" id="tx-desc" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Categoría</label>
+                            <input type="text" id="tx-category" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Importe (€)</label>
+                            <input type="number" step="0.01" id="tx-amount" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500">
+                        </div>
+                        <div class="border-t border-zinc-800 pt-4 space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Fecha</label>
+                                <input type="date" id="tx-start-date" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-zinc-500">
+                            </div>
+                        </div>
+                        <div class="flex gap-2 pt-2">
+                            <button type="submit" id="tx-submit-btn" class="apple-button w-full bg-white text-black font-bold py-3.5 rounded-xl mt-2">Registrar</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="lg:col-span-2 apple-card p-6 rounded-3xl">
+                    <h2 class="text-lg font-bold text-white mb-4">Historial</h2>
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="border-b border-zinc-800 text-xs uppercase text-zinc-400"><th class="py-3">Concepto</th><th>Cat.</th><th class="text-right">Importe</th><th></th></tr>
+                        </thead>
+                        <tbody id="transactions-table-body" class="divide-y divide-zinc-800/50"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- INVERSIONES -->
+        <section id="tab-inversiones" class="tab-content hidden space-y-8">
+            <div class="flex justify-between items-center">
+                <h1 class="text-3xl font-bold text-white">Gestión de Cartera</h1>
+                <button onclick="syncMarketData(event)" class="apple-button bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 text-white font-bold py-2 px-4 rounded-xl flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    <span>Sincronizar API</span>
+                </button>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="apple-card p-6 rounded-3xl h-fit">
+                    <h2 id="inv-form-title" class="text-lg font-bold text-white mb-4">Añadir Posición</h2>
+                    <form id="investment-form" onsubmit="handleInvestmentSubmit(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Nombre Comercial</label>
+                            <input type="text" id="inv-name" required placeholder="Ej: Vanguard Global" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Ticker API</label>
+                            <input type="text" id="inv-ticker" placeholder="Ej: VOO, AAPL" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Capital Invertido (€)</label>
+                            <input type="number" step="0.01" id="inv-buy" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Valor Actual Manual (€)</label>
+                            <input type="number" step="0.01" id="inv-current" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white">
+                        </div>
+                        <button type="submit" class="apple-button w-full bg-white text-black font-bold py-3.5 rounded-xl mt-2">Añadir a Cartera</button>
+                    </form>
+                </div>
+                <div class="lg:col-span-2 apple-card p-6 rounded-3xl">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="border-b border-zinc-800 text-xs uppercase text-zinc-400">
+                                <th class="py-3">Activo</th>
+                                <th>Ticker</th>
+                                <th class="text-right">Invertido</th>
+                                <th class="text-right">Actual</th>
+                                <th class="text-right">ROI</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="investments-table-body" class="divide-y divide-zinc-800/50"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ESTRATEGIA: PLANIFICADOR DE OBJETIVOS -->
+        <section id="tab-estrategia" class="tab-content hidden space-y-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-white">Planificador de Objetivos</h1>
+                    <p class="text-zinc-400 mt-1">Establece tu meta financiera y recibe recomendaciones matemáticas para lograrla.</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="exportData()" class="apple-button bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 text-white py-2 px-4 rounded-xl text-sm font-bold">⬇ Exportar Datos</button>
+                    <label class="apple-button bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 text-white py-2 px-4 rounded-xl text-sm font-bold cursor-pointer">
+                        ⬆ Importar <input type="file" id="import-file" class="hidden" accept=".json" onchange="importData(event)">
+                    </label>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Configurador de Objetivo -->
+                <div class="apple-card p-6 rounded-3xl h-fit">
+                    <h2 class="text-lg font-bold text-white mb-4">Definir Meta</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Nombre del Objetivo</label>
+                            <!-- EVENTO EN TIEMPO REAL: oninput -->
+                            <input type="text" id="goal-name" placeholder="Ej: Entrada Vehículo" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500" oninput="saveGoalConfig()">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Importe Necesario (€)</label>
+                            <!-- EVENTO EN TIEMPO REAL: oninput -->
+                            <input type="number" id="goal-amount" placeholder="15000" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500" oninput="saveGoalConfig()">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-zinc-400 mb-2 mt-4">Dinero Destinado</label>
+                            <!-- EVENTO DE SELECCIÓN: onchange -->
+                            <select id="goal-source" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500" onchange="saveGoalConfig()">
+                                <option value="patrimonio">Usar Patrimonio Total (Cartera + Banco)</option>
+                                <option value="liquidez">Usar Solo Liquidez (Banco)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progreso y Recomendaciones -->
+                <div class="lg:col-span-2 space-y-8">
+                    
+                    <!-- Tarjeta de Progreso -->
+                    <div class="apple-card p-6 rounded-3xl">
+                        <div class="flex justify-between items-end mb-4">
+                            <div>
+                                <h3 class="text-sm font-bold uppercase tracking-wider text-zinc-400" id="display-goal-name">Tu Objetivo</h3>
+                                <div class="text-3xl font-bold text-white mt-1">
+                                    <span id="display-goal-current">0 €</span> <span class="text-lg text-zinc-500">/ <span id="display-goal-target">0 €</span></span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-2xl font-bold text-white" id="display-goal-pct">0%</span>
+                            </div>
+                        </div>
+                        <!-- Barra -->
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" id="goal-progress-bar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Panel de Recomendaciones Inteligentes -->
+                    <div class="apple-card p-6 rounded-3xl">
+                        <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Recomendaciones Estratégicas
+                        </h2>
+                        <div id="recommendations-container" class="space-y-4">
+                            <!-- Inyectado por JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const API_KEY = 'WXLTURDEJK2RXLM6'; 
+        
+        const defaultTransactions = [
+            { desc: 'Saldo inicial', category: 'Liquidez', type: 'ingreso', amount: 0.57, startDate: '2026-10-01' },
+            { desc: 'Ingreso inicial', category: 'Liquidez', type: 'ingreso', amount: 115.62, startDate: '2026-10-01' },
+            { desc: 'Uber', category: 'Transporte', type: 'gasto', amount: 30.97, startDate: '2026-10-05' },
+            { desc: 'Churros', category: 'Comida', type: 'gasto', amount: 4.50, startDate: '2026-10-10' },
+            { desc: 'Uber', category: 'Transporte', type: 'gasto', amount: 19.98, startDate: '2026-10-15' },
+            { desc: 'Gimnasio', category: 'Deportes', type: 'gasto', amount: 40.90, startDate: '2026-10-01' }
+        ];
+
+        const defaultInvestments = [
+            { name: 'Vanguard Global', ticker: 'VOO', buyPrice: 1934.27, currentPrice: 2202.36 },
+            { name: 'Nasdaq 100', ticker: 'QQQ', buyPrice: 34.00, currentPrice: 35.14 },
+            { name: 'Plata', ticker: 'PHAG', buyPrice: 207.38, currentPrice: 131.79 }
+        ];
+
+        let savedTx = null;
+        let savedInv = null;
+        const keysTx = ['tempus_data_tx_v6', 'tempus_ios_tx_v5', 'tempus_data_tx_v3', 'tempus_tx'];
+        const keysInv = ['tempus_data_inv_v6', 'tempus_ios_inv_v5', 'tempus_data_inv_v3', 'tempus_inv'];
+
+        for (let k of keysTx) {
+            let data = localStorage.getItem(k);
+            if (data) { try { let parsed = JSON.parse(data); if (parsed && parsed.length > 0) { savedTx = parsed; break; } } catch(e){} }
+        }
+        for (let k of keysInv) {
+            let data = localStorage.getItem(k);
+            if (data) { try { let parsed = JSON.parse(data); if (parsed && parsed.length > 0) { savedInv = parsed; break; } } catch(e){} }
+        }
+
+        let transactions = (savedTx && savedTx.length > 0) ? savedTx : [...defaultTransactions];
+        let investments = (savedInv && savedInv.length > 0) ? savedInv : [...defaultInvestments];
+
+        // Cargar configuración de objetivos de la memoria
+        let goalConfig = JSON.parse(localStorage.getItem('tempus_goal_config')) || { name: 'Entrada Vehículo', amount: 15000, source: 'patrimonio' };
+
+        function saveData() {
+            localStorage.setItem('tempus_data_tx_v6', JSON.stringify(transactions));
+            localStorage.setItem('tempus_data_inv_v6', JSON.stringify(investments));
+        }
+
+        function saveGoalConfig() {
+            goalConfig.name = document.getElementById('goal-name').value || 'Mi Objetivo';
+            goalConfig.amount = parseFloat(document.getElementById('goal-amount').value) || 0;
+            goalConfig.source = document.getElementById('goal-source').value;
+            localStorage.setItem('tempus_goal_config', JSON.stringify(goalConfig));
+            updateUI(); // Esto refresca la pantalla sin borrar lo que estás tecleando
+        }
+
+        let gastosChartInstance = null, carteraChartInstance = null, timelineChartInstance = null;
+        const chartColors = ['#ffffff', '#d4d4d8', '#a1a1aa', '#71717a', '#52525b'];
+        let currentCalendarDate = new Date();
+
+        function switchTab(tabName) {
+            ['resumen', 'flujo', 'inversiones', 'estrategia'].forEach(t => {
+                const section = document.getElementById(`tab-${t}`);
+                const btn = document.getElementById(`btn-${t}`);
+                if (section) section.classList.toggle('hidden', t !== tabName);
+                if (btn) {
+                    if (t === tabName) btn.className = "apple-button px-5 py-2.5 rounded-xl text-sm font-semibold bg-white text-black shadow-md";
+                    else btn.className = "apple-button px-5 py-2.5 rounded-xl text-sm font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900";
+                }
+            });
+            updateUI();
+        }
+
+        function formatMoney(amount) {
+            return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(amount);
+        }
+
+        function updateUI() {
+            Chart.defaults.font.family = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+            Chart.defaults.color = '#a1a1aa';
+            
+            let ing = transactions.filter(t => t.type === 'ingreso').reduce((a, t) => a + t.amount, 0);
+            let gas = transactions.filter(t => t.type === 'gasto').reduce((a, t) => a + t.amount, 0);
+            let liq = ing - gas;
+            let invBuy = investments.reduce((a, i) => a + i.buyPrice, 0);
+            let invCur = investments.reduce((a, i) => a + i.currentPrice, 0);
+            let pat = liq + invCur;
+            let roi = invBuy > 0 ? ((invCur - invBuy) / invBuy) * 100 : 0;
+            let tasaAhorro = ing > 0 ? ((ing - gas) / ing) * 100 : 0;
+
+            if(document.getElementById('kpi-patrimonio')) document.getElementById('kpi-patrimonio').innerText = formatMoney(pat);
+            if(document.getElementById('kpi-liquidez')) document.getElementById('kpi-liquidez').innerText = formatMoney(liq);
+            if(document.getElementById('kpi-ingresos')) document.getElementById('kpi-ingresos').innerText = formatMoney(ing);
+            if(document.getElementById('kpi-gastos')) document.getElementById('kpi-gastos').innerText = formatMoney(gas);
+            if(document.getElementById('kpi-flujo')) document.getElementById('kpi-flujo').innerText = formatMoney(liq);
+            if(document.getElementById('kpi-cartera')) document.getElementById('kpi-cartera').innerText = formatMoney(invCur);
+            
+            const kpiAhorro = document.getElementById('kpi-ahorro');
+            if(kpiAhorro) {
+                kpiAhorro.innerText = `${tasaAhorro.toFixed(1)}%`;
+                kpiAhorro.className = `text-2xl font-bold mt-1 ${tasaAhorro >= 20 ? 'text-emerald-400' : (tasaAhorro > 0 ? 'text-white' : 'text-rose-400')}`;
+            }
+            
+            const badge = document.getElementById('kpi-roi-badge');
+            if(badge) {
+                badge.innerText = `ROI: ${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%`;
+                badge.className = `text-xs font-semibold px-2 py-1 rounded border ${roi >= 0 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'}`;
+            }
+
+            renderTables();
+            renderCharts(invCur, liq);
+            renderCalendar();
+            updateGoalProgress(pat, liq, gas, ing);
+            saveData();
+        }
+
+        function renderTables() {
+            const txBody = document.getElementById('transactions-table-body');
+            if(txBody) {
+                txBody.innerHTML = '';
+                transactions.slice().reverse().forEach((t, idx) => {
+                    let realIdx = transactions.length - 1 - idx;
+                    txBody.innerHTML += `<tr class="hover:bg-zinc-900/50"><td class="py-3 text-white">${t.desc}</td><td class="text-zinc-400">${t.category}</td><td class="text-right font-bold ${t.type==='ingreso'?'text-emerald-400':'text-rose-400'}">${t.type==='ingreso'?'+':'-'}${formatMoney(t.amount)}</td><td class="text-right"><button onclick="deleteTransaction(${realIdx})" class="text-zinc-500 hover:text-rose-400 font-bold">✕</button></td></tr>`;
+                });
+            }
+
+            const invBody = document.getElementById('investments-table-body');
+            if(invBody) {
+                invBody.innerHTML = '';
+                investments.forEach((i, idx) => {
+                    let p = ((i.currentPrice - i.buyPrice)/i.buyPrice)*100;
+                    invBody.innerHTML += `<tr class="hover:bg-zinc-900/50"><td class="py-3 text-white">${i.name}</td><td class="text-zinc-400 font-mono text-xs">${i.ticker || '-'}</td><td class="text-right text-zinc-400">${formatMoney(i.buyPrice)}</td><td class="text-right font-bold text-white">${formatMoney(i.currentPrice)}</td><td class="text-right ${p>=0?'text-emerald-400':'text-rose-400'}">${p.toFixed(2)}%</td><td class="text-right"><button onclick="deleteInvestment(${idx})" class="text-zinc-500 hover:text-rose-400 font-bold">✕</button></td></tr>`;
+                });
+            }
+        }
+
+        function renderCharts(invCur, liq) {
+            const canvasCartera = document.getElementById('carteraChart');
+            const canvasGastos = document.getElementById('gastosChart');
+            const canvasTimeline = document.getElementById('timelineChart');
+            
+            if(canvasCartera) {
+                if (carteraChartInstance) carteraChartInstance.destroy();
+                const carteraMenu = document.getElementById('cartera-legend-menu');
+                if (carteraMenu) {
+                    carteraMenu.innerHTML = '';
+                    investments.forEach((i, idx) => {
+                        let pct = invCur > 0 ? ((i.currentPrice / invCur) * 100).toFixed(1) : 0;
+                        let color = chartColors[idx % chartColors.length];
+                        carteraMenu.innerHTML += `<div class="flex items-center justify-between gap-3"><div class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${color};"></span><span class="text-zinc-300 font-medium truncate max-w-[90px]">${i.name}</span></div><span class="text-white font-bold">${pct}%</span></div>`;
+                    });
+                }
+                carteraChartInstance = new Chart(canvasCartera.getContext('2d'), {
+                    type: 'doughnut',
+                    data: { labels: investments.map(i=>i.name), datasets: [{ data: investments.map(i=>i.currentPrice), backgroundColor: chartColors, borderColor: '#000000', borderWidth: 2 }] },
+                    options: { 
+                        responsive: true, maintainAspectRatio: false, plugins: { 
+                            legend: { display:false },
+                            tooltip: { callbacks: { label: function(c) { let v = c.parsed; let t = c.dataset.data.reduce((a,b)=>a+b,0); let p = t>0?((v/t)*100).toFixed(1):0; return ` ${formatMoney(v)} (${p}%)`; }}}
+                        }, cutout: '75%' 
+                    }
+                });
+            }
+
+            if(canvasGastos) {
+                const gastosMap = {};
+                transactions.filter(t => t.type === 'gasto').forEach(t => { gastosMap[t.category] = (gastosMap[t.category] || 0) + t.amount; });
+                const gastoKeys = Object.keys(gastosMap);
+                const gastoValues = Object.values(gastosMap);
+                
+                if (gastosChartInstance) gastosChartInstance.destroy();
+                const gastosMenu = document.getElementById('gastos-legend-menu');
+                if (gastosMenu) {
+                    gastosMenu.innerHTML = '';
+                    let totalGastos = gastoValues.reduce((a, b) => a + b, 0);
+                    gastoKeys.forEach((key, idx) => {
+                        let val = gastoValues[idx];
+                        let pct = totalGastos > 0 ? ((val / totalGastos) * 100).toFixed(1) : 0;
+                        let color = chartColors[idx % chartColors.length];
+                        gastosMenu.innerHTML += `<div class="flex items-center justify-between gap-3"><div class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${color};"></span><span class="text-zinc-300 font-medium truncate max-w-[90px]">${key}</span></div><span class="text-white font-bold">${pct}%</span></div>`;
+                    });
+                }
+
+                gastosChartInstance = new Chart(canvasGastos.getContext('2d'), {
+                    type: 'doughnut',
+                    data: { labels: gastoKeys.length > 0 ? gastoKeys : ['Sin gastos'], datasets: [{ data: gastoKeys.length > 0 ? gastoValues : [1], backgroundColor: chartColors.slice(0, gastoKeys.length > 0 ? gastoKeys.length : 1), borderColor: '#000000', borderWidth: 2 }] },
+                    options: { 
+                        responsive: true, maintainAspectRatio: false, plugins: { 
+                            legend: { display:false },
+                            tooltip: { callbacks: { label: function(c) { let v = c.parsed; let t = c.dataset.data.reduce((a,b)=>a+b,0); let p = t>0?((v/t)*100).toFixed(1):0; return ` ${formatMoney(v)} (${p}%)`; }}}
+                        }, cutout: '75%' 
+                    }
+                });
+            }
+
+            if(canvasTimeline) {
+                const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+                let monthlyIngresos = new Array(12).fill(0);
+                let monthlyGastos = new Array(12).fill(0);
+
+                transactions.forEach(t => {
+                    let monthIdx = 9;
+                    if (t.startDate) { let d = new Date(t.startDate); if (!isNaN(d.getTime())) monthIdx = d.getMonth(); }
+                    if (t.type === 'ingreso') monthlyIngresos[monthIdx] += t.amount; 
+                    else monthlyGastos[monthIdx] += t.amount; 
+                });
+
+                if (timelineChartInstance) timelineChartInstance.destroy();
+                timelineChartInstance = new Chart(canvasTimeline.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: months,
+                        datasets: [
+                            { label: 'Ingresos', data: monthlyIngresos, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.08)', borderWidth: 3, tension: 0.4, fill: true, pointBackgroundColor: '#10b981' },
+                            { label: 'Gastos', data: monthlyGastos, borderColor: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.08)', borderWidth: 3, tension: 0.4, fill: true, pointBackgroundColor: '#f43f5e' }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { x: { grid: { color: 'rgba(39, 39, 42, 0.5)' } }, y: { grid: { color: 'rgba(39, 39, 42, 0.5)' } } } }
+                });
+            }
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            const monthYearText = document.getElementById('calendar-month-year');
+            if(!grid || !monthYearText) return;
+
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            const monthNames = ["Enero", "Feb", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            monthYearText.innerText = `${monthNames[month]} ${year}`;
+
+            const firstDayIndex = (new Date(year, month, 1).getDay() + 6) % 7;
+            const totalDays = new Date(year, month + 1, 0).getDate();
+
+            grid.innerHTML = '';
+            for (let i = 0; i < firstDayIndex; i++) { grid.innerHTML += `<div></div>`; }
+
+            const today = new Date();
+            for (let day = 1; day <= totalDays; day++) {
+                let isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+                grid.innerHTML += `<div class="h-8 flex items-center justify-center rounded-xl font-medium transition-all ${isToday ? 'bg-white text-black font-bold shadow-lg' : 'text-zinc-300 hover:bg-zinc-800'}">${day}</div>`;
+            }
+        }
+
+        function changeMonth(direction) {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
+            renderCalendar();
+        }
+
+        // LÓGICA DEL PLANIFICADOR DE OBJETIVOS
+        function updateGoalProgress(pat = 0, liq = 0, gas = 0, ing = 0) {
+            let currentAmount = goalConfig.source === 'patrimonio' ? pat : liq;
+            let targetAmount = goalConfig.amount;
+            
+            let pct = targetAmount > 0 ? (currentAmount / targetAmount) * 100 : 0;
+            if (pct > 100) pct = 100;
+
+            const dispName = document.getElementById('display-goal-name');
+            const dispCurrent = document.getElementById('display-goal-current');
+            const dispTarget = document.getElementById('display-goal-target');
+            const dispPct = document.getElementById('display-goal-pct');
+            const bar = document.getElementById('goal-progress-bar');
+            const recBox = document.getElementById('recommendations-container');
+
+            if(dispName) dispName.innerText = goalConfig.name || "Tu Objetivo";
+            if(dispCurrent) dispCurrent.innerText = formatMoney(currentAmount);
+            if(dispTarget) dispTarget.innerText = formatMoney(targetAmount);
+            if(dispPct) dispPct.innerText = `${pct.toFixed(1)}%`;
+            if(bar) bar.style.width = `${pct}%`;
+
+            if(recBox) {
+                recBox.innerHTML = '';
+                if (targetAmount === 0 || isNaN(targetAmount)) {
+                    recBox.innerHTML = '<p class="text-zinc-400 text-sm">Configura un importe arriba para empezar a recibir recomendaciones.</p>';
+                    return;
+                }
+                if (currentAmount >= targetAmount) {
+                    recBox.innerHTML = '<div class="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl"><p class="text-emerald-400 font-bold">¡Objetivo Alcanzado!</p><p class="text-emerald-500/80 text-sm mt-1">Ya tienes el capital necesario disponible. ¡Enhorabuena!</p></div>';
+                    return;
+                }
+
+                // Recomendación 1: Tiempo estimado
+                let flujoNeto = ing - gas;
+                let restante = targetAmount - currentAmount;
+                let rec1 = "";
+                if (flujoNeto > 0) {
+                    let meses = Math.ceil(restante / flujoNeto);
+                    rec1 = `<div class="p-4 bg-zinc-900 border border-zinc-800 rounded-xl"><p class="text-white font-bold text-sm">📅 Proyección Actual</p><p class="text-zinc-400 text-sm mt-1">Manteniendo tu ahorro mensual actual (${formatMoney(flujoNeto)}), lograrás el objetivo en aprox. <strong class="text-white">${meses} meses</strong>.</p></div>`;
+                } else {
+                    rec1 = `<div class="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl"><p class="text-rose-400 font-bold text-sm">⚠️ Flujo Negativo</p><p class="text-rose-400/80 text-sm mt-1">Actualmente gastas más de lo que ingresas. Necesitas aumentar ingresos o reducir gastos para avanzar.</p></div>`;
+                }
+                recBox.innerHTML += rec1;
+
+                // Recomendación 2: Optimización de Gastos
+                const gastosMap = {};
+                transactions.filter(t => t.type === 'gasto').forEach(t => { gastosMap[t.category] = (gastosMap[t.category] || 0) + t.amount; });
+                const mainGasto = Object.keys(gastosMap).sort((a,b) => gastosMap[b] - gastosMap[a])[0];
+                if (mainGasto) {
+                    let ahorroPotencial = gastosMap[mainGasto] * 0.15;
+                    recBox.innerHTML += `<div class="p-4 bg-zinc-900 border border-zinc-800 rounded-xl"><p class="text-white font-bold text-sm">✂️ Optimización Rápida</p><p class="text-zinc-400 text-sm mt-1">Tu mayor gasto es en <strong>${mainGasto}</strong>. Si reduces esa partida solo un 15%, ahorrarías <strong class="text-emerald-400">+${formatMoney(ahorroPotencial)}</strong> extra cada mes.</p></div>`;
+                }
+
+                // Recomendación 3: Inversión de Liquidez
+                if (goalConfig.source === 'patrimonio' && liq > (gas * 3) && gas > 0) {
+                    recBox.innerHTML += `<div class="p-4 bg-zinc-900 border border-zinc-800 rounded-xl"><p class="text-white font-bold text-sm">📈 Liquidez Estancada</p><p class="text-zinc-400 text-sm mt-1">Tienes más de 3 meses de gastos parados en el banco. Considera invertir el exceso en tu fondo global para que el interés compuesto trabaje para ti y llegues antes a la meta.</p></div>`;
+                }
+            }
+        }
+
+        function handleTransactionSubmit(e) {
+            e.preventDefault();
+            transactions.push({ type: document.getElementById('tx-type').value, desc: document.getElementById('tx-desc').value, category: document.getElementById('tx-category').value, amount: parseFloat(document.getElementById('tx-amount').value), startDate: document.getElementById('tx-start-date').value || new Date().toISOString().split('T')[0] });
+            document.getElementById('transaction-form').reset(); updateUI();
+        }
+
+        function handleInvestmentSubmit(e) {
+            e.preventDefault();
+            investments.push({ name: document.getElementById('inv-name').value, ticker: document.getElementById('inv-ticker').value, buyPrice: parseFloat(document.getElementById('inv-buy').value), currentPrice: parseFloat(document.getElementById('inv-current').value) });
+            document.getElementById('investment-form').reset(); updateUI();
+        }
+
+        function deleteTransaction(idx) { transactions.splice(idx, 1); updateUI(); }
+        function deleteInvestment(idx) { investments.splice(idx, 1); updateUI(); }
+
+        function exportData() {
+            const dataStr = JSON.stringify({ transactions, investments, goalConfig });
+            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+            const link = document.createElement('a');
+            link.setAttribute('href', dataUri); link.setAttribute('download', 'tempus_desktop_backup.json');
+            document.body.appendChild(link); link.click(); link.remove();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.transactions) transactions = data.transactions;
+                    if (data.investments) investments = data.investments;
+                    if (data.goalConfig) { goalConfig = data.goalConfig; }
+                    
+                    // Al importar, también rellenamos los inputs visuales
+                    if(document.getElementById('goal-name')) document.getElementById('goal-name').value = goalConfig.name;
+                    if(document.getElementById('goal-amount')) document.getElementById('goal-amount').value = goalConfig.amount || '';
+                    if(document.getElementById('goal-source')) document.getElementById('goal-source').value = goalConfig.source;
+                    
+                    updateUI();
+                    alert("Backup restaurado con éxito.");
+                } catch (err) { alert("Archivo inválido."); }
+            };
+            reader.readAsText(file);
+        }
+
+        async function syncMarketData(event) {
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> <span>Sincronizando...</span>`;
+            let updatedCount = 0;
+            try {
+                for (let inv of investments) {
+                    if (inv.ticker && inv.ticker.length <= 6) {
+                        const res = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${inv.ticker}&apikey=${API_KEY}`);
+                        const data = await res.json();
+                        if (data['Global Quote'] && data['Global Quote']['05. price']) {
+                            inv.currentPrice = parseFloat(data['Global Quote']['05. price']);
+                            updatedCount++;
+                        }
+                        await new Promise(r => setTimeout(r, 1800));
+                    }
+                }
+                updateUI();
+                alert(updatedCount > 0 ? `Actualizados ${updatedCount} activos.` : "Límite diario de API alcanzado o tickers sin cotización.");
+            } catch (e) { alert("Error conectando con el mercado."); } finally { btn.innerHTML = originalText; }
+        }
+
+        // Iniciar campos del formulario con los valores guardados
+        window.onload = function() {
+            if(document.getElementById('goal-name')) document.getElementById('goal-name').value = goalConfig.name;
+            if(document.getElementById('goal-amount')) document.getElementById('goal-amount').value = goalConfig.amount || '';
+            if(document.getElementById('goal-source')) document.getElementById('goal-source').value = goalConfig.source;
+            updateUI();
+        };
+    </script>
+</body>
+</html>
