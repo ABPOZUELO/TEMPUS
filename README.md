@@ -2,7 +2,7 @@
 
 **Tempus** es una aplicación web que he desarrollado para gestionar finanzas personales, gastos e inversiones de forma visual, rápida y con privacidad total.
 
-La creé porque buscaba una herramienta clara para ver mi patrimonio y mis ahorros en un solo panel, sin tener que conectar mis cuentas bancarias a plataformas de terceros ni exponer mi información personal.
+La razón por la que comencé a crear esta aplicación es porque tenía mis finanzas completamente dispersas: la nómina y los gastos del día a día en un banco, las inversiones en otra plataforma, los ahorros por otro lado... Quería una herramienta que unificara todo en un único sitio, para tener una visión clara de mi patrimonio sin complicaciones y sin tener que conectar mis cuentas bancarias ni exponer mi información personal.
 
 ---
 
