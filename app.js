@@ -1,30 +1,72 @@
-// Almacenamiento local en el navegador del usuario (Sin conexión a bases de datos externas)
-        let userAlias = localStorage.getItem('tempus_demo_alias') || 'Invitado';
-        let transactions = JSON.parse(localStorage.getItem('tempus_demo_tx')) || [];
-        let investments = JSON.parse(localStorage.getItem('tempus_demo_inv')) || [];
-        let goalConfig = JSON.parse(localStorage.getItem('tempus_demo_goal')) || { name: 'Mi Objetivo', amount: 10000, source: 'patrimonio', apiKey: '' };
+        // ------------------ ESTADO Y AUTENTICACIÓN LOCAL (ZERO-KNOWLEDGE) ------------------
+        let currentUser = null;
+        let userAlias = '';
+        let transactions = [];
+        let investments = [];
+        let goalConfig = { name: 'Mi Objetivo', amount: 10000, source: 'patrimonio', apiKey: '' };
+        let isLoginMode = true;
 
         let gastosChartInstance = null, carteraChartInstance = null, timelineChartInstance = null;
         const chartColors = ['#ffffff', '#d4d4d8', '#a1a1aa', '#71717a', '#52525b', '#3f3f46', '#27272a'];
         let currentCalendarDate = new Date();
 
         function updateAliasDisplay() {
-            const display = userAlias || 'Invitado';
+            const display = userAlias || (currentUser ? currentUser.alias || currentUser.email.split('@')[0] : 'Usuario');
             const greeting = document.getElementById('user-alias-greeting');
             if (greeting) greeting.textContent = display;
             const nav = document.getElementById('user-email-display');
             if (nav) nav.textContent = display;
         }
 
-        // Persistencia local privada
+        // Base de datos local particionada por usuario
+        function getUsersDb() {
+            try {
+                return JSON.parse(localStorage.getItem('tempus_users_db') || '{}');
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function saveUsersDb(db) {
+            localStorage.setItem('tempus_users_db', JSON.stringify(db));
+        }
+
+        function loadCurrentUserData() {
+            if (!currentUser) return;
+            const db = getUsersDb();
+            const userData = db[currentUser.email] || {};
+            userAlias = userData.alias || currentUser.alias || currentUser.email.split('@')[0];
+            transactions = userData.transacciones || [];
+            investments = userData.inversiones || [];
+            goalConfig = userData.configuracion || { name: 'Mi Objetivo', amount: 10000, source: 'patrimonio', apiKey: '' };
+
+            updateAliasDisplay();
+
+            if (document.getElementById('goal-name')) document.getElementById('goal-name').value = goalConfig.name || '';
+            if (document.getElementById('goal-amount')) document.getElementById('goal-amount').value = goalConfig.amount || '';
+            if (document.getElementById('goal-source')) document.getElementById('goal-source').value = goalConfig.source || 'patrimonio';
+            if (document.getElementById('user-api-key')) document.getElementById('user-api-key').value = goalConfig.apiKey || '';
+            if (document.getElementById('tx-start-date')) {
+                document.getElementById('tx-start-date').value = new Date().toISOString().split('T')[0];
+            }
+            updateUI();
+        }
+
         function saveDataToCloud() {
-            localStorage.setItem('tempus_demo_alias', userAlias);
-            localStorage.setItem('tempus_demo_tx', JSON.stringify(transactions));
-            localStorage.setItem('tempus_demo_inv', JSON.stringify(investments));
-            localStorage.setItem('tempus_demo_goal', JSON.stringify(goalConfig));
+            if (!currentUser) return;
+            const db = getUsersDb();
+            if (!db[currentUser.email]) {
+                db[currentUser.email] = { password: '', alias: userAlias };
+            }
+            db[currentUser.email].alias = userAlias;
+            db[currentUser.email].transacciones = transactions;
+            db[currentUser.email].inversiones = investments;
+            db[currentUser.email].configuracion = goalConfig;
+            saveUsersDb(db);
         }
 
         window.saveGoalConfig = () => {
+            if (!currentUser) return;
             goalConfig.name = document.getElementById('goal-name').value || 'Mi Objetivo';
             goalConfig.amount = parseFloat(document.getElementById('goal-amount').value) || 0;
             goalConfig.source = document.getElementById('goal-source').value;
@@ -33,25 +75,127 @@
         };
 
         window.handleLogout = () => {
-            if (confirm("¿Quieres restablecer todos los registros de demostración en este navegador?")) {
-                localStorage.removeItem('tempus_demo_tx');
-                localStorage.removeItem('tempus_demo_inv');
-                localStorage.removeItem('tempus_demo_goal');
-                localStorage.removeItem('tempus_demo_alias');
+            if (confirm("¿Quieres cerrar sesión?")) {
+                localStorage.removeItem('tempus_auth_user');
                 location.reload();
             }
         };
 
-        document.addEventListener('DOMContentLoaded', () => {
-            updateAliasDisplay();
-            if(document.getElementById('goal-name')) document.getElementById('goal-name').value = goalConfig.name || '';
-            if(document.getElementById('goal-amount')) document.getElementById('goal-amount').value = goalConfig.amount || '';
-            if(document.getElementById('goal-source')) document.getElementById('goal-source').value = goalConfig.source || 'patrimonio';
-            if(document.getElementById('user-api-key')) document.getElementById('user-api-key').value = goalConfig.apiKey || '';
-            if(document.getElementById('tx-start-date')) {
-                document.getElementById('tx-start-date').value = new Date().toISOString().split('T')[0];
+        function setupAuthEvents() {
+            const toggleBtn = document.getElementById('auth-toggle-btn');
+            const authForm = document.getElementById('auth-form');
+            const title = document.getElementById('auth-title');
+            const subtitle = document.getElementById('auth-subtitle');
+            const submitBtn = document.getElementById('auth-submit-btn');
+            const aliasGroup = document.getElementById('auth-alias-group');
+
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    isLoginMode = !isLoginMode;
+                    if (isLoginMode) {
+                        if (title) title.innerText = "Iniciar Sesión";
+                        if (subtitle) subtitle.innerText = "Accede a tu portfolio personal";
+                        if (submitBtn) {
+                            submitBtn.innerText = "Entrar";
+                            submitBtn.className = "apple-button w-full bg-white text-black font-bold py-3.5 rounded-xl mt-2";
+                        }
+                        if (toggleBtn) toggleBtn.innerText = "¿No tienes cuenta? Regístrate aquí";
+                        if (aliasGroup) aliasGroup.classList.add('hidden');
+                    } else {
+                        if (title) title.innerText = "Crear Cuenta";
+                        if (subtitle) subtitle.innerText = "Regístrate para gestionar tu patrimonio";
+                        if (submitBtn) {
+                            submitBtn.innerText = "Registrarse";
+                            submitBtn.className = "apple-button w-full bg-zinc-800 text-white font-bold py-3.5 rounded-xl mt-2 border border-zinc-700 hover:bg-zinc-700";
+                        }
+                        if (toggleBtn) toggleBtn.innerText = "¿Ya tienes cuenta? Inicia sesión";
+                        if (aliasGroup) aliasGroup.classList.remove('hidden');
+                    }
+                });
             }
-            updateUI();
+
+            if (authForm) {
+                authForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const emailInput = document.getElementById('login-email');
+                    const passInput = document.getElementById('login-password');
+                    const aliasInput = document.getElementById('register-alias');
+
+                    const email = (emailInput?.value || '').trim().toLowerCase();
+                    const pass = passInput?.value || '';
+                    const alias = (aliasInput?.value || '').trim();
+
+                    if (!email || !pass) {
+                        alert("Por favor, introduce correo y contraseña.");
+                        return;
+                    }
+
+                    const db = getUsersDb();
+
+                    if (isLoginMode) {
+                        const user = db[email];
+                        if (!user || user.password !== pass) {
+                            alert("Credenciales incorrectas o usuario no registrado. Si eres nuevo, pulsa en '¿No tienes cuenta? Regístrate aquí'.");
+                            return;
+                        }
+                        currentUser = { email, alias: user.alias || email.split('@')[0] };
+                        localStorage.setItem('tempus_auth_user', JSON.stringify(currentUser));
+                        document.getElementById('login-screen')?.classList.add('hidden');
+                        document.getElementById('app-content')?.classList.remove('hidden');
+                        loadCurrentUserData();
+                    } else {
+                        if (pass.length < 6) {
+                            alert("La contraseña debe tener al menos 6 caracteres.");
+                            return;
+                        }
+                        if (db[email]) {
+                            alert("Este correo electrónico ya está registrado en este navegador. Inicia sesión con él.");
+                            return;
+                        }
+                        const finalAlias = alias || email.split('@')[0];
+                        db[email] = {
+                            password: pass,
+                            alias: finalAlias,
+                            transacciones: [],
+                            inversiones: [],
+                            configuracion: { name: 'Mi Objetivo', amount: 10000, source: 'patrimonio', apiKey: '' }
+                        };
+                        saveUsersDb(db);
+                        currentUser = { email, alias: finalAlias };
+                        localStorage.setItem('tempus_auth_user', JSON.stringify(currentUser));
+                        document.getElementById('login-screen')?.classList.add('hidden');
+                        document.getElementById('app-content')?.classList.remove('hidden');
+                        loadCurrentUserData();
+                        alert("¡Cuenta creada con éxito! Bienvenido a Tempus.");
+                    }
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupAuthEvents();
+            let savedAuth = null;
+            try {
+                savedAuth = JSON.parse(localStorage.getItem('tempus_auth_user') || 'null');
+            } catch (e) {
+                savedAuth = null;
+            }
+
+            if (savedAuth && savedAuth.email) {
+                const db = getUsersDb();
+                if (db[savedAuth.email]) {
+                    currentUser = savedAuth;
+                    document.getElementById('login-screen')?.classList.add('hidden');
+                    document.getElementById('app-content')?.classList.remove('hidden');
+                    loadCurrentUserData();
+                    return;
+                }
+            }
+
+            // Si no hay sesión válida, mostrar login obligatoriamente
+            currentUser = null;
+            document.getElementById('login-screen')?.classList.remove('hidden');
+            document.getElementById('app-content')?.classList.add('hidden');
         });
 
         // ------------------ FUNCIONES GLOBALES ------------------
@@ -486,7 +630,7 @@
         // ------------------ GESTIÓN DE PERFIL LOCAL (ZERO-KNOWLEDGE) ------------------
         window.openProfileModal = () => {
             const currentEmailEl = document.getElementById('profile-current-email');
-            if (currentEmailEl) currentEmailEl.textContent = `${userAlias || 'Invitado'} • Almacenamiento Local`;
+            if (currentEmailEl) currentEmailEl.textContent = `${userAlias || 'Usuario'} • ${currentUser ? currentUser.email : 'Sesión Local'}`;
             const aliasInput = document.getElementById('profile-new-alias');
             if (aliasInput) aliasInput.value = userAlias || '';
             const msgEl = document.getElementById('profile-msg');
@@ -510,7 +654,7 @@
             saveDataToCloud();
             updateAliasDisplay();
             const currentEmailEl = document.getElementById('profile-current-email');
-            if (currentEmailEl) currentEmailEl.textContent = `${userAlias} • Almacenamiento Local`;
+            if (currentEmailEl) currentEmailEl.textContent = `${userAlias} • ${currentUser ? currentUser.email : 'Sesión Local'}`;
             showProfileMessage('Alias actualizado con éxito.', true);
         };
 
