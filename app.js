@@ -1,202 +1,168 @@
-        // ------------------ ESTADO Y AUTENTICACIÓN LOCAL (ZERO-KNOWLEDGE) ------------------
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider, verifyBeforeUpdateEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB2a7vhtnbeQqBhHtWTUlvzS6vDKDKyuqM",
+            authDomain: "tempus-c7811.firebaseapp.com",
+            projectId: "tempus-c7811",
+            storageBucket: "tempus-c7811.firebasestorage.app",
+            messagingSenderId: "750633422076",
+            appId: "1:750633422076:web:23fd20d53d8bdb661c1b79",
+            measurementId: "G-8TH366C1MH"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
         let currentUser = null;
         let userAlias = '';
         let transactions = [];
         let investments = [];
         let goalConfig = { name: 'Mi Objetivo', amount: 10000, source: 'patrimonio', apiKey: '' };
-        let isLoginMode = true;
 
         let gastosChartInstance = null, carteraChartInstance = null, timelineChartInstance = null;
         const chartColors = ['#ffffff', '#d4d4d8', '#a1a1aa', '#71717a', '#52525b', '#3f3f46', '#27272a'];
         let currentCalendarDate = new Date();
+        let isLoginMode = true;
 
         function updateAliasDisplay() {
-            const display = userAlias || (currentUser ? currentUser.alias || currentUser.email.split('@')[0] : 'Usuario');
+            const display = userAlias || (currentUser ? currentUser.email.split('@')[0] : 'Usuario');
             const greeting = document.getElementById('user-alias-greeting');
             if (greeting) greeting.textContent = display;
             const nav = document.getElementById('user-email-display');
             if (nav) nav.textContent = display;
         }
 
-        // Base de datos local particionada por usuario
-        function getUsersDb() {
+        // ------------------ AUTENTICACIÓN ------------------
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app-content').classList.remove('hidden');
+                updateAliasDisplay();
+                await loadUserData();
+                if(document.getElementById('tx-start-date')) {
+                    document.getElementById('tx-start-date').value = new Date().toISOString().split('T')[0];
+                }
+            } else {
+                currentUser = null;
+                userAlias = '';
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('app-content').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('auth-toggle-btn').addEventListener('click', () => {
+            isLoginMode = !isLoginMode;
+            const title = document.getElementById('auth-title');
+            const subtitle = document.getElementById('auth-subtitle');
+            const submitBtn = document.getElementById('auth-submit-btn');
+            const toggleBtn = document.getElementById('auth-toggle-btn');
+            const aliasGroup = document.getElementById('auth-alias-group');
+
+            if(isLoginMode) {
+                title.innerText = "Iniciar Sesión";
+                subtitle.innerText = "Accede a tu portfolio personal";
+                submitBtn.innerText = "Entrar";
+                submitBtn.className = "apple-button w-full bg-white text-black font-bold py-3.5 rounded-xl mt-2";
+                toggleBtn.innerText = "¿No tienes cuenta? Regístrate aquí";
+                if(aliasGroup) aliasGroup.classList.add('hidden');
+            } else {
+                title.innerText = "Crear Cuenta";
+                subtitle.innerText = "Regístrate para gestionar tu patrimonio";
+                submitBtn.innerText = "Registrarse";
+                submitBtn.className = "apple-button w-full bg-zinc-800 text-white font-bold py-3.5 rounded-xl mt-2 border border-zinc-700 hover:bg-zinc-700";
+                toggleBtn.innerText = "¿Ya tienes cuenta? Inicia sesión";
+                if(aliasGroup) aliasGroup.classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('auth-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const pass = document.getElementById('login-password').value;
+
+            if (isLoginMode) {
+                signInWithEmailAndPassword(auth, email, pass)
+                    .catch((error) => alert("Error al entrar: Revisa tus credenciales o asegúrate de tener cuenta."));
+            } else {
+                if(pass.length < 6) { alert("La contraseña debe tener al menos 6 caracteres"); return; }
+                const aliasInput = document.getElementById('register-alias');
+                const finalAlias = (aliasInput && aliasInput.value.trim()) || email.split('@')[0];
+                createUserWithEmailAndPassword(auth, email, pass)
+                    .then(async (userCred) => {
+                        userAlias = finalAlias;
+                        transactions = [];
+                        investments = [];
+                        await saveDataToCloud();
+                        updateAliasDisplay();
+                        alert("¡Cuenta creada con éxito!");
+                    })
+                    .catch((error) => alert("Error al registrar: El correo ya existe o es inválido."));
+            }
+        });
+
+        window.handleLogout = () => {
+            signOut(auth).then(() => { location.reload(); });
+        };
+
+        // ------------------ BASE DE DATOS (NUBE) ------------------
+
+        async function loadUserData() {
+            if (!currentUser) return;
+            document.getElementById('loading-screen').classList.remove('hidden');
             try {
-                return JSON.parse(localStorage.getItem('tempus_users_db') || '{}');
+                const docSnap = await getDoc(doc(db, "usuarios", currentUser.uid));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    userAlias = data.alias || data.userAlias || '';
+                    transactions = data.transacciones || [];
+                    investments = data.inversiones || [];
+                    if(data.configuracion) goalConfig = { ...goalConfig, ...data.configuracion };
+                }
+
+                updateAliasDisplay();
+
+                if(document.getElementById('goal-name')) document.getElementById('goal-name').value = goalConfig.name || '';
+                if(document.getElementById('goal-amount')) document.getElementById('goal-amount').value = goalConfig.amount || '';
+                if(document.getElementById('goal-source')) document.getElementById('goal-source').value = goalConfig.source || 'patrimonio';
+                if(document.getElementById('user-api-key')) document.getElementById('user-api-key').value = goalConfig.apiKey || '';
+
+                updateUI();
             } catch (e) {
-                return {};
+                console.error("Error leyendo datos: ", e);
+                alert("Hubo un error cargando tus datos. Revisa los permisos de Firebase.");
             }
+            document.getElementById('loading-screen').classList.add('hidden');
         }
 
-        function saveUsersDb(db) {
-            localStorage.setItem('tempus_users_db', JSON.stringify(db));
-        }
-
-        function loadCurrentUserData() {
+        async function saveDataToCloud() {
             if (!currentUser) return;
-            const db = getUsersDb();
-            const userData = db[currentUser.email] || {};
-            userAlias = userData.alias || currentUser.alias || currentUser.email.split('@')[0];
-            transactions = userData.transacciones || [];
-            investments = userData.inversiones || [];
-            goalConfig = userData.configuracion || { name: 'Mi Objetivo', amount: 10000, source: 'patrimonio', apiKey: '' };
-
-            updateAliasDisplay();
-
-            if (document.getElementById('goal-name')) document.getElementById('goal-name').value = goalConfig.name || '';
-            if (document.getElementById('goal-amount')) document.getElementById('goal-amount').value = goalConfig.amount || '';
-            if (document.getElementById('goal-source')) document.getElementById('goal-source').value = goalConfig.source || 'patrimonio';
-            if (document.getElementById('user-api-key')) document.getElementById('user-api-key').value = goalConfig.apiKey || '';
-            if (document.getElementById('tx-start-date')) {
-                document.getElementById('tx-start-date').value = new Date().toISOString().split('T')[0];
+            try {
+                await setDoc(doc(db, "usuarios", currentUser.uid), {
+                    email: currentUser.email,
+                    alias: userAlias || '',
+                    transacciones: transactions,
+                    inversiones: investments,
+                    configuracion: goalConfig,
+                    ultimaActualizacion: new Date().toISOString()
+                });
+            } catch (e) {
+                console.error("Error guardando datos: ", e);
             }
-            updateUI();
         }
 
-        function saveDataToCloud() {
-            if (!currentUser) return;
-            const db = getUsersDb();
-            if (!db[currentUser.email]) {
-                db[currentUser.email] = { password: '', alias: userAlias };
-            }
-            db[currentUser.email].alias = userAlias;
-            db[currentUser.email].transacciones = transactions;
-            db[currentUser.email].inversiones = investments;
-            db[currentUser.email].configuracion = goalConfig;
-            saveUsersDb(db);
-        }
-
-        window.saveGoalConfig = () => {
+        window.saveGoalConfig = async () => {
             if (!currentUser) return;
             goalConfig.name = document.getElementById('goal-name').value || 'Mi Objetivo';
             goalConfig.amount = parseFloat(document.getElementById('goal-amount').value) || 0;
             goalConfig.source = document.getElementById('goal-source').value;
             updateUI();
-            saveDataToCloud();
+            await saveDataToCloud();
         };
-
-        window.handleLogout = () => {
-            if (confirm("¿Quieres cerrar sesión?")) {
-                localStorage.removeItem('tempus_auth_user');
-                location.reload();
-            }
-        };
-
-        function setupAuthEvents() {
-            const toggleBtn = document.getElementById('auth-toggle-btn');
-            const authForm = document.getElementById('auth-form');
-            const title = document.getElementById('auth-title');
-            const subtitle = document.getElementById('auth-subtitle');
-            const submitBtn = document.getElementById('auth-submit-btn');
-            const aliasGroup = document.getElementById('auth-alias-group');
-
-            if (toggleBtn) {
-                toggleBtn.addEventListener('click', () => {
-                    isLoginMode = !isLoginMode;
-                    if (isLoginMode) {
-                        if (title) title.innerText = "Iniciar Sesión";
-                        if (subtitle) subtitle.innerText = "Accede a tu portfolio personal";
-                        if (submitBtn) {
-                            submitBtn.innerText = "Entrar";
-                            submitBtn.className = "apple-button w-full bg-white text-black font-bold py-3.5 rounded-xl mt-2";
-                        }
-                        if (toggleBtn) toggleBtn.innerText = "¿No tienes cuenta? Regístrate aquí";
-                        if (aliasGroup) aliasGroup.classList.add('hidden');
-                    } else {
-                        if (title) title.innerText = "Crear Cuenta";
-                        if (subtitle) subtitle.innerText = "Regístrate para gestionar tu patrimonio";
-                        if (submitBtn) {
-                            submitBtn.innerText = "Registrarse";
-                            submitBtn.className = "apple-button w-full bg-zinc-800 text-white font-bold py-3.5 rounded-xl mt-2 border border-zinc-700 hover:bg-zinc-700";
-                        }
-                        if (toggleBtn) toggleBtn.innerText = "¿Ya tienes cuenta? Inicia sesión";
-                        if (aliasGroup) aliasGroup.classList.remove('hidden');
-                    }
-                });
-            }
-
-            if (authForm) {
-                authForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const emailInput = document.getElementById('login-email');
-                    const passInput = document.getElementById('login-password');
-                    const aliasInput = document.getElementById('register-alias');
-
-                    const email = (emailInput?.value || '').trim().toLowerCase();
-                    const pass = passInput?.value || '';
-                    const alias = (aliasInput?.value || '').trim();
-
-                    if (!email || !pass) {
-                        alert("Por favor, introduce correo y contraseña.");
-                        return;
-                    }
-
-                    const db = getUsersDb();
-
-                    if (isLoginMode) {
-                        const user = db[email];
-                        if (!user || user.password !== pass) {
-                            alert("Credenciales incorrectas o usuario no registrado. Si eres nuevo, pulsa en '¿No tienes cuenta? Regístrate aquí'.");
-                            return;
-                        }
-                        currentUser = { email, alias: user.alias || email.split('@')[0] };
-                        localStorage.setItem('tempus_auth_user', JSON.stringify(currentUser));
-                        document.getElementById('login-screen')?.classList.add('hidden');
-                        document.getElementById('app-content')?.classList.remove('hidden');
-                        loadCurrentUserData();
-                    } else {
-                        if (pass.length < 6) {
-                            alert("La contraseña debe tener al menos 6 caracteres.");
-                            return;
-                        }
-                        if (db[email]) {
-                            alert("Este correo electrónico ya está registrado en este navegador. Inicia sesión con él.");
-                            return;
-                        }
-                        const finalAlias = alias || email.split('@')[0];
-                        db[email] = {
-                            password: pass,
-                            alias: finalAlias,
-                            transacciones: [],
-                            inversiones: [],
-                            configuracion: { name: 'Mi Objetivo', amount: 10000, source: 'patrimonio', apiKey: '' }
-                        };
-                        saveUsersDb(db);
-                        currentUser = { email, alias: finalAlias };
-                        localStorage.setItem('tempus_auth_user', JSON.stringify(currentUser));
-                        document.getElementById('login-screen')?.classList.add('hidden');
-                        document.getElementById('app-content')?.classList.remove('hidden');
-                        loadCurrentUserData();
-                        alert("¡Cuenta creada con éxito! Bienvenido a Tempus.");
-                    }
-                });
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            setupAuthEvents();
-            let savedAuth = null;
-            try {
-                savedAuth = JSON.parse(localStorage.getItem('tempus_auth_user') || 'null');
-            } catch (e) {
-                savedAuth = null;
-            }
-
-            if (savedAuth && savedAuth.email) {
-                const db = getUsersDb();
-                if (db[savedAuth.email]) {
-                    currentUser = savedAuth;
-                    document.getElementById('login-screen')?.classList.add('hidden');
-                    document.getElementById('app-content')?.classList.remove('hidden');
-                    loadCurrentUserData();
-                    return;
-                }
-            }
-
-            // Si no hay sesión válida, mostrar login obligatoriamente
-            currentUser = null;
-            document.getElementById('login-screen')?.classList.remove('hidden');
-            document.getElementById('app-content')?.classList.add('hidden');
-        });
 
         // ------------------ FUNCIONES GLOBALES ------------------
 
@@ -627,35 +593,72 @@
         };
 
         // ------------------ GESTIÓN DE PERFIL DE USUARIO ------------------
-        // ------------------ GESTIÓN DE PERFIL LOCAL (ZERO-KNOWLEDGE) ------------------
         window.openProfileModal = () => {
+            const user = currentUser || window.currentUser;
+            if (!user) return;
             const currentEmailEl = document.getElementById('profile-current-email');
-            if (currentEmailEl) currentEmailEl.textContent = `${userAlias || 'Usuario'} • ${currentUser ? currentUser.email : 'Sesión Local'}`;
+            if (currentEmailEl) currentEmailEl.textContent = `${userAlias ? userAlias + ' • ' : ''}${user.email || ''}`;
             const aliasInput = document.getElementById('profile-new-alias');
             if (aliasInput) aliasInput.value = userAlias || '';
             const msgEl = document.getElementById('profile-msg');
             if (msgEl) { msgEl.classList.add('hidden'); msgEl.textContent = ''; }
+            switchProfileTab('alias');
             document.getElementById('profile-modal').classList.remove('hidden');
         };
 
         window.closeProfileModal = () => {
             const modal = document.getElementById('profile-modal');
             if (modal) modal.classList.add('hidden');
+            const formAlias = document.getElementById('form-profile-alias');
+            const formEmail = document.getElementById('form-profile-email');
+            const formPwd = document.getElementById('form-profile-password');
+            if (formAlias) formAlias.reset();
+            if (formEmail) formEmail.reset();
+            if (formPwd) formPwd.reset();
+            const msgEl = document.getElementById('profile-msg');
+            if (msgEl) { msgEl.classList.add('hidden'); msgEl.textContent = ''; }
         };
 
-        window.handleProfileAliasSubmit = (e) => {
+        window.switchProfileTab = (tab) => {
+            const tabAliasBtn = document.getElementById('tab-btn-profile-alias');
+            const tabEmailBtn = document.getElementById('tab-btn-profile-email');
+            const tabPwdBtn = document.getElementById('tab-btn-profile-password');
+            const formAlias = document.getElementById('form-profile-alias');
+            const formEmail = document.getElementById('form-profile-email');
+            const formPwd = document.getElementById('form-profile-password');
+            const msgEl = document.getElementById('profile-msg');
+            if (msgEl) { msgEl.classList.add('hidden'); msgEl.textContent = ''; }
+
+            const activeClass = "flex-1 py-1.5 text-xs font-semibold rounded-lg bg-zinc-800 text-white shadow";
+            const inactiveClass = "flex-1 py-1.5 text-xs font-semibold rounded-lg text-zinc-400 hover:text-white";
+
+            if (tabAliasBtn) tabAliasBtn.className = tab === 'alias' ? activeClass : inactiveClass;
+            if (tabEmailBtn) tabEmailBtn.className = tab === 'email' ? activeClass : inactiveClass;
+            if (tabPwdBtn) tabPwdBtn.className = tab === 'password' ? activeClass : inactiveClass;
+
+            if (formAlias) formAlias.classList.toggle('hidden', tab !== 'alias');
+            if (formEmail) formEmail.classList.toggle('hidden', tab !== 'email');
+            if (formPwd) formPwd.classList.toggle('hidden', tab !== 'password');
+        };
+
+        window.handleProfileAliasSubmit = async (e) => {
             e.preventDefault();
+            if (!currentUser) return;
             const newAlias = document.getElementById('profile-new-alias').value.trim();
             if (!newAlias) {
                 showProfileMessage('El alias no puede estar vacío.');
                 return;
             }
-            userAlias = newAlias;
-            saveDataToCloud();
-            updateAliasDisplay();
-            const currentEmailEl = document.getElementById('profile-current-email');
-            if (currentEmailEl) currentEmailEl.textContent = `${userAlias} • ${currentUser ? currentUser.email : 'Sesión Local'}`;
-            showProfileMessage('Alias actualizado con éxito.', true);
+            try {
+                userAlias = newAlias;
+                await saveDataToCloud();
+                updateAliasDisplay();
+                const currentEmailEl = document.getElementById('profile-current-email');
+                if (currentEmailEl) currentEmailEl.textContent = `${userAlias} • ${currentUser.email}`;
+                showProfileMessage('Alias actualizado con éxito.', true);
+            } catch (err) {
+                showProfileMessage('Error al actualizar el alias.');
+            }
         };
 
         const showProfileMessage = (text, isSuccess = false) => {
@@ -666,6 +669,95 @@
                 : "mb-4 p-3 rounded-xl text-xs font-medium border bg-rose-950/60 border-rose-800 text-rose-300";
             msgEl.textContent = text;
             msgEl.classList.remove('hidden');
+        };
+
+        window.handleProfileEmailSubmit = async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
+            const newEmail = document.getElementById('profile-new-email').value.trim();
+            const currentPassword = document.getElementById('profile-email-current-password').value;
+            const btn = document.getElementById('btn-submit-email');
+            const originalText = btn ? btn.textContent : '';
+
+            try {
+                if (btn) { btn.disabled = true; btn.textContent = "Actualizando..."; }
+                const credential = EmailAuthProvider.credential(currentUser.email, currentPassword);
+                await reauthenticateWithCredential(currentUser, credential);
+
+                try {
+                    await updateEmail(currentUser, newEmail);
+                    const emailDisplay = document.getElementById('user-email-display');
+                    if (emailDisplay) emailDisplay.textContent = newEmail;
+                    const profileEmailDisplay = document.getElementById('profile-current-email');
+                    if (profileEmailDisplay) profileEmailDisplay.textContent = newEmail;
+                    showProfileMessage("Correo electrónico actualizado correctamente.", true);
+                    const pwdInput = document.getElementById('profile-email-current-password');
+                    if (pwdInput) pwdInput.value = '';
+                } catch (err) {
+                    if (err.code === 'auth/operation-not-allowed' && typeof verifyBeforeUpdateEmail === 'function') {
+                        await verifyBeforeUpdateEmail(currentUser, newEmail);
+                        showProfileMessage("Se ha enviado un correo de verificación a la nueva dirección para confirmar el cambio.", true);
+                    } else {
+                        throw err;
+                    }
+                }
+            } catch (error) {
+                let msg = "Error al actualizar el correo.";
+                if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                    msg = "La contraseña actual es incorrecta.";
+                } else if (error.code === 'auth/email-already-in-use') {
+                    msg = "Ese correo ya está registrado por otra cuenta.";
+                } else if (error.code === 'auth/invalid-email') {
+                    msg = "El formato del correo electrónico no es válido.";
+                }
+                showProfileMessage(msg, false);
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = originalText; }
+            }
+        };
+
+        window.handleProfilePasswordSubmit = async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
+            const currentPassword = document.getElementById('profile-pwd-current').value;
+            const newPassword = document.getElementById('profile-new-password').value;
+            const confirmPassword = document.getElementById('profile-confirm-password').value;
+            const btn = document.getElementById('btn-submit-password');
+            const originalText = btn ? btn.textContent : '';
+
+            if (newPassword !== confirmPassword) {
+                showProfileMessage("Las contraseñas nuevas no coinciden.", false);
+                return;
+            }
+            if (newPassword.length < 6) {
+                showProfileMessage("La nueva contraseña debe tener al menos 6 caracteres.", false);
+                return;
+            }
+
+            try {
+                if (btn) { btn.disabled = true; btn.textContent = "Actualizando..."; }
+                const credential = EmailAuthProvider.credential(currentUser.email, currentPassword);
+                await reauthenticateWithCredential(currentUser, credential);
+                await updatePassword(currentUser, newPassword);
+
+                showProfileMessage("Contraseña actualizada con éxito.", true);
+                const pwdCur = document.getElementById('profile-pwd-current');
+                const pwdNew = document.getElementById('profile-new-password');
+                const pwdConf = document.getElementById('profile-confirm-password');
+                if (pwdCur) pwdCur.value = '';
+                if (pwdNew) pwdNew.value = '';
+                if (pwdConf) pwdConf.value = '';
+            } catch (error) {
+                let msg = "Error al actualizar la contraseña.";
+                if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                    msg = "La contraseña actual es incorrecta.";
+                } else if (error.code === 'auth/weak-password') {
+                    msg = "La nueva contraseña es demasiado débil (mínimo 6 caracteres).";
+                }
+                showProfileMessage(msg, false);
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = originalText; }
+            }
         };
 
         // ------------------ IMPORTACIÓN INTELIGENTE DE PDF ------------------
