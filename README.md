@@ -1,57 +1,63 @@
 # Tempus by Abella ⏳📊
 
-**Tempus** es una aplicación web de gestión patrimonial (*Wealth Management*) de arquitectura *Local-First*, diseñada para ofrecer un control financiero exhaustivo, privado y multiplataforma. 
+**Tempus** es una aplicación web de gestión patrimonial (*Wealth Management*) construida bajo una filosofía de arquitectura **Local-First & Zero-Knowledge**, diseñada para ofrecer un control financiero exhaustivo, privado, ágil y visual.
 
-Desarrollada bajo un enfoque *mobile-first*, la herramienta permite registrar el flujo de caja, monitorear la distribución de una cartera de inversiones en tiempo real y, a través de un motor analítico interno, calcular proyecciones matemáticas para la consecución de objetivos financieros.
-
-## 🚀 Lógica de Negocio y Funcionalidades
-
-El sistema se estructura en cuatro módulos independientes que se retroalimentan entre sí:
-
-### 1. Panel de Control (Dashboard Analítico)
-Centro de mando que procesa el historial de transacciones y el estado de la cartera para extraer KPIs financieros en tiempo real:
-*   **Cálculo de Patrimonio Neto:** Suma dinámica de la liquidez disponible y el valor de mercado de los activos.
-*   **Tasa de Ahorro y Flujo Neto:** Evaluación de la salud financiera mensual cruzando ingresos contra gastos consolidados.
-*   **Visualización de Datos:** Integración con *Chart.js* para renderizar la distribución del gasto por categorías (Doughnut Chart) y proyectar la evolución temporal de ingresos y gastos mensualizados (Line Chart).
-
-### 2. Motor de Flujo de Caja (Cash Flow)
-Libro mayor (*ledger*) para el registro de movimientos de capital.
-*   Sistema de categorización para auditar el coste de vida.
-*   Impacto automático de cada transacción sobre el cálculo de la liquidez global del usuario.
-
-### 3. Planificador de Estrategia y Objetivos
-Un simulador algorítmico que cruza la meta financiera del usuario con su realidad patrimonial para generar recomendaciones accionables:
-*   **Proyección Temporal:** Calcula los meses exactos necesarios para alcanzar un objetivo dividiendo el capital restante entre el flujo de caja neto mensual.
-*   **Optimización de Gasto:** Identifica el "centro de coste" más alto del usuario y proyecta matemáticamente el impacto de aplicar una reducción marginal (15%) sobre el tiempo de consecución del objetivo.
-*   **Análisis de Coste de Oportunidad:** Monitoriza el ratio de liquidez frente a los gastos recurrentes. Si el sistema detecta un exceso de capital inmovilizado (superando los 3 meses de colchón de seguridad), emite alertas para reasignar ese capital hacia la cartera de inversión y combatir la inflación.
-
-### 4. Gestión de Cartera de Inversión
-Módulo de *tracking* de activos (Acciones, ETFs, Fondos Indexados, Materias Primas).
-*   **Sincronización API Real-Time:** Integración con la API REST de **Alpha Vantage** para obtener el precio de cotización en vivo (*Global Quote*) mediante *tickers* de mercado.
-*   Cálculo automático del Retorno de Inversión (ROI) tanto a nivel de posición individual como de cartera consolidada.
-
-## 🛠️ Arquitectura y Stack Tecnológico
-
-El proyecto está diseñado para funcionar íntegramente en el lado del cliente (Client-Side), garantizando un **entorno Zero-Knowledge** donde el servidor no tiene acceso a la información del usuario.
-
-*   **Frontend Core:** HTML5 semántico y Vanilla JavaScript (ES6+). La ausencia de *frameworks* pesados garantiza tiempos de carga casi instantáneos.
-*   **UI/UX:** Tailwind CSS (v4) configurado mediante variables CSS para soportar *Dark Mode* de forma nativa. Interfaz inspirada en el ecosistema Apple (componentes encapsulados, *glassmorphism* mediante `backdrop-filter`).
-*   **Persistencia de Datos (Local-First):** Uso intensivo de la API `LocalStorage` del navegador. Los datos se estructuran y almacenan en arrays JSON.
-*   **Portabilidad:** Sistema de backup integrado que serializa el estado completo de la base de datos local y permite al usuario exportar e importar su información financiera en formato `.json`.
-
-## 🔒 Privacidad y Seguridad
-
-A diferencia de las aplicaciones financieras tradicionales, Tempus no requiere creación de cuentas ni sincronización bancaria mediante *scrapping*. 
-*   **Garantía de Privacidad:** Todos los registros numéricos y anotaciones personales permanecen enclavados en el almacenamiento del dispositivo físico del usuario. 
-*   Las únicas llamadas externas se realizan desde el cliente hacia la API de Alpha Vantage, transmitiendo exclusivamente los *tickers* públicos de los activos, sin vincularlos a cantidades invertidas ni a identidades.
-
-## 📱 Despliegue y Uso como PWA
-
-La aplicación está desplegada en producción a través de **GitHub Pages**. Gracias a su diseño web responsivo, puede instalarse en cualquier dispositivo móvil eludiendo las tiendas de aplicaciones tradicionales:
-
-1. Acceder a la URL de producción mediante **Safari** (iOS) o **Chrome** (Android).
-2. Desplegar las opciones del navegador y seleccionar **"Añadir a la pantalla de inicio"**.
-3. La aplicación funcionará a pantalla completa como una *Progressive Web App (PWA)* independiente.
+Desarrollada con un enfoque multidispositivo, la herramienta permite auditar el flujo de caja, monitorear la distribución de una cartera de inversiones en tiempo real y, a través de un motor analítico interno, calcular proyecciones matemáticas para la consecución de objetivos financieros.
 
 ---
-*Diseñado, programado y desplegado por Jorge Abella Pozuelo.*
+
+## 🚀 Módulos y Funcionalidades
+
+El sistema se estructura en cuatro módulos independientes y altamente reactivos:
+
+### 1. Panel de Control (Dashboard Analítico)
+Centro de mando que procesa el historial de transacciones y el estado de la cartera para extraer métricas financieras clave en tiempo real:
+*   **Cálculo de Patrimonio Neto:** Suma dinámica de la liquidez disponible y el valor de mercado de los activos.
+*   **Tasa de Ahorro y Flujo Neto:** Evaluación de la salud financiera mensual cruzando ingresos contra gastos consolidados.
+*   **Visualización de Datos con Donut Charts:** Desglose interactivo de gastos por categorías y distribución visual de la cartera de inversiones (acciones, ETFs y liquidez).
+*   **Evolución Temporal:** Proyección y seguimiento continuo de ingresos y gastos mensualizados.
+
+### 2. Motor de Flujo de Caja (Cash Flow)
+Libro mayor (*ledger*) ágil para el registro y auditoría de movimientos de capital:
+*   **Filtros de Búsqueda Multicriterio:** Localización instantánea de registros por rango de fechas, categorías, tipo (ingreso/gasto) y buscador de texto por concepto.
+*   **Importador Inteligente de Extractos en PDF:** Motor de extracción en cliente mediante `pdf.js` que procesa extractos bancarios e incorpora un **algoritmo de detección de duplicados** para prevenir dobles registros.
+*   **Categorización Financiera:** Organización sistemática de ingresos y gastos para auditar el coste de vida.
+
+### 3. Planificador de Estrategia y Objetivos
+Simulador algorítmico que cruza la meta financiera del usuario con su balance patrimonial:
+*   **Proyección Temporal:** Estima los meses necesarios para alcanzar un objetivo según el flujo de caja neto mensual.
+*   **Optimización de Gasto:** Identifica el centro de coste más elevado y proyecta el impacto de aplicar reducciones marginales.
+*   **Análisis de Coste de Oportunidad:** Monitoriza el colchón de seguridad frente a gastos recurrentes y genera recomendaciones para combatir la inflación asignando excesos de liquidez hacia activos de inversión.
+
+### 4. Gestión de Cartera de Inversión
+Módulo de *tracking* de activos (Acciones, ETFs, Fondos Indexados, Criptoactivos):
+*   **Sincronización de Mercado:** Conexión con datos de cotización bursátil para calcular retornos y plusvalías latentes.
+*   **Cálculo de ROI:** Monitorización del Retorno de Inversión individual por posición y consolidado a nivel de cartera.
+
+---
+
+## 🔒 Privacidad por Diseño (Zero-Knowledge)
+
+A diferencia de las aplicaciones bancarias tradicionales o servicios centralizados:
+*   **Tus datos nunca salen de tu dispositivo:** Los registros numéricos, extractos y anotaciones financieras se almacenan exclusivamente en el almacenamiento local seguro (`LocalStorage`) de tu navegador web.
+*   **Cero Riesgo de Filtración Centralizada:** No existe un servidor central recopilando información personal ni acceso a datos bancarios mediante *scrapping*.
+*   **Privacidad Total:** Quien prueba o utiliza la aplicación opera en un entorno hermético y aislado, con la posibilidad de reiniciar sus datos o exportar copias de seguridad en formato `.json` en cualquier instante.
+
+---
+
+## 🛠️ Stack Tecnológico
+
+*   **Frontend Core:** HTML5 semántico, JavaScript moderno (ES6+), `Chart.js`, `jspdf`, `jspdf-autotable` y `pdf.js`.
+*   **UI/UX:** Tailwind CSS con estética Apple Dark Mode Glassmorphism (`backdrop-filter: blur`, tarjetas translúcidas, tipografía Helvetica Neue).
+*   **Persistencia:** Arquitectura *Local-First* orientada a cliente.
+
+---
+
+## 📱 Acceso y Despliegue
+
+La aplicación se encuentra desplegada como **Progressive Web App (PWA)** a través de **GitHub Pages**:
+1. Accede desde tu navegador web habitual (Safari en iOS o Chrome en Android / Desktop).
+2. En dispositivos móviles, puedes pulsar en **"Añadir a la pantalla de inicio"** para usarla como una aplicación nativa a pantalla completa.
+
+---
+*Diseñado y desarrollado por Jorge Abella Pozuelo.*

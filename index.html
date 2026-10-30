@@ -6,16 +6,25 @@
     <title>Tempus by Abella - Wealth Management</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background-color: #000000;
-            background-image: radial-gradient(circle at 50% -20%, rgba(30, 30, 35, 0.4) 0%, transparent 60%);
+            background-color: #0b0c10;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(20, 24, 32, 0.45) 0%, rgba(10, 11, 14, 0.75) 100%),
+                url('./background.jpg');
+            background-size: cover;
+            background-position: center;
             background-attachment: fixed;
+            background-repeat: no-repeat;
         }
         .apple-card {
-            background: rgba(10, 10, 12, 0.9);
-            backdrop-filter: blur(16px);
+            background: rgba(18, 18, 22, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.08);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
@@ -32,341 +41,501 @@
             100% { opacity: 1; transform: translateY(0); }
         }
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #000000; }
-        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
-        
-        .progress-bar-bg { background-color: #27272a; border-radius: 999px; height: 12px; width: 100%; overflow: hidden; }
+        ::-webkit-scrollbar-track { background: #232329; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #52525b; }
+
+        .progress-bar-bg { background-color: #3f3f46; border-radius: 999px; height: 12px; width: 100%; overflow: hidden; }
         .progress-bar-fill { background-color: #ffffff; height: 100%; transition: width 0.3s ease-out; }
     </style>
 </head>
 <body class="text-zinc-100 min-h-screen selection:bg-white selection:text-black">
 
-    <header class="sticky top-0 z-50 backdrop-blur-2xl bg-black/90 border-b border-zinc-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-11 h-11 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13h2v8H3v-8zm4-6h2v14H7V7zm4-4h2v18h-2V3zm4 8h2v10h-2V11zm4 4h2v6h-2v-6z"></path></svg>
+    <!-- APLICACIÓN PRINCIPAL (ZERO-KNOWLEDGE / LOCAL-FIRST) -->
+    <div id="app-content">
+        <header class="sticky top-0 z-40 backdrop-blur-2xl bg-black/90 border-b border-zinc-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+                <div class="flex items-center space-x-3" title="Tempus Wealth Management">
+                    <div class="w-11 h-11 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13h2v8H3v-8zm4-6h2v14H7V7zm4-4h2v18h-2V3zm4 8h2v10h-2V11zm4 4h2v6h-2v-6z"></path></svg>
+                    </div>
+                    <div>
+                        <span class="text-xl font-bold tracking-widest text-white uppercase">Tempus</span>
+                        <span class="block text-[10px] text-zinc-500 tracking-widest uppercase">By Abella</span>
+                    </div>
                 </div>
-                <div>
-                    <span class="text-xl font-bold tracking-widest text-white uppercase">Tempus</span>
-                    <span class="block text-[10px] text-zinc-500 tracking-widest uppercase">By Abella</span>
+                <nav class="hidden md:flex space-x-1 bg-zinc-950 p-1.5 rounded-2xl border border-zinc-800">
+                    <button onclick="switchTab('resumen')" id="btn-resumen" class="apple-button px-5 py-2.5 rounded-xl text-sm font-semibold bg-white text-black shadow-md">Resumen</button>
+                    <button onclick="switchTab('flujo')" id="btn-flujo" class="apple-button px-5 py-2.5 rounded-xl text-sm font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900">Flujo de Caja</button>
+                    <button onclick="switchTab('inversiones')" id="btn-inversiones" class="apple-button px-5 py-2.5 rounded-xl text-sm font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900">Inversiones</button>
+                    <button onclick="switchTab('estrategia')" id="btn-estrategia" class="apple-button px-5 py-2.5 rounded-xl text-sm font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900">Estrategia</button>
+                </nav>
+                <div class="flex items-center gap-3">
+                    <button onclick="openProfileModal()" id="btn-open-profile" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-xs text-zinc-300 hover:text-white apple-button transition-all">
+                        <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                        <span id="user-email-display" class="hidden md:inline">Perfil</span>
+                    </button>
+                    <button onclick="handleLogout()" class="text-xs font-semibold text-zinc-400 hover:text-rose-400 apple-button transition-colors">Reiniciar Demo</button>
                 </div>
             </div>
-            <nav class="flex space-x-1 bg-zinc-950 p-1.5 rounded-2xl border border-zinc-800">
-                <button onclick="switchTab('resumen')" id="btn-resumen" class="apple-button px-5 py-2.5 rounded-xl text-sm font-semibold bg-white text-black shadow-md">Resumen</button>
-                <button onclick="switchTab('flujo')" id="btn-flujo" class="apple-button px-5 py-2.5 rounded-xl text-sm font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900">Flujo de Caja</button>
-                <button onclick="switchTab('inversiones')" id="btn-inversiones" class="apple-button px-5 py-2.5 rounded-xl text-sm font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900">Inversiones</button>
-                <button onclick="switchTab('estrategia')" id="btn-estrategia" class="apple-button px-5 py-2.5 rounded-xl text-sm font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900">Estrategia</button>
+            <nav class="flex md:hidden overflow-x-auto space-x-1 bg-zinc-950 p-2 border-t border-zinc-800">
+                <button onclick="switchTab('resumen')" id="btn-resumen-m" class="px-4 py-2 rounded-xl text-xs font-semibold bg-white text-black whitespace-nowrap">Resumen</button>
+                <button onclick="switchTab('flujo')" id="btn-flujo-m" class="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 whitespace-nowrap">Flujo de Caja</button>
+                <button onclick="switchTab('inversiones')" id="btn-inversiones-m" class="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 whitespace-nowrap">Inversiones</button>
+                <button onclick="switchTab('estrategia')" id="btn-estrategia-m" class="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 whitespace-nowrap">Estrategia</button>
             </nav>
-        </div>
-    </header>
+        </header>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-        <!-- RESUMEN -->
-        <section id="tab-resumen" class="tab-content space-y-8">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 class="text-3xl font-bold text-white">Panel General</h1>
-                    <p class="text-zinc-400 mt-1">Control de patrimonio, liquidez y métricas clave.</p>
-                </div>
-                <div class="flex gap-4">
-                    <div class="apple-card p-5 rounded-2xl flex flex-col justify-center">
-                        <span class="text-xs font-bold uppercase tracking-wider text-zinc-400">Tasa de Ahorro Mensual</span>
-                        <div id="kpi-ahorro" class="text-2xl font-bold text-white mt-1">0,0%</div>
-                    </div>
-                    <div class="apple-card bg-zinc-950 border border-zinc-800 p-5 rounded-2xl shadow-xl flex items-center justify-between gap-6">
-                        <div>
-                            <span class="text-xs font-bold uppercase tracking-wider text-zinc-400">Patrimonio Neto Total</span>
-                            <div id="kpi-patrimonio" class="text-3xl font-bold text-white mt-1">0,00 €</div>
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- RESUMEN -->
+            <section id="tab-resumen" class="tab-content space-y-8">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-1.5 mb-1">
+                            <span class="text-xs font-semibold text-zinc-400">Bienvenido de nuevo,</span>
+                            <span id="user-alias-greeting" class="text-xs font-bold text-white capitalize">Usuario</span>
                         </div>
-                        <div class="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center text-white">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <h1 class="text-3xl font-bold text-white" title="Métricas globales de tu patrimonio">Panel General</h1>
+                        <p class="text-zinc-400 mt-1">Control de patrimonio, liquidez y métricas clave.</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="apple-card p-5 rounded-2xl flex flex-col justify-center" title="Porcentaje de tus ingresos que logras ahorrar al mes">
+                            <span class="text-xs font-bold uppercase tracking-wider text-zinc-400">Tasa de Ahorro</span>
+                            <div id="kpi-ahorro" class="text-2xl font-bold text-white mt-1">0,0%</div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                <div class="apple-card p-5 rounded-2xl">
-                    <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Liquidez (Banco)</span>
-                    <div id="kpi-liquidez" class="text-2xl font-bold text-white mt-2">0,00 €</div>
-                </div>
-                <div class="apple-card p-5 rounded-2xl">
-                    <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Flujo de Caja Neto</span>
-                    <div id="kpi-flujo" class="text-2xl font-bold text-white mt-2">0,00 €</div>
-                </div>
-                <div class="apple-card p-5 rounded-2xl relative">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Valor Cartera</span>
-                        <span id="kpi-roi-badge" class="text-xs font-semibold px-2 py-1 rounded bg-zinc-900 border border-zinc-700 text-white">ROI: 0%</span>
-                    </div>
-                    <div id="kpi-cartera" class="text-2xl font-bold text-white mt-2">0,00 €</div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="apple-card p-6 rounded-3xl flex flex-col justify-between">
-                    <div class="flex items-start justify-between gap-4 mb-4">
-                        <h2 class="text-lg font-bold text-white">Análisis de Gastos</h2>
-                        <div id="gastos-legend-menu" class="bg-black border border-zinc-800 rounded-xl p-2.5 text-xs space-y-1.5 min-w-[160px] shadow-xl"></div>
-                    </div>
-                    <div class="h-64 flex items-center justify-center relative">
-                        <canvas id="gastosChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="apple-card p-6 rounded-3xl flex flex-col justify-between">
-                    <div class="flex items-start justify-between gap-4 mb-4">
-                        <h2 class="text-lg font-bold text-white">Distribución de Cartera</h2>
-                        <div id="cartera-legend-menu" class="bg-black border border-zinc-800 rounded-xl p-2.5 text-xs space-y-1.5 min-w-[160px] shadow-xl"></div>
-                    </div>
-                    <div class="h-64 flex items-center justify-center relative">
-                        <canvas id="carteraChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-4">
-                <div class="apple-card p-6 rounded-3xl flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 id="calendar-month-year" class="text-md font-bold text-white capitalize">Mes</h3>
-                        <div class="flex space-x-1.5">
-                            <button onclick="changeMonth(-1)" class="w-7 h-7 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white flex items-center justify-center text-xs apple-button font-bold border border-zinc-700">‹</button>
-                            <button onclick="changeMonth(1)" class="w-7 h-7 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white flex items-center justify-center text-xs apple-button font-bold border border-zinc-700">›</button>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-7 text-center text-xs font-semibold text-zinc-500 mb-2">
-                        <span>Lu</span><span>Ma</span><span>Mi</span><span>Ju</span><span>Vi</span><span>Sá</span><span>Do</span>
-                    </div>
-                    <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center text-sm"></div>
-                </div>
-
-                <div class="lg:col-span-2 apple-card p-6 rounded-3xl flex flex-col justify-between">
-                    <div class="flex items-center space-x-3 mb-4">
-                        <h2 class="text-lg font-bold text-white">Evolución Anual (Mensualizado)</h2>
-                    </div>
-                    <div class="h-64 flex items-center justify-center relative">
-                        <canvas id="timelineChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- FLUJO DE CAJA -->
-        <section id="tab-flujo" class="tab-content hidden space-y-8">
-            <h1 class="text-3xl font-bold text-white">Flujo de Caja</h1>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="apple-card p-6 rounded-3xl h-fit">
-                    <h2 class="text-lg font-bold text-white mb-4">Nueva Transacción</h2>
-                    <form id="transaction-form" onsubmit="handleTransactionSubmit(event)" class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Tipo</label>
-                            <select id="tx-type" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500">
-                                <option value="ingreso">Ingreso (Verde)</option>
-                                <option value="gasto">Gasto (Rojo)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Concepto</label>
-                            <input type="text" id="tx-desc" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Categoría</label>
-                            <input type="text" id="tx-category" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Importe (€)</label>
-                            <input type="number" step="0.01" id="tx-amount" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500">
-                        </div>
-                        <div class="border-t border-zinc-800 pt-4 space-y-4">
+                        <div class="apple-card bg-zinc-950 border border-zinc-800 p-5 rounded-2xl shadow-xl flex items-center justify-between gap-6" title="Suma total de tu liquidez y tus inversiones">
                             <div>
-                                <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Fecha</label>
-                                <input type="date" id="tx-start-date" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-zinc-500">
+                                <span class="text-xs font-bold uppercase tracking-wider text-zinc-400">Patrimonio Neto</span>
+                                <div id="kpi-patrimonio" class="text-3xl font-bold text-white mt-1">0,00 €</div>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center text-white">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             </div>
                         </div>
-                        <div class="flex gap-2 pt-2">
-                            <button type="submit" id="tx-submit-btn" class="apple-button w-full bg-white text-black font-bold py-3.5 rounded-xl mt-2">Registrar</button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
-                <div class="lg:col-span-2 apple-card p-6 rounded-3xl">
-                    <h2 class="text-lg font-bold text-white mb-4">Historial</h2>
-                    <table class="w-full text-left border-collapse text-sm">
-                        <thead>
-                            <tr class="border-b border-zinc-800 text-xs uppercase text-zinc-400"><th class="py-3">Concepto</th><th>Cat.</th><th class="text-right">Importe</th><th></th></tr>
-                        </thead>
-                        <tbody id="transactions-table-body" class="divide-y divide-zinc-800/50"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
 
-        <!-- INVERSIONES -->
-        <section id="tab-inversiones" class="tab-content hidden space-y-8">
-            <div class="flex justify-between items-center">
-                <h1 class="text-3xl font-bold text-white">Gestión de Cartera</h1>
-                <button onclick="syncMarketData(event)" class="apple-button bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 text-white font-bold py-2 px-4 rounded-xl flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                    <span>Sincronizar API</span>
-                </button>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="apple-card p-6 rounded-3xl h-fit">
-                    <h2 id="inv-form-title" class="text-lg font-bold text-white mb-4">Añadir Posición</h2>
-                    <form id="investment-form" onsubmit="handleInvestmentSubmit(event)" class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Nombre Comercial</label>
-                            <input type="text" id="inv-name" required placeholder="Ej: Vanguard Global" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                    <div class="apple-card p-5 rounded-2xl" title="Dinero en efectivo disponible en tus cuentas bancarias">
+                        <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Liquidez (Banco)</span>
+                        <div id="kpi-liquidez" class="text-2xl font-bold text-white mt-2">0,00 €</div>
+                    </div>
+                    <div class="apple-card p-5 rounded-2xl" title="Balance entre todos tus ingresos y gastos registrados">
+                        <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Flujo de Caja</span>
+                        <div id="kpi-flujo" class="text-2xl font-bold text-white mt-2">0,00 €</div>
+                    </div>
+                    <div class="apple-card p-5 rounded-2xl relative" title="Valor actual de todos tus activos financieros">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Valor Cartera</span>
+                            <span id="kpi-roi-badge" class="text-xs font-semibold px-2 py-1 rounded bg-zinc-900 border border-zinc-700 text-white">ROI: 0%</span>
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Ticker API</label>
-                            <input type="text" id="inv-ticker" placeholder="Ej: VOO, AAPL" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Capital Invertido (€)</label>
-                            <input type="number" step="0.01" id="inv-buy" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Valor Actual Manual (€)</label>
-                            <input type="number" step="0.01" id="inv-current" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white">
-                        </div>
-                        <button type="submit" class="apple-button w-full bg-white text-black font-bold py-3.5 rounded-xl mt-2">Añadir a Cartera</button>
-                    </form>
+                        <div id="kpi-cartera" class="text-2xl font-bold text-white mt-2">0,00 €</div>
+                    </div>
                 </div>
-                <div class="lg:col-span-2 apple-card p-6 rounded-3xl">
-                    <table class="w-full text-left border-collapse text-sm">
-                        <thead>
-                            <tr class="border-b border-zinc-800 text-xs uppercase text-zinc-400">
-                                <th class="py-3">Activo</th>
-                                <th>Ticker</th>
-                                <th class="text-right">Invertido</th>
-                                <th class="text-right">Actual</th>
-                                <th class="text-right">ROI</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody id="investments-table-body" class="divide-y divide-zinc-800/50"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
 
-        <!-- ESTRATEGIA -->
-        <section id="tab-estrategia" class="tab-content hidden space-y-8">
-            <div class="flex justify-between items-center">
-                <div>
-                    <h1 class="text-3xl font-bold text-white">Planificador de Objetivos</h1>
-                    <p class="text-zinc-400 mt-1">Establece tu meta financiera y recibe recomendaciones matemáticas para lograrla.</p>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="exportData()" class="apple-button bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 text-white py-2 px-4 rounded-xl text-sm font-bold">⬇ Exportar Datos</button>
-                    <label class="apple-button bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 text-white py-2 px-4 rounded-xl text-sm font-bold cursor-pointer">
-                        ⬆ Importar <input type="file" id="import-file" class="hidden" accept=".json" onchange="importData(event)">
-                    </label>
-                </div>
-            </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="apple-card p-6 rounded-3xl flex flex-col justify-between" title="Desglose visual de en qué categorías gastas tu dinero">
+                        <div class="flex items-start justify-between gap-4 mb-4">
+                            <h2 class="text-lg font-bold text-white">Análisis de Gastos</h2>
+                            <div id="gastos-legend-menu" class="bg-black border border-zinc-800 rounded-xl p-2.5 text-xs space-y-1.5 min-w-[160px] shadow-xl"></div>
+                        </div>
+                        <div class="h-64 flex items-center justify-center relative">
+                            <canvas id="gastosChart"></canvas>
+                        </div>
+                    </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="apple-card p-6 rounded-3xl h-fit">
-                    <h2 class="text-lg font-bold text-white mb-4">Definir Meta</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Nombre del Objetivo</label>
-                            <input type="text" id="goal-name" placeholder="Ej: Mi Objetivo" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500" oninput="saveGoalConfig()">
+                    <div class="apple-card p-6 rounded-3xl flex flex-col justify-between" title="Distribución actual de tu cartera de inversiones">
+                        <div class="flex items-start justify-between gap-4 mb-4">
+                            <h2 class="text-lg font-bold text-white">Distribución de Cartera</h2>
+                            <div id="cartera-legend-menu" class="bg-black border border-zinc-800 rounded-xl p-2.5 text-xs space-y-1.5 min-w-[160px] shadow-xl"></div>
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Importe Necesario (€)</label>
-                            <input type="number" id="goal-amount" placeholder="0" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500" oninput="saveGoalConfig()">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-zinc-400 mb-2 mt-4">Dinero Destinado</label>
-                            <select id="goal-source" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500" onchange="saveGoalConfig()">
-                                <option value="patrimonio">Usar Patrimonio Total (Cartera + Banco)</option>
-                                <option value="liquidez">Usar Solo Liquidez (Banco)</option>
-                            </select>
+                        <div class="h-64 flex items-center justify-center relative">
+                            <canvas id="carteraChart"></canvas>
                         </div>
                     </div>
                 </div>
 
-                <div class="lg:col-span-2 space-y-8">
-                    <div class="apple-card p-6 rounded-3xl">
-                        <div class="flex justify-between items-end mb-4">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-4">
+                    <div class="apple-card p-6 rounded-3xl flex flex-col justify-between" title="Calendario interactivo del mes">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 id="calendar-month-year" class="text-md font-bold text-white capitalize">Octubre 2026</h3>
+                            <div class="flex space-x-1.5">
+                                <button onclick="changeMonth(-1)" class="w-7 h-7 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white flex items-center justify-center text-xs apple-button font-bold border border-zinc-700">‹</button>
+                                <button onclick="changeMonth(1)" class="w-7 h-7 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white flex items-center justify-center text-xs apple-button font-bold border border-zinc-700">›</button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-7 text-center text-xs font-semibold text-zinc-500 mb-2">
+                            <span>Lu</span><span>Ma</span><span>Mi</span><span>Ju</span><span>Vi</span><span>Sá</span><span>Do</span>
+                        </div>
+                        <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center text-sm"></div>
+                    </div>
+
+                    <div class="lg:col-span-2 apple-card p-6 rounded-3xl flex flex-col justify-between" title="Evolución de tus ingresos frente a tus gastos a lo largo del año">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <h2 class="text-lg font-bold text-white">Evolución Anual (Mensualizado)</h2>
+                        </div>
+                        <div class="h-64 flex items-center justify-center relative">
+                            <canvas id="timelineChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FLUJO DE CAJA -->
+            <section id="tab-flujo" class="tab-content hidden space-y-8">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-3xl font-bold text-white">Flujo de Caja</h1>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="space-y-8">
+                        <!-- NUEVA TRANSACCIÓN -->
+                        <div class="apple-card p-6 rounded-3xl">
+                            <h2 class="text-lg font-bold text-white mb-4">Nueva Transacción</h2>
+                            <form onsubmit="handleTransactionSubmit(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Tipo</label>
+                                    <select id="tx-type" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500">
+                                        <option value="ingreso">Ingreso</option>
+                                        <option value="gasto">Gasto</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Concepto</label>
+                                    <input type="text" id="tx-desc" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Categoría</label>
+                                    <select id="tx-category" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500">
+                                        <option value="Liquidez">Liquidez / Ingresos</option>
+                                        <option value="Alimentación">Alimentación</option>
+                                        <option value="Transporte">Transporte</option>
+                                        <option value="Vivienda">Vivienda</option>
+                                        <option value="Ocio">Ocio / Restaurantes</option>
+                                        <option value="Salud">Salud</option>
+                                        <option value="Deportes">Deportes</option>
+                                        <option value="Compras">Compras</option>
+                                        <option value="Suscripciones">Suscripciones</option>
+                                        <option value="Inversión">Inversión</option>
+                                        <option value="Otros">Otros</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Importe (€)</label>
+                                    <input type="number" step="0.01" id="tx-amount" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500">
+                                </div>
+                                <div class="border-t border-zinc-800 pt-4 space-y-4">
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Fecha</label>
+                                        <input type="date" id="tx-start-date" required style="color-scheme: dark;" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-zinc-500">
+                                    </div>
+                                </div>
+                                <div class="flex gap-2 pt-2">
+                                    <button type="submit" class="apple-button w-full bg-white text-black font-bold py-3.5 rounded-xl mt-2">Registrar</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- TARJETA IMPORTAR EXTRACTO PDF -->
+                        <div class="apple-card p-6 rounded-3xl" title="Sube un extracto bancario en PDF para registrar movimientos de forma inteligente">
+                            <h2 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                Importar Extracto PDF
+                            </h2>
+                            <p class="text-xs text-zinc-400 mb-4">Analiza movimientos y omite los que ya estén registrados.</p>
+                            <button type="button" id="btn-open-pdf-modal" onclick="openPdfImportModal()" class="apple-button w-full bg-zinc-900 hover:bg-zinc-800 text-white font-bold py-2.5 rounded-xl border border-zinc-700 flex items-center justify-center gap-2 text-xs">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                <span>Cargar y Analizar PDF</span>
+                            </button>
+                        </div>
+
+                        <!-- TARJETA DESCARGAR PDF: Selector de Fecha Nativo Completo -->
+                        <div class="apple-card p-6 rounded-3xl" title="Selecciona cualquier día en el calendario para descargar el informe de ese mes completo">
+                            <h2 class="text-lg font-bold text-white mb-2">Descargar Informe</h2>
+                            <p class="text-xs text-zinc-400 mb-4">Exporta los movimientos mensuales.</p>
+                            <div class="space-y-3">
+                                <!-- input type="month" para seleccionar mes y año directamente -->
+                                <input type="month" id="pdf-date" style="color-scheme: light;" class="w-full bg-white text-black font-medium border border-zinc-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-zinc-400 shadow-inner cursor-pointer">
+                                <button onclick="downloadPDF()" class="apple-button w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-2.5 rounded-xl border border-zinc-700">Generar PDF</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2 apple-card p-6 rounded-3xl">
+                        <div class="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center mb-4">
+                            <div class="flex items-center gap-2">
+                                <h2 class="text-lg font-bold text-white" title="Registro histórico de todos tus gastos e ingresos">Historial</h2>
+                                <span id="tx-count-badge" class="text-xs bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full font-medium">0</span>
+                                <button type="button" onclick="openPdfImportModal()" class="ml-2 apple-button px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white text-xs flex items-center gap-1.5 transition-all" title="Importar extracto en PDF">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                    <span class="hidden sm:inline">Importar PDF</span>
+                                </button>
+                            </div>
+                            <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                                <div class="relative flex-1 sm:w-44">
+                                    <input type="text" id="tx-search-input" oninput="renderTables()" placeholder="Buscar concepto (ej: Uber)..." class="w-full bg-black/60 border border-zinc-800 rounded-xl px-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-500">
+                                </div>
+                                <select id="tx-filter-type" onchange="renderTables()" class="bg-black/60 border border-zinc-800 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-500">
+                                    <option value="todos">Todos</option>
+                                    <option value="ingreso">Ingresos</option>
+                                    <option value="gasto">Gastos</option>
+                                </select>
+                                <select id="tx-filter-cat" onchange="renderTables()" class="bg-black/60 border border-zinc-800 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-500">
+                                    <option value="todas">Todas las categorías</option>
+                                    <option value="Liquidez">Liquidez</option>
+                                    <option value="Alimentación">Alimentación</option>
+                                    <option value="Transporte">Transporte</option>
+                                    <option value="Vivienda">Vivienda</option>
+                                    <option value="Ocio">Ocio</option>
+                                    <option value="Salud">Salud</option>
+                                    <option value="Deportes">Deportes</option>
+                                    <option value="Compras">Compras</option>
+                                    <option value="Suscripciones">Suscripciones</option>
+                                    <option value="Inversión">Inversión</option>
+                                    <option value="Otros">Otros</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-sm min-w-max">
+                                <thead>
+                                    <tr class="border-b border-zinc-800 text-xs uppercase text-zinc-400">
+                                        <th class="py-3">Fecha</th>
+                                        <th>Concepto</th>
+                                        <th>Cat.</th>
+                                        <th class="text-right">Importe</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactions-table-body" class="divide-y divide-zinc-800/50"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- INVERSIONES -->
+            <section id="tab-inversiones" class="tab-content hidden space-y-8">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-3xl font-bold text-white" title="Monitorización del estado de tus activos financieros">Gestión de Cartera</h1>
+                    <button id="sync-market-button" onclick="syncMarketData(event)" class="apple-button bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 text-white font-bold py-2 px-4 rounded-xl flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        <span class="hidden sm:inline">Sincronizar API</span>
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="apple-card p-6 rounded-3xl h-fit">
+                        <h2 class="text-lg font-bold text-white mb-4">Añadir Posición</h2>
+                        <form onsubmit="handleInvestmentSubmit(event)" class="space-y-4">
                             <div>
-                                <h3 class="text-sm font-bold uppercase tracking-wider text-zinc-400" id="display-goal-name">Tu Objetivo</h3>
-                                <div class="text-3xl font-bold text-white mt-1">
-                                    <span id="display-goal-current">0 €</span> <span class="text-lg text-zinc-500">/ <span id="display-goal-target">0 €</span></span>
+                                <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Nombre Comercial</label>
+                                <input type="text" id="inv-name" required placeholder="Ej: Fondo indexado" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-zinc-400 mb-2" title="Código oficial del activo en bolsa para buscar su precio">Ticker API</label>
+                                <input type="text" id="inv-ticker" placeholder="Ej: TICKER" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Capital Invertido (€)</label>
+                                <input type="number" step="0.01" id="inv-buy" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Valor Actual Manual (€)</label>
+                                <input type="number" step="0.01" id="inv-current" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white">
+                            </div>
+                            <button type="submit" class="apple-button w-full bg-white text-black font-bold py-3.5 rounded-xl mt-2">Añadir a Cartera</button>
+                        </form>
+                    </div>
+                    <div class="lg:col-span-2 apple-card p-6 rounded-3xl">
+                        <div class="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center mb-4">
+                            <div class="flex items-center gap-2">
+                                <h2 class="text-lg font-bold text-white">Posiciones</h2>
+                                <span id="inv-count-badge" class="text-xs bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full font-medium">0</span>
+                            </div>
+                            <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                                <div class="relative flex-1 sm:w-48">
+                                    <input type="text" id="inv-search-input" oninput="renderTables()" placeholder="Buscar activo o ticker..." class="w-full bg-black/60 border border-zinc-800 rounded-xl px-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-500">
+                                </div>
+                                <select id="inv-filter-roi" onchange="renderTables()" class="bg-black/60 border border-zinc-800 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-500">
+                                    <option value="todos">Todos los rendimientos</option>
+                                    <option value="ganancia">En ganancia (+)</option>
+                                    <option value="perdida">En pérdida (-)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-sm min-w-max">
+                                <thead>
+                                    <tr class="border-b border-zinc-800 text-xs uppercase text-zinc-400">
+                                        <th class="py-3">Activo</th>
+                                        <th>Ticker</th>
+                                        <th class="text-right">Invertido</th>
+                                        <th class="text-right">Actual</th>
+                                        <th class="text-right">ROI</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="investments-table-body" class="divide-y divide-zinc-800/50"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ESTRATEGIA -->
+            <section id="tab-estrategia" class="tab-content hidden space-y-8">
+                <div class="flex justify-between items-center flex-wrap gap-4">
+                    <div>
+                        <h1 class="text-3xl font-bold text-white" title="Simulador matemático para calcular cuándo lograrás tus metas">Planificador de Objetivos</h1>
+                        <p class="text-zinc-400 mt-1 hidden sm:block">Establece tu meta financiera y recibe recomendaciones matemáticas.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="exportData()" class="apple-button bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 text-white py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold" title="Descargar todo tu portfolio en formato JSON">⬇ Exportar Datos</button>
+                        <label class="apple-button bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 text-white py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold cursor-pointer" title="Cargar un archivo JSON de respaldo">
+                            ⬆ Importar <input type="file" id="import-file" class="hidden" accept=".json" onchange="importData(event)">
+                        </label>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="apple-card p-6 rounded-3xl h-fit">
+                        <h2 class="text-lg font-bold text-white mb-4">Definir Meta</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Nombre del Objetivo</label>
+                                <input type="text" id="goal-name" placeholder="Ej: Mi objetivo financiero" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500" oninput="saveGoalConfig()">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Importe Necesario (€)</label>
+                                <input type="number" id="goal-amount" placeholder="15000" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500" oninput="saveGoalConfig()">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-zinc-400 mb-2 mt-4">Dinero Destinado</label>
+                                <select id="goal-source" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500" onchange="saveGoalConfig()">
+                                    <option value="patrimonio">Usar Patrimonio Total</option>
+                                    <option value="liquidez">Usar Solo Liquidez (Banco)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2 space-y-8">
+                        <div class="apple-card p-6 rounded-3xl">
+                            <div class="flex justify-between items-end mb-4">
+                                <div>
+                                    <h3 class="text-sm font-bold uppercase tracking-wider text-zinc-400" id="display-goal-name">Tu Objetivo</h3>
+                                    <div class="text-3xl font-bold text-white mt-1">
+                                        <span id="display-goal-current">0 €</span> <span class="text-lg text-zinc-500">/ <span id="display-goal-target">0 €</span></span>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-2xl font-bold text-white" id="display-goal-pct">0%</span>
                                 </div>
                             </div>
-                            <div class="text-right">
-                                <span class="text-2xl font-bold text-white" id="display-goal-pct">0%</span>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" id="goal-progress-bar" style="width: 0%;"></div>
                             </div>
                         </div>
-                        <div class="progress-bar-bg">
-                            <div class="progress-bar-fill" id="goal-progress-bar" style="width: 0%;"></div>
+
+                        <div class="apple-card p-6 rounded-3xl">
+                            <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                Recomendaciones Estratégicas
+                            </h2>
+                            <div id="recommendations-container" class="space-y-4"></div>
                         </div>
                     </div>
-
-                    <div class="apple-card p-6 rounded-3xl">
-                        <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            Recomendaciones Estratégicas
-                        </h2>
-                        <div id="recommendations-container" class="space-y-4"></div>
-                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        </main>
+    </div>
 
-    </main>
-
+    <!-- SCRIPT CLIENTE LOCAL-FIRST / ZERO-KNOWLEDGE (100% SEGURO) -->
     <script>
-        const API_KEY = 'WXLTURDEJK2RXLM6'; 
-        
-        // Llaves completamente nuevas para aislar los datos (v7)
-        let transactions = JSON.parse(localStorage.getItem('tempus_tx_v7')) || [];
-        let investments = JSON.parse(localStorage.getItem('tempus_inv_v7')) || [];
-        let goalConfig = JSON.parse(localStorage.getItem('tempus_goal_v7')) || { name: '', amount: 0, source: 'patrimonio' };
-
-        function saveData() {
-            localStorage.setItem('tempus_tx_v7', JSON.stringify(transactions));
-            localStorage.setItem('tempus_inv_v7', JSON.stringify(investments));
-        }
-
-        function saveGoalConfig() {
-            goalConfig.name = document.getElementById('goal-name').value || '';
-            goalConfig.amount = parseFloat(document.getElementById('goal-amount').value) || 0;
-            goalConfig.source = document.getElementById('goal-source').value || 'patrimonio';
-            localStorage.setItem('tempus_goal_v7', JSON.stringify(goalConfig));
-            updateUI();
-        }
+        // Almacenamiento local en el navegador del usuario (Sin conexión a bases de datos externas)
+        let userAlias = localStorage.getItem('tempus_demo_alias') || 'Invitado';
+        let transactions = JSON.parse(localStorage.getItem('tempus_demo_tx')) || [];
+        let investments = JSON.parse(localStorage.getItem('tempus_demo_inv')) || [];
+        let goalConfig = JSON.parse(localStorage.getItem('tempus_demo_goal')) || { name: 'Mi Objetivo', amount: 10000, source: 'patrimonio', apiKey: '' };
 
         let gastosChartInstance = null, carteraChartInstance = null, timelineChartInstance = null;
-        const chartColors = ['#ffffff', '#d4d4d8', '#a1a1aa', '#71717a', '#52525b'];
+        const chartColors = ['#ffffff', '#d4d4d8', '#a1a1aa', '#71717a', '#52525b', '#3f3f46', '#27272a'];
         let currentCalendarDate = new Date();
 
-        function switchTab(tabName) {
+        function updateAliasDisplay() {
+            const display = userAlias || 'Invitado';
+            const greeting = document.getElementById('user-alias-greeting');
+            if (greeting) greeting.textContent = display;
+            const nav = document.getElementById('user-email-display');
+            if (nav) nav.textContent = display;
+        }
+
+        // Persistencia local privada
+        function saveDataToCloud() {
+            localStorage.setItem('tempus_demo_alias', userAlias);
+            localStorage.setItem('tempus_demo_tx', JSON.stringify(transactions));
+            localStorage.setItem('tempus_demo_inv', JSON.stringify(investments));
+            localStorage.setItem('tempus_demo_goal', JSON.stringify(goalConfig));
+        }
+
+        window.saveGoalConfig = () => {
+            goalConfig.name = document.getElementById('goal-name').value || 'Mi Objetivo';
+            goalConfig.amount = parseFloat(document.getElementById('goal-amount').value) || 0;
+            goalConfig.source = document.getElementById('goal-source').value;
+            updateUI();
+            saveDataToCloud();
+        };
+
+        window.handleLogout = () => {
+            if (confirm("¿Quieres restablecer todos los registros de demostración en este navegador?")) {
+                localStorage.removeItem('tempus_demo_tx');
+                localStorage.removeItem('tempus_demo_inv');
+                localStorage.removeItem('tempus_demo_goal');
+                localStorage.removeItem('tempus_demo_alias');
+                location.reload();
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateAliasDisplay();
+            if(document.getElementById('goal-name')) document.getElementById('goal-name').value = goalConfig.name || '';
+            if(document.getElementById('goal-amount')) document.getElementById('goal-amount').value = goalConfig.amount || '';
+            if(document.getElementById('goal-source')) document.getElementById('goal-source').value = goalConfig.source || 'patrimonio';
+            if(document.getElementById('user-api-key')) document.getElementById('user-api-key').value = goalConfig.apiKey || '';
+            if(document.getElementById('tx-start-date')) {
+                document.getElementById('tx-start-date').value = new Date().toISOString().split('T')[0];
+            }
+            updateUI();
+        });
+
+        // ------------------ FUNCIONES GLOBALES ------------------
+
+        window.switchTab = (tabName) => {
             ['resumen', 'flujo', 'inversiones', 'estrategia'].forEach(t => {
                 const section = document.getElementById(`tab-${t}`);
                 const btn = document.getElementById(`btn-${t}`);
+                const btnM = document.getElementById(`btn-${t}-m`);
                 if (section) section.classList.toggle('hidden', t !== tabName);
-                if (btn) {
-                    if (t === tabName) btn.className = "apple-button px-5 py-2.5 rounded-xl text-sm font-semibold bg-white text-black shadow-md";
-                    else btn.className = "apple-button px-5 py-2.5 rounded-xl text-sm font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900";
-                }
+                if (btn) btn.className = (t === tabName) ? "apple-button px-5 py-2.5 rounded-xl text-sm font-semibold bg-white text-black shadow-md" : "apple-button px-5 py-2.5 rounded-xl text-sm font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900";
+                if (btnM) btnM.className = (t === tabName) ? "px-4 py-2 rounded-xl text-xs font-semibold bg-white text-black whitespace-nowrap" : "px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 whitespace-nowrap";
             });
             updateUI();
-        }
+        };
 
         function formatMoney(amount) {
             return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(amount);
+        }
+        function formatDate(dateStr) {
+            if (!dateStr) return "-";
+            const date = new Date(dateStr);
+            if (isNaN(date)) return dateStr;
+            return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
         }
 
         function updateUI() {
             Chart.defaults.font.family = "'Helvetica Neue', Helvetica, Arial, sans-serif";
             Chart.defaults.color = '#a1a1aa';
-            
+
             let ing = transactions.filter(t => t.type === 'ingreso').reduce((a, t) => a + t.amount, 0);
             let gas = transactions.filter(t => t.type === 'gasto').reduce((a, t) => a + t.amount, 0);
             let liq = ing - gas;
@@ -378,17 +547,14 @@
 
             if(document.getElementById('kpi-patrimonio')) document.getElementById('kpi-patrimonio').innerText = formatMoney(pat);
             if(document.getElementById('kpi-liquidez')) document.getElementById('kpi-liquidez').innerText = formatMoney(liq);
-            if(document.getElementById('kpi-ingresos')) document.getElementById('kpi-ingresos').innerText = formatMoney(ing);
-            if(document.getElementById('kpi-gastos')) document.getElementById('kpi-gastos').innerText = formatMoney(gas);
             if(document.getElementById('kpi-flujo')) document.getElementById('kpi-flujo').innerText = formatMoney(liq);
             if(document.getElementById('kpi-cartera')) document.getElementById('kpi-cartera').innerText = formatMoney(invCur);
-            
+
             const kpiAhorro = document.getElementById('kpi-ahorro');
             if(kpiAhorro) {
                 kpiAhorro.innerText = `${tasaAhorro.toFixed(1)}%`;
                 kpiAhorro.className = `text-2xl font-bold mt-1 ${tasaAhorro >= 20 ? 'text-emerald-400' : (tasaAhorro > 0 ? 'text-white' : 'text-rose-400')}`;
             }
-            
             const badge = document.getElementById('kpi-roi-badge');
             if(badge) {
                 badge.innerText = `ROI: ${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%`;
@@ -399,72 +565,121 @@
             renderCharts(invCur, liq);
             renderCalendar();
             updateGoalProgress(pat, liq, gas, ing);
-            saveData();
         }
 
-        function renderTables() {
+        window.renderTables = function() {
             const txBody = document.getElementById('transactions-table-body');
+            const txSearch = (document.getElementById('tx-search-input')?.value || '').toLowerCase().trim();
+            const txType = document.getElementById('tx-filter-type')?.value || 'todos';
+            const txCat = document.getElementById('tx-filter-cat')?.value || 'todas';
+
             if(txBody) {
                 txBody.innerHTML = '';
-                if(transactions.length === 0) {
-                    txBody.innerHTML = '<tr><td colspan="4" class="py-4 text-center text-zinc-500">No hay transacciones registradas</td></tr>';
+                const reversedTx = [...transactions].reverse();
+                const filteredTx = reversedTx.filter(t => {
+                    const matchSearch = !txSearch || 
+                        (t.desc && t.desc.toLowerCase().includes(txSearch)) || 
+                        (t.category && t.category.toLowerCase().includes(txSearch));
+                    const matchType = txType === 'todos' || t.type === txType;
+                    const matchCat = txCat === 'todas' || t.category === txCat;
+                    return matchSearch && matchType && matchCat;
+                });
+
+                const txBadge = document.getElementById('tx-count-badge');
+                if (txBadge) txBadge.innerText = `${filteredTx.length}`;
+
+                if (filteredTx.length === 0) {
+                    txBody.innerHTML = '';
                 } else {
-                    transactions.slice().reverse().forEach((t, idx) => {
-                        let realIdx = transactions.length - 1 - idx;
-                        txBody.innerHTML += `<tr class="hover:bg-zinc-900/50"><td class="py-3 text-white">${t.desc}</td><td class="text-zinc-400">${t.category}</td><td class="text-right font-bold ${t.type==='ingreso'?'text-emerald-400':'text-rose-400'}">${t.type==='ingreso'?'+':'-'}${formatMoney(t.amount)}</td><td class="text-right"><button onclick="deleteTransaction(${realIdx})" class="text-zinc-500 hover:text-rose-400 font-bold">✕</button></td></tr>`;
+                    filteredTx.forEach((t) => {
+                        let originalIdx = transactions.indexOf(t);
+                        txBody.innerHTML += `
+                        <tr class="hover:bg-zinc-900/50">
+                            <td class="py-3 text-zinc-500 text-xs">${formatDate(t.startDate)}</td>
+                            <td class="text-white">${t.desc}</td>
+                            <td class="text-zinc-400">${t.category}</td>
+                            <td class="text-right font-bold ${t.type==='ingreso'?'text-emerald-400':'text-rose-400'}">${t.type==='ingreso'?'+':'-'}${formatMoney(t.amount)}</td>
+                            <td class="text-right"><button onclick="deleteTransaction(${originalIdx})" class="text-zinc-500 hover:text-rose-400 font-bold" title="Eliminar">✕</button></td>
+                        </tr>`;
                     });
                 }
             }
 
             const invBody = document.getElementById('investments-table-body');
+            const invSearch = (document.getElementById('inv-search-input')?.value || '').toLowerCase().trim();
+            const invRoi = document.getElementById('inv-filter-roi')?.value || 'todos';
+
             if(invBody) {
                 invBody.innerHTML = '';
-                if (investments.length === 0) {
-                    invBody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-zinc-500">No hay inversiones registradas</td></tr>';
+                const filteredInv = investments.filter(i => {
+                    const matchSearch = !invSearch || 
+                        (i.name && i.name.toLowerCase().includes(invSearch)) || 
+                        (i.ticker && i.ticker.toLowerCase().includes(invSearch));
+                    const p = ((i.currentPrice - i.buyPrice)/i.buyPrice)*100;
+                    const matchRoi = invRoi === 'todos' || 
+                        (invRoi === 'ganancia' && p >= 0) || 
+                        (invRoi === 'perdida' && p < 0);
+                    return matchSearch && matchRoi;
+                });
+
+                const invBadge = document.getElementById('inv-count-badge');
+                if (invBadge) invBadge.innerText = `${filteredInv.length}`;
+
+                if (filteredInv.length === 0) {
+                    invBody.innerHTML = '';
                 } else {
-                    investments.forEach((i, idx) => {
+                    filteredInv.forEach((i) => {
+                        let originalIdx = investments.indexOf(i);
                         let p = ((i.currentPrice - i.buyPrice)/i.buyPrice)*100;
-                        invBody.innerHTML += `<tr class="hover:bg-zinc-900/50"><td class="py-3 text-white">${i.name}</td><td class="text-zinc-400 font-mono text-xs">${i.ticker || '-'}</td><td class="text-right text-zinc-400">${formatMoney(i.buyPrice)}</td><td class="text-right font-bold text-white">${formatMoney(i.currentPrice)}</td><td class="text-right ${p>=0?'text-emerald-400':'text-rose-400'}">${p.toFixed(2)}%</td><td class="text-right"><button onclick="deleteInvestment(${idx})" class="text-zinc-500 hover:text-rose-400 font-bold">✕</button></td></tr>`;
+                        invBody.innerHTML += `
+                        <tr class="hover:bg-zinc-900/50">
+                            <td class="py-3 text-white">${i.name}</td>
+                            <td class="text-zinc-400 font-mono text-xs">${i.ticker || '-'}</td>
+                            <td class="text-right text-zinc-400">${formatMoney(i.buyPrice)}</td>
+                            <td class="text-right font-bold text-white">${formatMoney(i.currentPrice)}</td>
+                            <td class="text-right ${p>=0?'text-emerald-400':'text-rose-400'}">${p.toFixed(2)}%</td>
+                            <td class="text-right"><button onclick="deleteInvestment(${originalIdx})" class="text-zinc-500 hover:text-rose-400 font-bold" title="Eliminar">✕</button></td>
+                        </tr>`;
                     });
                 }
             }
-        }
+        };
+        const renderTables = window.renderTables;
 
         function renderCharts(invCur, liq) {
             const canvasCartera = document.getElementById('carteraChart');
             const canvasGastos = document.getElementById('gastosChart');
             const canvasTimeline = document.getElementById('timelineChart');
-            
-            if(canvasCartera) {
-                if (carteraChartInstance) carteraChartInstance.destroy();
-                const carteraMenu = document.getElementById('cartera-legend-menu');
-                if (carteraMenu) carteraMenu.innerHTML = '';
 
-                if (investments.length > 0) {
+            if(canvasCartera && carteraChartInstance) carteraChartInstance.destroy();
+            if(canvasCartera) {
+                const carteraMenu = document.getElementById('cartera-legend-menu');
+                if (carteraMenu) {
+                    carteraMenu.innerHTML = '';
                     investments.forEach((i, idx) => {
                         let pct = invCur > 0 ? ((i.currentPrice / invCur) * 100).toFixed(1) : 0;
                         let color = chartColors[idx % chartColors.length];
                         carteraMenu.innerHTML += `<div class="flex items-center justify-between gap-3"><div class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${color};"></span><span class="text-zinc-300 font-medium truncate max-w-[90px]">${i.name}</span></div><span class="text-white font-bold">${pct}%</span></div>`;
                     });
-                    carteraChartInstance = new Chart(canvasCartera.getContext('2d'), {
-                        type: 'doughnut',
-                        data: { labels: investments.map(i=>i.name), datasets: [{ data: investments.map(i=>i.currentPrice), backgroundColor: chartColors, borderColor: '#000000', borderWidth: 2 }] },
-                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display:false }, tooltip: { callbacks: { label: function(c) { let v = c.parsed; let t = c.dataset.data.reduce((a,b)=>a+b,0); let p = t>0?((v/t)*100).toFixed(1):0; return ` ${formatMoney(v)} (${p}%)`; }}} }, cutout: '75%' }
-                    });
                 }
+                carteraChartInstance = new Chart(canvasCartera.getContext('2d'), {
+                    type: 'doughnut',
+                    data: { labels: investments.map(i=>i.name), datasets: [{ data: investments.map(i=>i.currentPrice), backgroundColor: chartColors, borderColor: 'rgba(24, 24, 28, 1)', borderWidth: 3 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display:false }, tooltip: { callbacks: { label: function(c) { let v = c.parsed; let t = c.dataset.data.reduce((a,b)=>a+b,0); let p = t>0?((v/t)*100).toFixed(1):0; return ` ${formatMoney(v)} (${p}%)`; }}}}, cutout: '75%' }
+                });
             }
 
+            if(canvasGastos && gastosChartInstance) gastosChartInstance.destroy();
             if(canvasGastos) {
                 const gastosMap = {};
+                // Solo lee transacciones guardadas explícitamente como "gasto"
                 transactions.filter(t => t.type === 'gasto').forEach(t => { gastosMap[t.category] = (gastosMap[t.category] || 0) + t.amount; });
                 const gastoKeys = Object.keys(gastosMap);
                 const gastoValues = Object.values(gastosMap);
-                
-                if (gastosChartInstance) gastosChartInstance.destroy();
-                const gastosMenu = document.getElementById('gastos-legend-menu');
-                if (gastosMenu) gastosMenu.innerHTML = '';
 
-                if (gastoKeys.length > 0) {
+                const gastosMenu = document.getElementById('gastos-legend-menu');
+                if (gastosMenu) {
+                    gastosMenu.innerHTML = '';
                     let totalGastos = gastoValues.reduce((a, b) => a + b, 0);
                     gastoKeys.forEach((key, idx) => {
                         let val = gastoValues[idx];
@@ -472,27 +687,27 @@
                         let color = chartColors[idx % chartColors.length];
                         gastosMenu.innerHTML += `<div class="flex items-center justify-between gap-3"><div class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${color};"></span><span class="text-zinc-300 font-medium truncate max-w-[90px]">${key}</span></div><span class="text-white font-bold">${pct}%</span></div>`;
                     });
-                    gastosChartInstance = new Chart(canvasGastos.getContext('2d'), {
-                        type: 'doughnut',
-                        data: { labels: gastoKeys, datasets: [{ data: gastoValues, backgroundColor: chartColors.slice(0, gastoKeys.length), borderColor: '#000000', borderWidth: 2 }] },
-                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display:false }, tooltip: { callbacks: { label: function(c) { let v = c.parsed; let t = c.dataset.data.reduce((a,b)=>a+b,0); let p = t>0?((v/t)*100).toFixed(1):0; return ` ${formatMoney(v)} (${p}%)`; }}} }, cutout: '75%' }
-                    });
                 }
+
+                gastosChartInstance = new Chart(canvasGastos.getContext('2d'), {
+                    type: 'doughnut',
+                    data: { labels: gastoKeys.length > 0 ? gastoKeys : ['Sin gastos'], datasets: [{ data: gastoKeys.length > 0 ? gastoValues : [1], backgroundColor: chartColors.slice(0, gastoKeys.length > 0 ? gastoKeys.length : 1), borderColor: 'rgba(24, 24, 28, 1)', borderWidth: 3 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display:false }, tooltip: { callbacks: { label: function(c) { let v = c.parsed; let t = c.dataset.data.reduce((a,b)=>a+b,0); let p = t>0?((v/t)*100).toFixed(1):0; return ` ${formatMoney(v)} (${p}%)`; }}}}, cutout: '75%' }
+                });
             }
 
+            if(canvasTimeline && timelineChartInstance) timelineChartInstance.destroy();
             if(canvasTimeline) {
                 const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
                 let monthlyIngresos = new Array(12).fill(0);
                 let monthlyGastos = new Array(12).fill(0);
 
                 transactions.forEach(t => {
-                    let monthIdx = 9;
+                    let monthIdx = new Date().getMonth();
                     if (t.startDate) { let d = new Date(t.startDate); if (!isNaN(d.getTime())) monthIdx = d.getMonth(); }
-                    if (t.type === 'ingreso') monthlyIngresos[monthIdx] += t.amount; 
-                    else monthlyGastos[monthIdx] += t.amount; 
+                    if (t.type === 'ingreso') monthlyIngresos[monthIdx] += t.amount; else monthlyGastos[monthIdx] += t.amount;
                 });
 
-                if (timelineChartInstance) timelineChartInstance.destroy();
                 timelineChartInstance = new Chart(canvasTimeline.getContext('2d'), {
                     type: 'line',
                     data: {
@@ -502,7 +717,7 @@
                             { label: 'Gastos', data: monthlyGastos, borderColor: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.08)', borderWidth: 3, tension: 0.4, fill: true, pointBackgroundColor: '#f43f5e' }
                         ]
                     },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { x: { grid: { color: 'rgba(39, 39, 42, 0.5)' } }, y: { grid: { color: 'rgba(39, 39, 42, 0.5)' } } } }
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { x: { grid: { color: 'rgba(63, 63, 70, 0.3)' } }, y: { grid: { color: 'rgba(63, 63, 70, 0.3)' } } } }
                 });
             }
         }
@@ -530,15 +745,15 @@
             }
         }
 
-        function changeMonth(direction) {
+        window.changeMonth = (direction) => {
             currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
             renderCalendar();
-        }
+        };
 
-        function updateGoalProgress(pat = 0, liq = 0, gas = 0, ing = 0) {
+        function updateGoalProgress(pat, liq, gas, ing) {
             let currentAmount = goalConfig.source === 'patrimonio' ? pat : liq;
             let targetAmount = goalConfig.amount;
-            
+
             let pct = targetAmount > 0 ? (currentAmount / targetAmount) * 100 : 0;
             if (pct > 100) pct = 100;
 
@@ -568,71 +783,138 @@
 
                 let flujoNeto = ing - gas;
                 let restante = targetAmount - currentAmount;
-                let rec1 = "";
                 if (flujoNeto > 0) {
                     let meses = Math.ceil(restante / flujoNeto);
-                    rec1 = `<div class="p-4 bg-zinc-900 border border-zinc-800 rounded-xl"><p class="text-white font-bold text-sm">📅 Proyección Actual</p><p class="text-zinc-400 text-sm mt-1">Manteniendo tu ahorro mensual actual (${formatMoney(flujoNeto)}), lograrás el objetivo en aprox. <strong class="text-white">${meses} meses</strong>.</p></div>`;
+                    recBox.innerHTML += `<div class="p-4 bg-zinc-900 border border-zinc-800 rounded-xl"><p class="text-white font-bold text-sm">📅 Proyección Actual</p><p class="text-zinc-400 text-sm mt-1">Manteniendo tu ahorro mensual actual (${formatMoney(flujoNeto)}), lograrás el objetivo en aprox. <strong class="text-white">${meses} meses</strong>.</p></div>`;
                 } else {
-                    rec1 = `<div class="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl"><p class="text-rose-400 font-bold text-sm">⚠️ Flujo Negativo</p><p class="text-rose-400/80 text-sm mt-1">Actualmente gastas más de lo que ingresas o no tienes ingresos registrados. Registra tu flujo para ver proyecciones.</p></div>`;
+                    recBox.innerHTML += `<div class="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl"><p class="text-rose-400 font-bold text-sm">⚠️ Flujo Negativo</p><p class="text-rose-400/80 text-sm mt-1">Gastas más de lo que ingresas. Reduce gastos para avanzar.</p></div>`;
                 }
-                recBox.innerHTML += rec1;
+
+                const gastosMap = {};
+                transactions.filter(t => t.type === 'gasto').forEach(t => { gastosMap[t.category] = (gastosMap[t.category] || 0) + t.amount; });
+                const mainGasto = Object.keys(gastosMap).sort((a,b) => gastosMap[b] - gastosMap[a])[0];
+                if (mainGasto) {
+                    let ahorroPotencial = gastosMap[mainGasto] * 0.15;
+                    recBox.innerHTML += `<div class="p-4 bg-zinc-900 border border-zinc-800 rounded-xl"><p class="text-white font-bold text-sm">✂️ Optimización Rápida</p><p class="text-zinc-400 text-sm mt-1">Tu mayor gasto es en <strong>${mainGasto}</strong>. Si lo reduces un 15%, ahorrarías <strong class="text-emerald-400">+${formatMoney(ahorroPotencial)}</strong> extra al mes.</p></div>`;
+                }
             }
         }
 
-        function handleTransactionSubmit(e) {
+        window.handleTransactionSubmit = async (e) => {
             e.preventDefault();
-            transactions.push({ type: document.getElementById('tx-type').value, desc: document.getElementById('tx-desc').value, category: document.getElementById('tx-category').value, amount: parseFloat(document.getElementById('tx-amount').value), startDate: document.getElementById('tx-start-date').value || new Date().toISOString().split('T')[0] });
-            document.getElementById('transaction-form').reset(); updateUI();
-        }
+            transactions.push({
+                type: document.getElementById('tx-type').value,
+                desc: document.getElementById('tx-desc').value,
+                category: document.getElementById('tx-category').value,
+                amount: parseFloat(document.getElementById('tx-amount').value),
+                startDate: document.getElementById('tx-start-date').value || new Date().toISOString().split('T')[0]
+            });
+            e.target.reset();
+            if(document.getElementById('tx-start-date')) document.getElementById('tx-start-date').value = new Date().toISOString().split('T')[0];
+            updateUI();
+            await saveDataToCloud();
+        };
 
-        function handleInvestmentSubmit(e) {
+        window.handleInvestmentSubmit = async (e) => {
             e.preventDefault();
-            investments.push({ name: document.getElementById('inv-name').value, ticker: document.getElementById('inv-ticker').value, buyPrice: parseFloat(document.getElementById('inv-buy').value), currentPrice: parseFloat(document.getElementById('inv-current').value) });
-            document.getElementById('investment-form').reset(); updateUI();
-        }
+            investments.push({
+                name: document.getElementById('inv-name').value,
+                ticker: document.getElementById('inv-ticker').value,
+                buyPrice: parseFloat(document.getElementById('inv-buy').value),
+                currentPrice: parseFloat(document.getElementById('inv-current').value)
+            });
+            e.target.reset();
+            updateUI();
+            await saveDataToCloud();
+        };
 
-        function deleteTransaction(idx) { transactions.splice(idx, 1); updateUI(); }
-        function deleteInvestment(idx) { investments.splice(idx, 1); updateUI(); }
+        window.deleteTransaction = async (idx) => { transactions.splice(idx, 1); updateUI(); await saveDataToCloud(); };
+        window.deleteInvestment = async (idx) => { investments.splice(idx, 1); updateUI(); await saveDataToCloud(); };
 
-        function exportData() {
+        window.exportData = () => {
+            if (!currentUser) return;
             const dataStr = JSON.stringify({ transactions, investments, goalConfig });
             const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
             const link = document.createElement('a');
-            link.setAttribute('href', dataUri); link.setAttribute('download', 'tempus_desktop_backup.json');
+            link.setAttribute('href', dataUri); link.setAttribute('download', `tempus_${currentUser.email}_backup.json`);
             document.body.appendChild(link); link.click(); link.remove();
-        }
+        };
 
-        function importData(event) {
+        window.importData = (event) => {
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
                     if (data.transactions) transactions = data.transactions;
                     if (data.investments) investments = data.investments;
                     if (data.goalConfig) { goalConfig = data.goalConfig; }
-                    
+
                     if(document.getElementById('goal-name')) document.getElementById('goal-name').value = goalConfig.name;
                     if(document.getElementById('goal-amount')) document.getElementById('goal-amount').value = goalConfig.amount || '';
                     if(document.getElementById('goal-source')) document.getElementById('goal-source').value = goalConfig.source;
-                    
+
                     updateUI();
+                    await saveDataToCloud();
                     alert("Backup restaurado con éxito.");
                 } catch (err) { alert("Archivo inválido."); }
             };
             reader.readAsText(file);
-        }
+        };
 
-        async function syncMarketData(event) {
+        window.downloadPDF = () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const fullDateVal = document.getElementById('pdf-date').value;
+
+            if(!fullDateVal) { alert('Selecciona una fecha en el calendario.'); return; }
+
+            // Extraer el mes (YYYY-MM) de la fecha seleccionada para filtrar los gastos
+            const monthVal = fullDateVal.substring(0, 7);
+            const filteredTx = transactions.filter(t => t.startDate && t.startDate.startsWith(monthVal));
+
+            if(filteredTx.length === 0) { alert('No hay movimientos registrados en este mes.'); return; }
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(18);
+            doc.text(`Informe Financiero Tempus`, 14, 20);
+
+            const [year, month] = monthVal.split('-');
+            const dateObj = new Date(year, month - 1);
+            let mesNombre = dateObj.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+            mesNombre = mesNombre.charAt(0).toUpperCase() + mesNombre.slice(1);
+
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Mes reportado: ${mesNombre}`, 14, 28);
+            doc.text(`Usuario: ${currentUser ? currentUser.email : ''}`, 14, 34);
+
+            const tableData = filteredTx.reverse().map(t => [
+                formatDate(t.startDate), t.desc, t.category, t.type === 'ingreso' ? 'Ingreso' : 'Gasto', formatMoney(t.amount)
+            ]);
+
+            doc.autoTable({
+                startY: 42, head: [['Fecha', 'Concepto', 'Categoría', 'Tipo', 'Importe']], body: tableData,
+                theme: 'striped', headStyles: { fillColor: [20, 20, 20] }, styles: { font: 'helvetica', fontSize: 10 }
+            });
+
+            doc.save(`Tempus_Informe_${monthVal}.pdf`);
+        };
+
+        window.syncMarketData = async (event) => {
+            if (!goalConfig.apiKey || goalConfig.apiKey.trim() === '') {
+                document.getElementById('api-key-modal').classList.remove('hidden');
+                return;
+            }
             const btn = event.currentTarget;
             const originalText = btn.innerHTML;
-            btn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> <span>Sincronizando...</span>`;
+            btn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> <span class="hidden sm:inline">Sincronizando...</span>`;
             let updatedCount = 0;
             try {
                 for (let inv of investments) {
                     if (inv.ticker && inv.ticker.length <= 6) {
-                        const res = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${inv.ticker}&apikey=${API_KEY}`);
+                        const res = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${inv.ticker}&apikey=${goalConfig.apiKey}`);
                         const data = await res.json();
                         if (data['Global Quote'] && data['Global Quote']['05. price']) {
                             inv.currentPrice = parseFloat(data['Global Quote']['05. price']);
@@ -642,16 +924,585 @@
                     }
                 }
                 updateUI();
+                await saveDataToCloud();
                 alert(updatedCount > 0 ? `Actualizados ${updatedCount} activos.` : "Límite diario de API alcanzado o tickers sin cotización.");
             } catch (e) { alert("Error conectando con el mercado."); } finally { btn.innerHTML = originalText; }
+        };
+
+        window.saveAndSyncApi = async () => {
+            goalConfig.apiKey = document.getElementById('user-api-key').value.trim();
+            await saveDataToCloud();
+            document.getElementById('api-key-modal').classList.add('hidden');
+            await syncMarketData({ currentTarget: document.getElementById('sync-market-button') });
+        };
+
+        // ------------------ GESTIÓN DE PERFIL DE USUARIO ------------------
+        // ------------------ GESTIÓN DE PERFIL LOCAL (ZERO-KNOWLEDGE) ------------------
+        window.openProfileModal = () => {
+            const currentEmailEl = document.getElementById('profile-current-email');
+            if (currentEmailEl) currentEmailEl.textContent = `${userAlias || 'Invitado'} • Almacenamiento Local`;
+            const aliasInput = document.getElementById('profile-new-alias');
+            if (aliasInput) aliasInput.value = userAlias || '';
+            const msgEl = document.getElementById('profile-msg');
+            if (msgEl) { msgEl.classList.add('hidden'); msgEl.textContent = ''; }
+            document.getElementById('profile-modal').classList.remove('hidden');
+        };
+
+        window.closeProfileModal = () => {
+            const modal = document.getElementById('profile-modal');
+            if (modal) modal.classList.add('hidden');
+        };
+
+        window.handleProfileAliasSubmit = (e) => {
+            e.preventDefault();
+            const newAlias = document.getElementById('profile-new-alias').value.trim();
+            if (!newAlias) {
+                showProfileMessage('El alias no puede estar vacío.');
+                return;
+            }
+            userAlias = newAlias;
+            saveDataToCloud();
+            updateAliasDisplay();
+            const currentEmailEl = document.getElementById('profile-current-email');
+            if (currentEmailEl) currentEmailEl.textContent = `${userAlias} • Almacenamiento Local`;
+            showProfileMessage('Alias actualizado con éxito.', true);
+        };
+
+        const showProfileMessage = (text, isSuccess = false) => {
+            const msgEl = document.getElementById('profile-msg');
+            if (!msgEl) return;
+            msgEl.className = isSuccess
+                ? "mb-4 p-3 rounded-xl text-xs font-medium border bg-emerald-950/60 border-emerald-800 text-emerald-300"
+                : "mb-4 p-3 rounded-xl text-xs font-medium border bg-rose-950/60 border-rose-800 text-rose-300";
+            msgEl.textContent = text;
+            msgEl.classList.remove('hidden');
+        };
+
+        // ------------------ IMPORTACIÓN INTELIGENTE DE PDF ------------------
+        let parsedPdfTransactions = [];
+
+        window.openPdfImportModal = () => {
+            const modal = document.getElementById('pdf-import-modal');
+            if (!modal) return;
+            parsedPdfTransactions = [];
+            const dropzone = document.getElementById('pdf-dropzone');
+            const preview = document.getElementById('pdf-preview-container');
+            const loading = document.getElementById('pdf-loading-spinner');
+            const error = document.getElementById('pdf-error-msg');
+            const fileInput = document.getElementById('pdf-file-input');
+
+            if (dropzone) dropzone.classList.remove('hidden');
+            if (preview) preview.classList.add('hidden');
+            if (loading) loading.classList.add('hidden');
+            if (error) { error.classList.add('hidden'); error.textContent = ''; }
+            if (fileInput) fileInput.value = '';
+
+            modal.classList.remove('hidden');
+        };
+
+        window.closePdfImportModal = () => {
+            const modal = document.getElementById('pdf-import-modal');
+            if (modal) modal.classList.add('hidden');
+            parsedPdfTransactions = [];
+        };
+
+        function inferCategoryFromText(concept, type) {
+            const lower = concept.toLowerCase();
+            if (type === 'ingreso') {
+                if (/(invers|dividend|interes|rentabilidad)/i.test(lower)) return 'Inversión';
+                return 'Liquidez';
+            }
+            if (/(mercadona|carrefour|dia|lidl|alcampo|eroski|supermerc|consum|bonarea|hiper|fruteria|panaderia|restauran|bar\b|cafe|cafeter|mcdonald|burger|kfc|pizza|uber\s*eats|just\s*eat|glovo|starbucks)/i.test(lower)) return 'Alimentación';
+            if (/(uber|cabify|bolt|renfe|adif|alsa|metro|tmb|emt|repsol|cepsa|bp|galp|shell|gasolin|peaje|autopist|parking|aparcam|billete|vuelo|ryanair|iberia|vueling)/i.test(lower)) return 'Transporte';
+            if (/(alquiler|hipoteca|comunidad|endesa|iberdrola|naturgy|aqualia|canal\s*isabel|luz|agua|gas\b|seguro\s*hogar)/i.test(lower)) return 'Vivienda';
+            if (/(netflix|spotify|hbo|max|disney|amazon\s*prime|prime\s*video|apple\.com|icloud|chatgpt|openai|google\s*one|youtube|suscrip)/i.test(lower)) return 'Suscripciones';
+            if (/(cine|cinesa|yelmo|teatro|concierto|festival|entradas|ticketmaster|steam|playstation|nintendo|fiesta|ocio)/i.test(lower)) return 'Ocio';
+            if (/(farmacia|optica|dental|dentista|clinica|hospital|sanitas|adeslas|quiron|medico)/i.test(lower)) return 'Salud';
+            if (/(gimnasio|gym|basic-fit|fitup|decathlon|padel|tenis|futbol|crossfit)/i.test(lower)) return 'Deportes';
+            if (/(amazon|zara|bershka|pull&bear|stradivarius|mango|corte\s*ingles|ikea|leroy|fnac|mediamarkt|apple\s*store|shein|aliexpress|zalando|ropa|zapateria)/i.test(lower)) return 'Compras';
+            if (/(broker|degiro|trade\s*republic|myinvestor|indexa|coinbase|binance|kraken|etoro|inversion|fondos|acciones)/i.test(lower)) return 'Inversión';
+            return 'Otros';
         }
 
-        window.onload = function() {
-            if(document.getElementById('goal-name') && goalConfig.name) document.getElementById('goal-name').value = goalConfig.name;
-            if(document.getElementById('goal-amount') && goalConfig.amount > 0) document.getElementById('goal-amount').value = goalConfig.amount;
-            if(document.getElementById('goal-source')) document.getElementById('goal-source').value = goalConfig.source;
-            updateUI();
+        window.handlePdfFileSelect = async (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            await processUploadedPdf(file);
+        };
+
+        async function processUploadedPdf(file) {
+            const dropzone = document.getElementById('pdf-dropzone');
+            const preview = document.getElementById('pdf-preview-container');
+            const loading = document.getElementById('pdf-loading-spinner');
+            const error = document.getElementById('pdf-error-msg');
+
+            if (dropzone) dropzone.classList.add('hidden');
+            if (loading) loading.classList.remove('hidden');
+            if (error) { error.classList.add('hidden'); error.textContent = ''; }
+
+            try {
+                if (!window.pdfjsLib) {
+                    throw new Error("Librería PDF.js no disponible.");
+                }
+                if (window.pdfjsLib.GlobalWorkerOptions && !window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
+                    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                }
+
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                const lines = [];
+
+                for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                    const page = await pdf.getPage(pageNum);
+                    const textContent = await page.getTextContent();
+                    const items = textContent.items;
+                    if (!items || items.length === 0) continue;
+
+                    items.sort((a, b) => {
+                        const yDiff = b.transform[5] - a.transform[5];
+                        if (Math.abs(yDiff) > 4) return yDiff;
+                        return a.transform[4] - b.transform[4];
+                    });
+
+                    let currentLine = [];
+                    let currentY = null;
+                    for (const item of items) {
+                        const str = item.str ? item.str.trim() : '';
+                        if (!str) continue;
+                        const y = item.transform[5];
+                        if (currentY === null || Math.abs(currentY - y) > 4) {
+                            if (currentLine.length > 0) lines.push(currentLine.join(' ').trim());
+                            currentLine = [str];
+                            currentY = y;
+                        } else {
+                            currentLine.push(str);
+                        }
+                    }
+                    if (currentLine.length > 0) lines.push(currentLine.join(' ').trim());
+                }
+
+                // Parse transactions
+                const extracted = [];
+                for (const line of lines) {
+                    const dateMatch = line.match(/(\d{4}[-\/\.]\d{1,2}[-\/\.]\d{1,2})|(\d{1,2}[-\/\.]\d{1,2}[-\/\.]\d{2,4})/);
+                    if (!dateMatch) continue;
+                    const rawDate = dateMatch[0];
+                    let startDate = '';
+                    if (/^\d{4}/.test(rawDate)) {
+                        const p = rawDate.split(/[-\/\.]/);
+                        startDate = `${p[0]}-${p[1].padStart(2, '0')}-${p[2].padStart(2, '0')}`;
+                    } else {
+                        const p = rawDate.split(/[-\/\.]/);
+                        const y = p[2].length === 2 ? `20${p[2]}` : p[2];
+                        startDate = `${y}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
+                    }
+
+                    const withoutDates = line.replace(/(\d{4}[-\/\.]\d{1,2}[-\/\.]\d{1,2})|(\d{1,2}[-\/\.]\d{1,2}[-\/\.]\d{2,4})/g, '   ');
+                    const amountMatch = withoutDates.match(/([+-]?\s*\d{1,3}(?:\.\d{3})*,\d{2})\s*(?:€|EUR)?|([+-]?\s*\d{1,3}(?:,\d{3})*\.\d{2})\s*(?:€|EUR|\$)?|(\d+[\.,]\d{2})\s*-\s*/i);
+                    if (!amountMatch) continue;
+
+                    const rawAmount = amountMatch[0];
+                    const isPositive = rawAmount.includes('+') || line.toLowerCase().includes('ingreso') || line.toLowerCase().includes('abono') || line.toLowerCase().includes('nomina');
+                    const type = isPositive ? 'ingreso' : 'gasto';
+
+                    let cleanNum = rawAmount.replace(/[€\$EUR\s\+]/gi, '').replace('-', '');
+                    if (cleanNum.includes(',') && cleanNum.includes('.')) {
+                        if (cleanNum.indexOf('.') < cleanNum.indexOf(',')) {
+                            cleanNum = cleanNum.replace(/\./g, '').replace(',', '.');
+                        } else {
+                            cleanNum = cleanNum.replace(/,/g, '');
+                        }
+                    } else if (cleanNum.includes(',')) {
+                        cleanNum = cleanNum.replace(',', '.');
+                    }
+                    const amount = parseFloat(cleanNum);
+                    if (isNaN(amount) || amount <= 0) continue;
+
+                    let desc = withoutDates
+                        .replace(rawAmount, ' ')
+                        .replace(/(€|EUR|\$)/gi, ' ')
+                        .replace(/\b(ingreso|gasto|transporte|alimentacion|vivienda|ocio|salud|deportes|compras|suscripciones|inversion|otros|debe|haber|saldo|tarjeta|recibo)\b/gi, ' ')
+                        .replace(/[\-–—\+\*\/\:\;]/g, ' ')
+                        .trim()
+                        .replace(/\s+/g, ' ');
+
+                    if (!desc || desc.length < 2) desc = type === 'ingreso' ? 'Ingreso detectado' : 'Movimiento extracto';
+                    const category = inferCategoryFromText(desc, type);
+
+                    extracted.push({ startDate, desc, category, type, amount });
+                }
+
+                if (extracted.length === 0) {
+                    throw new Error("No se detectaron transacciones válidas en el documento PDF.");
+                }
+
+                // DEDUPLICACIÓN INTELIGENTE
+                const currentTxs = transactions || [];
+                const normalizeStr = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+
+                parsedPdfTransactions = [];
+                const seenBatch = new Set();
+
+                for (let i = 0; i < extracted.length; i++) {
+                    const item = extracted[i];
+                    const normDesc = normalizeStr(item.desc);
+                    const batchKey = `${item.startDate}_${item.type}_${item.amount.toFixed(2)}_${normDesc}`;
+
+                    if (seenBatch.has(batchKey)) {
+                        parsedPdfTransactions.push({
+                            ...item,
+                            id: i,
+                            isDuplicate: true,
+                            duplicateReason: 'Registro repetido dentro del mismo PDF',
+                            selected: false
+                        });
+                        continue;
+                    }
+                    seenBatch.add(batchKey);
+
+                    const duplicate = currentTxs.find(existing => {
+                        if (Math.abs(item.amount - existing.amount) > 0.01) return false;
+                        if (item.type !== existing.type) return false;
+                        if (item.startDate === existing.startDate) return true;
+
+                        const t1 = new Date(item.startDate).getTime();
+                        const t2 = new Date(existing.startDate).getTime();
+                        if (Math.abs(t1 - t2) <= 2.5 * 24 * 60 * 60 * 1000) {
+                            const existNorm = normalizeStr(existing.desc);
+                            if (normDesc === existNorm || normDesc.includes(existNorm) || existNorm.includes(normDesc)) return true;
+                            const w1 = item.desc.toLowerCase().split(/\s+/).filter(w => w.length >= 4);
+                            const w2 = existing.desc.toLowerCase().split(/\s+/).filter(w => w.length >= 4);
+                            if (w1.some(w => w2.includes(w))) return true;
+                        }
+                        return false;
+                    });
+
+                    if (duplicate) {
+                        parsedPdfTransactions.push({
+                            ...item,
+                            id: i,
+                            isDuplicate: true,
+                            duplicateReason: `Ya registrado el ${duplicate.startDate} (${duplicate.amount.toFixed(2)} € - "${duplicate.desc}")`,
+                            selected: false
+                        });
+                    } else {
+                        parsedPdfTransactions.push({
+                            ...item,
+                            id: i,
+                            isDuplicate: false,
+                            duplicateReason: null,
+                            selected: true
+                        });
+                    }
+                }
+
+                renderPdfPreviewTable();
+                if (loading) loading.classList.add('hidden');
+                if (preview) preview.classList.remove('hidden');
+
+            } catch (err) {
+                console.error(err);
+                if (loading) loading.classList.add('hidden');
+                if (dropzone) dropzone.classList.remove('hidden');
+                if (error) {
+                    error.textContent = err.message || "Error al procesar el archivo PDF.";
+                    error.classList.remove('hidden');
+                }
+            }
+        }
+
+        function getActivePdfTransactions() {
+            return (parsedPdfTransactions && parsedPdfTransactions.length > 0)
+                ? parsedPdfTransactions
+                : (window.parsedPdfTransactions || []);
+        }
+
+        window.renderPdfPreviewTable = () => {
+            const tbody = document.getElementById('pdf-table-body');
+            if (!tbody) return;
+
+            const list = getActivePdfTransactions();
+            const total = list.length;
+            const newCount = list.filter(t => !t.isDuplicate).length;
+            const dupCount = list.filter(t => t.isDuplicate).length;
+            const selCount = list.filter(t => t.selected).length;
+
+            const countTotalEl = document.getElementById('pdf-kpi-total');
+            const countNewEl = document.getElementById('pdf-kpi-new');
+            const countDupEl = document.getElementById('pdf-kpi-dup');
+            const countSelEl = document.getElementById('pdf-kpi-selected');
+            const btnConfirm = document.getElementById('btn-confirm-pdf-import');
+
+            if (countTotalEl) countTotalEl.textContent = total;
+            if (countNewEl) countNewEl.textContent = newCount;
+            if (countDupEl) countDupEl.textContent = dupCount;
+            if (countSelEl) countSelEl.textContent = selCount;
+            if (btnConfirm) {
+                btnConfirm.textContent = `Importar ${selCount} ${selCount === 1 ? 'registro' : 'registros'}`;
+                btnConfirm.disabled = selCount === 0;
+            }
+
+            const dupBanner = document.getElementById('pdf-dup-banner');
+            if (dupBanner) {
+                if (dupCount > 0) {
+                    dupBanner.classList.remove('hidden');
+                    const dupCountSpan = document.getElementById('pdf-dup-count-span');
+                    if (dupCountSpan) dupCountSpan.textContent = dupCount;
+                } else {
+                    dupBanner.classList.add('hidden');
+                }
+            }
+
+            const categoriesList = ['Liquidez', 'Alimentación', 'Transporte', 'Vivienda', 'Ocio', 'Salud', 'Deportes', 'Compras', 'Suscripciones', 'Inversión', 'Otros'];
+
+            tbody.innerHTML = list.map((t, idx) => `
+                <tr class="hover:bg-zinc-900/40 transition-colors ${t.isDuplicate ? 'opacity-60 bg-amber-950/10' : t.selected ? 'bg-zinc-900/20' : ''}">
+                    <td class="py-2.5 px-3 text-center">
+                        <input type="checkbox" ${t.selected ? 'checked' : ''} onchange="togglePdfRowSelect(${idx})" class="rounded border-zinc-700 text-white cursor-pointer">
+                    </td>
+                    <td class="py-2.5 px-3 whitespace-nowrap">
+                        ${t.isDuplicate 
+                            ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-950 border border-amber-800 text-amber-300" title="${t.duplicateReason || ''}">⚠️ Duplicado</span>`
+                            : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950 border border-emerald-800 text-emerald-300">✓ Nuevo</span>`
+                        }
+                    </td>
+                    <td class="py-2.5 px-3 whitespace-nowrap">
+                        <input type="date" value="${t.startDate}" style="color-scheme: dark;" onchange="updatePdfRowField(${idx}, 'startDate', this.value)" class="bg-black/50 border border-zinc-800 rounded-lg px-2 py-1 text-zinc-300 text-xs">
+                    </td>
+                    <td class="py-2.5 px-3">
+                        <input type="text" value="${t.desc}" onchange="updatePdfRowField(${idx}, 'desc', this.value)" class="w-full bg-black/50 border border-zinc-800 rounded-lg px-2 py-1 text-white text-xs">
+                        ${t.duplicateReason ? `<p class="text-[10px] text-amber-400/80 mt-0.5 italic">${t.duplicateReason}</p>` : ''}
+                    </td>
+                    <td class="py-2.5 px-3">
+                        <select onchange="updatePdfRowField(${idx}, 'category', this.value)" class="bg-black/50 border border-zinc-800 rounded-lg px-2 py-1 text-zinc-300 text-xs">
+                            ${categoriesList.map(cat => `<option value="${cat}" ${t.category === cat ? 'selected' : ''}>${cat}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td class="py-2.5 px-3 whitespace-nowrap text-xs font-semibold ${t.type === 'ingreso' ? 'text-emerald-400' : 'text-rose-400'}">
+                        ${t.type === 'ingreso' ? 'Ingreso' : 'Gasto'}
+                    </td>
+                    <td class="py-2.5 px-3 text-right font-bold whitespace-nowrap ${t.type === 'ingreso' ? 'text-emerald-400' : 'text-rose-400'}">
+                        ${t.type === 'ingreso' ? '+' : '-'}${formatMoney(t.amount)}
+                    </td>
+                </tr>
+            `).join('');
+        };
+
+        window.togglePdfRowSelect = (idx) => {
+            const list = getActivePdfTransactions();
+            if (list[idx]) {
+                list[idx].selected = !list[idx].selected;
+                renderPdfPreviewTable();
+            }
+        };
+
+        window.toggleSelectAllNewPdf = () => {
+            const list = getActivePdfTransactions();
+            const allNewSel = list.filter(t => !t.isDuplicate).every(t => t.selected);
+            list.forEach(t => {
+                if (!t.isDuplicate) t.selected = !allNewSel;
+            });
+            renderPdfPreviewTable();
+        };
+
+        window.updatePdfRowField = (idx, field, val) => {
+            const list = getActivePdfTransactions();
+            if (list[idx]) {
+                list[idx][field] = val;
+            }
+        };
+
+        window.confirmPdfImport = async () => {
+            const list = getActivePdfTransactions();
+            const toImport = list.filter(t => t.selected);
+            if (toImport.length === 0) {
+                alert("No has seleccionado ningún movimiento para importar.");
+                return;
+            }
+
+            const btn = document.getElementById('btn-confirm-pdf-import');
+            const originalText = btn ? btn.textContent : '';
+            if (btn) { btn.disabled = true; btn.textContent = "Guardando..."; }
+
+            try {
+                for (const item of toImport) {
+                    transactions.push({
+                        id: Date.now().toString() + Math.random().toString(36).substr(2, 4),
+                        desc: item.desc,
+                        amount: item.amount,
+                        category: item.category,
+                        type: item.type,
+                        startDate: item.startDate,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+                updateUI();
+                await saveDataToCloud();
+                closePdfImportModal();
+                alert(`¡Éxito! Se han importado ${toImport.length} movimientos correctamente.`);
+            } catch (err) {
+                console.error(err);
+                alert("Error al guardar los movimientos.");
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = originalText; }
+            }
         };
     </script>
+    <div id="api-key-modal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-sm hidden">
+        <div class="apple-card p-8 rounded-3xl w-full max-w-md mx-4">
+            <h2 class="text-2xl font-bold text-white mb-3">Configurar Conexión API</h2>
+            <p class="text-zinc-400 text-sm mb-6">
+                Introduce tu clave personal de Alpha Vantage para sincronizar las cotizaciones de tu cartera.
+                Puedes obtenerla gratuitamente en
+                <a href="https://www.alphavantage.co/support/#api-key" target="_blank" rel="noopener noreferrer" class="text-white underline hover:text-zinc-300">Alpha Vantage</a>.
+            </p>
+            <input type="text" id="user-api-key" placeholder="Pega tu API key" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500">
+            <div class="flex justify-end gap-3 mt-6">
+                <button type="button" onclick="document.getElementById('api-key-modal').classList.add('hidden')" class="apple-button px-4 py-3 rounded-xl text-zinc-300 hover:text-white">Cancelar</button>
+                <button type="button" onclick="saveAndSyncApi()" class="apple-button bg-white text-black font-bold px-4 py-3 rounded-xl">Guardar y Sincronizar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE PERFIL DE USUARIO -->
+    <div id="profile-modal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-sm hidden">
+        <div class="apple-card p-6 sm:p-8 rounded-3xl w-full max-w-md mx-4 relative">
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center text-white">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-white">Mi Perfil</h2>
+                        <p id="profile-current-email" class="text-xs text-zinc-400 truncate max-w-[220px]">usuario@correo.com</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeProfileModal()" class="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Formulario Modificar Alias -->
+            <form id="form-profile-alias" onsubmit="handleProfileAliasSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Alias / Nombre visible</label>
+                    <input type="text" id="profile-new-alias" required placeholder="Ej: Jorge" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500">
+                </div>
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeProfileModal()" class="apple-button px-4 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white">Cerrar</button>
+                    <button type="submit" id="btn-submit-alias" class="apple-button bg-white text-black font-bold px-4 py-2.5 rounded-xl text-xs">Guardar Alias</button>
+                </div>
+            </form>
+
+            <!-- Card Privacidad Zero-Knowledge -->
+            <div class="p-3.5 rounded-2xl bg-zinc-900/60 border border-zinc-800 text-xs space-y-2 mt-5">
+                <div class="flex items-center gap-2 text-emerald-400 font-semibold">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    <span>Privacidad Zero-Knowledge</span>
+                </div>
+                <p class="text-zinc-400 leading-relaxed text-[11px]">Tus transacciones y datos financieros se guardan únicamente en el almacenamiento local de tu navegador. Ningún servidor ni base de datos externa recopila tu información.</p>
+            </div>
+
+            <button type="button" onclick="handleLogout()" class="w-full mt-4 py-2.5 rounded-xl text-xs font-semibold text-rose-400 hover:text-white bg-rose-950/30 border border-rose-800/40 hover:bg-rose-900/50 transition-colors">Restablecer datos de demostración</button>
+        </div>
+    </div>
+
+    <!-- MODAL DE IMPORTACIÓN INTELIGENTE DE PDF -->
+    <div id="pdf-import-modal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-md hidden p-4 overflow-y-auto">
+        <div class="apple-card p-6 sm:p-8 rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col relative my-auto">
+            <!-- Cabecera -->
+            <div class="flex items-center justify-between pb-4 border-b border-zinc-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center text-white">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Importar Movimientos desde PDF</h2>
+                        <p class="text-xs text-zinc-400">Extractos bancarios, resúmenes de cuenta o facturas</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closePdfImportModal()" class="text-zinc-400 hover:text-white p-2 rounded-xl hover:bg-zinc-800 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Error banner -->
+            <div id="pdf-error-msg" class="hidden mt-4 p-3 rounded-xl text-xs font-medium border bg-rose-950/60 border-rose-800 text-rose-300"></div>
+
+            <!-- Zona de Carga Inicial -->
+            <div id="pdf-dropzone" class="py-12 flex flex-col items-center justify-center">
+                <label for="pdf-file-input" class="border-2 border-dashed border-zinc-700 hover:border-zinc-500 rounded-3xl p-8 sm:p-12 text-center cursor-pointer transition-colors w-full max-w-lg bg-zinc-900/30 hover:bg-zinc-900/60 group block">
+                    <div class="w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform">
+                        <svg class="w-8 h-8 text-zinc-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    </div>
+                    <p class="text-white font-bold text-base mb-1">Haz clic para seleccionar tu extracto en PDF</p>
+                    <p class="text-zinc-500 text-xs max-w-xs mx-auto mb-4">Compatible con extractos de Santander, BBVA, CaixaBank, Revolut, ING y exportaciones de Tempus.</p>
+                    <span class="inline-block px-4 py-2 rounded-xl bg-white text-black text-xs font-bold shadow apple-button">Seleccionar Archivo PDF</span>
+                    <input type="file" id="pdf-file-input" accept=".pdf" class="hidden" onchange="handlePdfFileSelect(event)">
+                </label>
+            </div>
+
+            <!-- Spinner de Procesamiento -->
+            <div id="pdf-loading-spinner" class="hidden py-16 flex flex-col items-center justify-center">
+                <svg class="w-10 h-10 animate-spin text-white mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                <p class="text-white font-bold text-sm">Analizando documento PDF...</p>
+                <p class="text-zinc-500 text-xs mt-1">Extrayendo movimientos y verificando duplicados ya registrados</p>
+            </div>
+
+            <!-- Vista Previa y Deduplicación -->
+            <div id="pdf-preview-container" class="hidden flex-1 flex flex-col min-h-0 mt-4 space-y-4">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="bg-zinc-900/70 border border-zinc-800 p-3 rounded-2xl">
+                        <span class="text-[10px] font-bold uppercase text-zinc-500">Total Detectados</span>
+                        <p id="pdf-kpi-total" class="text-xl font-bold text-white mt-0.5">0</p>
+                    </div>
+                    <div class="bg-emerald-950/30 border border-emerald-800/50 p-3 rounded-2xl">
+                        <span class="text-[10px] font-bold uppercase text-emerald-400">Nuevos Registros</span>
+                        <p id="pdf-kpi-new" class="text-xl font-bold text-emerald-400 mt-0.5">0</p>
+                    </div>
+                    <div class="bg-amber-950/30 border border-amber-800/50 p-3 rounded-2xl">
+                        <span class="text-[10px] font-bold uppercase text-amber-400">Duplicados Omitidos</span>
+                        <p id="pdf-kpi-dup" class="text-xl font-bold text-amber-400 mt-0.5">0</p>
+                    </div>
+                    <div class="bg-zinc-900/70 border border-zinc-800 p-3 rounded-2xl">
+                        <span class="text-[10px] font-bold uppercase text-white">Seleccionados</span>
+                        <p id="pdf-kpi-selected" class="text-xl font-bold text-white mt-0.5">0</p>
+                    </div>
+                </div>
+
+                <div id="pdf-dup-banner" class="hidden p-3 rounded-xl bg-amber-950/20 border border-amber-800/40 text-amber-300 text-xs flex items-center gap-2">
+                    <svg class="w-4 h-4 shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    <span>Se han detectado <strong id="pdf-dup-count-span">0</strong> movimientos que ya existen en tu cuenta. Se han desmarcado automáticamente para no duplicarlos.</span>
+                </div>
+
+                <div class="flex-1 overflow-y-auto border border-zinc-800 rounded-2xl max-h-[45vh]">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead class="bg-zinc-950 sticky top-0 z-10 border-b border-zinc-800">
+                            <tr class="text-zinc-400 uppercase font-semibold">
+                                <th class="py-2.5 px-3 w-10 text-center">
+                                    <button type="button" onclick="toggleSelectAllNewPdf()" title="Seleccionar / deseleccionar todos los nuevos" class="text-zinc-400 hover:text-white">✓</button>
+                                </th>
+                                <th class="py-2.5 px-3">Estado</th>
+                                <th class="py-2.5 px-3">Fecha</th>
+                                <th class="py-2.5 px-3">Concepto</th>
+                                <th class="py-2.5 px-3">Categoría</th>
+                                <th class="py-2.5 px-3">Tipo</th>
+                                <th class="py-2.5 px-3 text-right">Importe</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pdf-table-body" class="divide-y divide-zinc-800/50"></tbody>
+                    </table>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-zinc-800">
+                    <button type="button" onclick="openPdfImportModal()" class="text-xs text-zinc-400 hover:text-white underline">Cargar otro archivo</button>
+                    <div class="flex gap-3 w-full sm:w-auto">
+                        <button type="button" onclick="closePdfImportModal()" class="apple-button flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white">Cancelar</button>
+                        <button type="button" id="btn-confirm-pdf-import" onclick="confirmPdfImport()" class="apple-button flex-1 sm:flex-none bg-white text-black font-bold px-5 py-2.5 rounded-xl text-xs disabled:opacity-40 disabled:cursor-not-allowed">Importar Registros</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
