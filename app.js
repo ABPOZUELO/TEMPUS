@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider, verifyBeforeUpdateEmail, deleteUser } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider, verifyBeforeUpdateEmail, deleteUser, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -14,6 +14,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        setPersistence(auth, browserLocalPersistence).catch((err) => console.warn("Persistence error:", err));
         const db = getFirestore(app);
 
         let currentUser = null;
@@ -264,7 +265,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 
             renderTables();
             renderCharts(invCur, liq);
-            renderCalendar();
+            renderEconomicNews();
             updateGoalProgress(pat, liq, gas, ing);
         }
 
@@ -487,32 +488,148 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
             }
         }
 
-        function renderCalendar() {
-            const grid = document.getElementById('calendar-grid');
-            const monthYearText = document.getElementById('calendar-month-year');
-            if(!grid || !monthYearText) return;
-
-            const year = currentCalendarDate.getFullYear();
-            const month = currentCalendarDate.getMonth();
-            const monthNames = ["Enero", "Feb", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-            monthYearText.innerText = `${monthNames[month]} ${year}`;
-
-            const firstDayIndex = (new Date(year, month, 1).getDay() + 6) % 7;
-            const totalDays = new Date(year, month + 1, 0).getDate();
-
-            grid.innerHTML = '';
-            for (let i = 0; i < firstDayIndex; i++) { grid.innerHTML += `<div></div>`; }
-
-            const today = new Date();
-            for (let day = 1; day <= totalDays; day++) {
-                let isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
-                grid.innerHTML += `<div class="h-8 flex items-center justify-center rounded-xl font-medium transition-all ${isToday ? 'bg-white text-black font-bold shadow-lg' : 'text-zinc-300 hover:bg-zinc-800'}">${day}</div>`;
+        // ------------------ CLAVES & NOTICIAS ECONÓMICAS EN DIRECTO ------------------
+        const ECONOMIC_NEWS = [
+            {
+                id: 1,
+                category: 'macro',
+                badgeText: 'BCE / Tipos',
+                badgeColor: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+                time: 'Hace 25 min',
+                title: 'El BCE prepara nuevas bajadas de tipos tras situarse la inflación en el 2.1%',
+                summary: 'La moderación de precios en la Eurozona consolida el ciclo expansivo, estabilizando el Euribor.',
+                impact: '🟢 Favorable para hipotecas y deuda soberana',
+                fullAnalysis: 'El Banco Central Europeo confirma que la inflación en la Eurozona converge hacia su objetivo oficial del 2%. Esto reduce la presión sobre el coste de financiación para particulares y empresas, estabilizando los tipos del Euribor en el entorno del 2.5%.'
+            },
+            {
+                id: 2,
+                category: 'bolsa',
+                badgeText: 'Wall Street',
+                badgeColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+                time: 'Hace 1 hora',
+                title: 'El S&P 500 y el Nasdaq consolidan máximos anuales con balances tecnológicos récord',
+                summary: 'Los beneficios empresariales del trimestre superan las previsiones de Wall Street en más de un 7%.',
+                impact: '▲ Alcista en fondos indexados globales',
+                fullAnalysis: 'Los resultados empresariales superan las previsiones del consenso en más de un 7%. El flujo de capital hacia fondos cotizados (ETFs) indexados al MSCI World y S&P 500 alcanza cifras récord en 2026.'
+            },
+            {
+                id: 3,
+                category: 'macro',
+                badgeText: 'Ahorro / Bancos',
+                badgeColor: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
+                time: 'Hace 3 horas',
+                title: 'La rentabilidad de cuentas remuneradas y letras del tesoro se sitúa en el 2.8% - 3.2%',
+                summary: 'La banca mantiene tipos atractivos para captar pasivo antes del próximo ajuste monetario.',
+                impact: '★ Oportunidad de rentabilidad en liquidez',
+                fullAnalysis: 'Los ahorradores pueden seguir aprovechando rendimientos reales positivos en sus colchones de liquidez y fondos de emergencia, superando la tasa de inflación subyacente.'
+            },
+            {
+                id: 4,
+                category: 'cripto',
+                badgeText: 'Cripto / ETF',
+                badgeColor: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
+                time: 'Hace 5 horas',
+                title: 'Fondos institucionales y tesorerías aceleran su asignación a Bitcoin y Ethereum',
+                summary: 'La madurez regulatoria internacional consolida a los criptoactivos en carteras multiactivo.',
+                impact: '▲ Incremento de volumen institucional',
+                fullAnalysis: 'La consolidación de productos cotizados oficiales bajo supervisión de reguladores globales continúa atrayendo capital que antes estaba excluido por mandatos de inversión tradicionales.'
+            },
+            {
+                id: 5,
+                category: 'bolsa',
+                badgeText: 'IBEX 35',
+                badgeColor: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+                time: 'Hace 7 horas',
+                title: 'El IBEX 35 lidera la rentabilidad por dividendo en Europa con retornos superiores al 4.8%',
+                summary: 'La banca española y las energéticas retribuyen con dividendos récord a sus accionistas.',
+                impact: '💰 Flujo recurrente para carteras DGI',
+                fullAnalysis: 'El índice bursátil español se posiciona como uno de los más atractivos de Europa para inversores enfocados en retornos por dividendo en efectivo y flujos de caja recurrentes.'
             }
-        }
+        ];
 
-        window.changeMonth = (direction) => {
-            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
-            renderCalendar();
+        let currentNewsFilter = 'todas';
+
+        window.renderEconomicNews = function(filter = currentNewsFilter) {
+            currentNewsFilter = filter;
+            const container = document.getElementById('economic-news-container');
+            if (!container) return;
+
+            const filtered = filter === 'todas' 
+                ? ECONOMIC_NEWS 
+                : ECONOMIC_NEWS.filter(n => n.category === filter);
+
+            container.innerHTML = '';
+            if (filtered.length === 0) {
+                container.innerHTML = '<p class="text-xs text-zinc-500 italic py-4 text-center">No hay noticias en esta categoría.</p>';
+                return;
+            }
+
+            filtered.forEach(n => {
+                container.innerHTML += `
+                <div onclick="openNewsModal(${n.id})" class="p-3 rounded-2xl bg-zinc-950/70 border border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-900/60 transition-all cursor-pointer group">
+                    <div class="flex items-center justify-between gap-2 mb-1">
+                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold border ${n.badgeColor}">${n.badgeText}</span>
+                        <span class="text-[10px] text-zinc-500 font-mono">${n.time}</span>
+                    </div>
+                    <h3 class="text-xs font-semibold text-zinc-200 group-hover:text-white leading-snug line-clamp-2 transition-colors">${n.title}</h3>
+                    <p class="text-[11px] text-zinc-400 mt-1 line-clamp-1">${n.summary}</p>
+                    <div class="flex items-center gap-1.5 mt-1.5 text-[10px] text-zinc-400">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                        <span class="truncate">${n.impact}</span>
+                    </div>
+                </div>`;
+            });
+        };
+
+        window.filterEconomicNews = function(cat) {
+            ['todas', 'macro', 'bolsa', 'cripto'].forEach(c => {
+                const btn = document.getElementById(`news-filter-${c}`);
+                if (btn) {
+                    if (c === cat) {
+                        btn.className = "px-2.5 py-1 rounded-lg font-semibold bg-white text-black shadow-sm transition-all whitespace-nowrap";
+                    } else {
+                        btn.className = "px-2.5 py-1 rounded-lg font-medium text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all whitespace-nowrap";
+                    }
+                }
+            });
+            window.renderEconomicNews(cat);
+        };
+
+        window.refreshEconomicNews = function() {
+            const icon = document.getElementById('news-refresh-icon');
+            if (icon) {
+                icon.classList.add('rotate-180');
+                setTimeout(() => icon.classList.remove('rotate-180'), 500);
+            }
+            window.renderEconomicNews(currentNewsFilter);
+        };
+
+        window.openNewsModal = function(id) {
+            const item = ECONOMIC_NEWS.find(n => n.id === id);
+            if (!item) return;
+
+            const modal = document.getElementById('news-detail-modal');
+            const badge = document.getElementById('news-modal-badge');
+            const time = document.getElementById('news-modal-time');
+            const title = document.getElementById('news-modal-title');
+            const analysis = document.getElementById('news-modal-analysis');
+            const impact = document.getElementById('news-modal-impact');
+
+            if (badge) {
+                badge.className = `px-2.5 py-0.5 rounded-lg text-xs font-bold border ${item.badgeColor}`;
+                badge.textContent = item.badgeText;
+            }
+            if (time) time.textContent = item.time;
+            if (title) title.textContent = item.title;
+            if (analysis) analysis.textContent = item.fullAnalysis;
+            if (impact) impact.textContent = item.impact;
+
+            if (modal) modal.classList.remove('hidden');
+        };
+
+        window.closeNewsModal = function() {
+            const modal = document.getElementById('news-detail-modal');
+            if (modal) modal.classList.add('hidden');
         };
 
         // ------------------ ESTRATEGIA: SIMULADOR DE INTERÉS COMPUESTO ------------------
