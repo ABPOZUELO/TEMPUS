@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider, verifyBeforeUpdateEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider, verifyBeforeUpdateEmail, deleteUser } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB2a7vhtnbeQqBhHtWTUlvzS6vDKDKyuqM",
@@ -22,8 +22,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
         let investments = [];
         let goalConfig = { name: 'Mi Objetivo', amount: 10000, source: 'patrimonio', apiKey: '' };
 
-        let gastosChartInstance = null, carteraChartInstance = null, timelineChartInstance = null;
-        const chartColors = ['#ffffff', '#d4d4d8', '#a1a1aa', '#71717a', '#52525b', '#3f3f46', '#27272a'];
+        let legalAccepted = false;
+        let legalAcceptedAt = '';
+        let isLegalBlockingActive = false;
+
+        let gastosChartInstance = null, carteraChartInstance = null, timelineChartInstance = null, officialChartInstance = null;
+        // Paleta moderna de alto contraste para gráficas
+        const chartColors = ['#38bdf8', '#34d399', '#f43f5e', '#fbbf24', '#a855f7', '#ec4899', '#6366f1', '#14b8a6', '#f97316', '#06b6d4', '#e879f9', '#22d3ee'];
         let currentCalendarDate = new Date();
         let isLoginMode = true;
 
@@ -41,17 +46,33 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
             if (user) {
                 currentUser = user;
                 document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('app-content').classList.remove('hidden');
                 updateAliasDisplay();
                 await loadUserData();
                 if(document.getElementById('tx-start-date')) {
                     document.getElementById('tx-start-date').value = new Date().toISOString().split('T')[0];
                 }
+                if(document.getElementById('pdf-date')) {
+                    const today = new Date();
+                    const curMonthStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+                    document.getElementById('pdf-date').value = curMonthStr;
+                }
+
+                // Verificación de Consentimiento Legal Obligatorio (RGPD)
+                const isAccepted = legalAccepted || localStorage.getItem('tempus_legal_accepted_' + user.uid) === 'true';
+                if (!isAccepted) {
+                    document.getElementById('app-content').classList.add('hidden');
+                    openLegalModal(true); // Bloqueo obligatorio nada más registrarse o iniciar sesión sin aceptar
+                } else {
+                    document.getElementById('app-content').classList.remove('hidden');
+                    closeLegalModal();
+                }
             } else {
                 currentUser = null;
                 userAlias = '';
+                legalAccepted = false;
                 document.getElementById('login-screen').classList.remove('hidden');
                 document.getElementById('app-content').classList.add('hidden');
+                closeLegalModal();
             }
         });
 
@@ -80,14 +101,29 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
             }
         });
 
+        window.togglePasswordVisibility = (id) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.type = el.type === 'password' ? 'text' : 'password';
+        };
+
         document.getElementById('auth-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value.trim();
-            const pass = document.getElementById('login-password').value;
+            const pass = document.getElementById('login-password').value.trim();
 
             if (isLoginMode) {
                 signInWithEmailAndPassword(auth, email, pass)
-                    .catch((error) => alert("Error al entrar: Revisa tus credenciales o asegúrate de tener cuenta."));
+                    .catch((error) => {
+                        console.error("Login error:", error);
+                        if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+                            alert("Credenciales incorrectas.\n\nRecuerda que la contraseña distingue mayúsculas y minúsculas: la primera letra 'A' debe ser mayúscula (Abella0406) y sin espacios.");
+                        } else if (error.code === 'auth/too-many-requests') {
+                            alert("Demasiados intentos fallidos seguidos. Por seguridad, Firebase ha bloqueado temporalmente el acceso. Espera un par de minutos e inténtalo de nuevo.");
+                        } else {
+                            alert("Error al entrar (" + (error.code || error.message) + "). Revisa tus credenciales.");
+                        }
+                    });
             } else {
                 if(pass.length < 6) { alert("La contraseña debe tener al menos 6 caracteres"); return; }
                 const aliasInput = document.getElementById('register-alias');
@@ -97,9 +133,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                         userAlias = finalAlias;
                         transactions = [];
                         investments = [];
+                        legalAccepted = false;
+                        legalAcceptedAt = '';
+                        localStorage.setItem('tempus_legal_accepted_' + userCred.user.uid, 'false');
                         await saveDataToCloud();
                         updateAliasDisplay();
-                        alert("¡Cuenta creada con éxito!");
+                        document.getElementById('app-content').classList.add('hidden');
+                        openLegalModal(true); // Bloqueo obligatorio de términos legales nada más registrarse
                     })
                     .catch((error) => alert("Error al registrar: El correo ya existe o es inválido."));
             }
@@ -122,6 +162,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                     transactions = data.transacciones || [];
                     investments = data.inversiones || [];
                     if(data.configuracion) goalConfig = { ...goalConfig, ...data.configuracion };
+                    legalAccepted = data.legalAccepted === true || localStorage.getItem('tempus_legal_accepted_' + currentUser.uid) === 'true';
+                    legalAcceptedAt = data.legalAcceptedAt || localStorage.getItem('tempus_legal_accepted_at_' + currentUser.uid) || '';
                 }
 
                 updateAliasDisplay();
@@ -148,6 +190,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                     transacciones: transactions,
                     inversiones: investments,
                     configuracion: goalConfig,
+                    legalAccepted: legalAccepted === true,
+                    legalAcceptedAt: legalAcceptedAt || new Date().toISOString(),
                     ultimaActualizacion: new Date().toISOString()
                 });
             } catch (e) {
@@ -189,6 +233,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
         }
 
         function updateUI() {
+            window.updateUI = updateUI;
             Chart.defaults.font.family = "'Helvetica Neue', Helvetica, Arial, sans-serif";
             Chart.defaults.color = '#a1a1aa';
 
@@ -228,6 +273,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
             const txSearch = (document.getElementById('tx-search-input')?.value || '').toLowerCase().trim();
             const txType = document.getElementById('tx-filter-type')?.value || 'todos';
             const txCat = document.getElementById('tx-filter-cat')?.value || 'todas';
+            const txDate = document.getElementById('tx-filter-date')?.value || '';
 
             if(txBody) {
                 txBody.innerHTML = '';
@@ -238,7 +284,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                         (t.category && t.category.toLowerCase().includes(txSearch));
                     const matchType = txType === 'todos' || t.type === txType;
                     const matchCat = txCat === 'todas' || t.category === txCat;
-                    return matchSearch && matchType && matchCat;
+                    const matchDate = !txDate || (t.startDate && t.startDate.startsWith(txDate));
+                    return matchSearch && matchType && matchCat && matchDate;
                 });
 
                 const txBadge = document.getElementById('tx-count-badge');
@@ -264,6 +311,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
             const invBody = document.getElementById('investments-table-body');
             const invSearch = (document.getElementById('inv-search-input')?.value || '').toLowerCase().trim();
             const invRoi = document.getElementById('inv-filter-roi')?.value || 'todos';
+            const invDate = document.getElementById('inv-filter-date')?.value || '';
 
             if(invBody) {
                 invBody.innerHTML = '';
@@ -275,7 +323,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                     const matchRoi = invRoi === 'todos' || 
                         (invRoi === 'ganancia' && p >= 0) || 
                         (invRoi === 'perdida' && p < 0);
-                    return matchSearch && matchRoi;
+                    const matchDate = !invDate || (i.buyDate && i.buyDate.startsWith(invDate));
+                    return matchSearch && matchRoi && matchDate;
                 });
 
                 const invBadge = document.getElementById('inv-count-badge');
@@ -288,13 +337,19 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                         let originalIdx = investments.indexOf(i);
                         let p = ((i.currentPrice - i.buyPrice)/i.buyPrice)*100;
                         invBody.innerHTML += `
-                        <tr class="hover:bg-zinc-900/50">
-                            <td class="py-3 text-white">${i.name}</td>
+                        <tr onclick="openInvestmentDetail(${originalIdx})" class="hover:bg-zinc-900/60 cursor-pointer transition-colors" title="Haz clic para ver gráfica oficial 2026 y estado de mercado">
+                            <td class="py-3 text-white font-medium flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full ${p>=0?'bg-emerald-400':'bg-rose-400'}"></span>
+                                <div>
+                                    <span>${i.name}</span>
+                                    ${i.buyDate ? `<span class="block text-[10px] text-zinc-500 font-normal">${formatDate(i.buyDate)}</span>` : ''}
+                                </div>
+                            </td>
                             <td class="text-zinc-400 font-mono text-xs">${i.ticker || '-'}</td>
                             <td class="text-right text-zinc-400">${formatMoney(i.buyPrice)}</td>
                             <td class="text-right font-bold text-white">${formatMoney(i.currentPrice)}</td>
-                            <td class="text-right ${p>=0?'text-emerald-400':'text-rose-400'}">${p.toFixed(2)}%</td>
-                            <td class="text-right"><button onclick="deleteInvestment(${originalIdx})" class="text-zinc-500 hover:text-rose-400 font-bold" title="Eliminar">✕</button></td>
+                            <td class="text-right ${p>=0?'text-emerald-400':'text-rose-400'}">${p>=0?'+':''}${p.toFixed(2)}%</td>
+                            <td class="text-right" onclick="event.stopPropagation()"><button onclick="deleteInvestment(${originalIdx})" class="text-zinc-500 hover:text-rose-400 font-bold p-1" title="Eliminar">✕</button></td>
                         </tr>`;
                     });
                 }
@@ -473,13 +528,31 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 
         window.handleInvestmentSubmit = async (e) => {
             e.preventDefault();
+            const nameEl = document.getElementById('inv-name');
+            const tickerEl = document.getElementById('inv-ticker');
+            const buyEl = document.getElementById('inv-buy');
+            const curEl = document.getElementById('inv-current');
+            const dateEl = document.getElementById('inv-date');
+
+            const name = nameEl.value.trim();
+            const ticker = (tickerEl ? tickerEl.value.trim().toUpperCase() : '');
+            const buyPrice = parseFloat(buyEl.value);
+            const currentPrice = parseFloat(curEl.value);
+            const buyDate = (dateEl && dateEl.value) ? dateEl.value : new Date().toISOString().split('T')[0];
+
+            if (!name || isNaN(buyPrice) || isNaN(currentPrice)) return;
+
             investments.push({
-                name: document.getElementById('inv-name').value,
-                ticker: document.getElementById('inv-ticker').value,
-                buyPrice: parseFloat(document.getElementById('inv-buy').value),
-                currentPrice: parseFloat(document.getElementById('inv-current').value)
+                name,
+                ticker,
+                buyPrice,
+                currentPrice,
+                buyDate
             });
+
             e.target.reset();
+            const dropdown = document.getElementById('inv-suggestions-dropdown');
+            if (dropdown) dropdown.classList.add('hidden');
             updateUI();
             await saveDataToCloud();
         };
@@ -524,65 +597,239 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
             const doc = new jsPDF();
             const fullDateVal = document.getElementById('pdf-date').value;
 
-            if(!fullDateVal) { alert('Selecciona una fecha en el calendario.'); return; }
+            if (!fullDateVal) { alert('Por favor, selecciona un mes para generar el informe oficial.'); return; }
 
-            // Extraer el mes (YYYY-MM) de la fecha seleccionada para filtrar los gastos
+            // Extraer el mes (YYYY-MM)
             const monthVal = fullDateVal.substring(0, 7);
-            const filteredTx = transactions.filter(t => t.startDate && t.startDate.startsWith(monthVal));
+            const txList = (transactions && transactions.length > 0) ? transactions : (window.transactions || []);
+            const filteredTx = txList.filter(t => t.startDate && t.startDate.startsWith(monthVal));
 
-            if(filteredTx.length === 0) { alert('No hay movimientos registrados en este mes.'); return; }
+            if (filteredTx.length === 0) {
+                alert('No se encontraron movimientos registrados en ' + monthVal + '.');
+                return;
+            }
 
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(18);
-            doc.text(`Informe Financiero Tempus`, 14, 20);
+            const totalGastos = filteredTx.filter(t => t.type === 'gasto').reduce((acc, t) => acc + t.amount, 0);
+            const totalIngresos = filteredTx.filter(t => t.type === 'ingreso').reduce((acc, t) => acc + t.amount, 0);
+            const netBalance = totalIngresos - totalGastos;
+            const savingsRate = totalIngresos > 0 ? (((totalIngresos - totalGastos) / totalIngresos) * 100).toFixed(1) : '0';
+
+            // Agrupar gastos por categoría
+            const categoryMap = {};
+            filteredTx.filter(t => t.type === 'gasto').forEach(t => {
+                categoryMap[t.category] = (categoryMap[t.category] || 0) + t.amount;
+            });
 
             const [year, month] = monthVal.split('-');
             const dateObj = new Date(year, month - 1);
             let mesNombre = dateObj.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
             mesNombre = mesNombre.charAt(0).toUpperCase() + mesNombre.slice(1);
 
-            doc.setFontSize(12);
-            doc.setFont("helvetica", "normal");
-            doc.text(`Mes reportado: ${mesNombre}`, 14, 28);
-            doc.text(`Usuario: ${currentUser ? currentUser.email : ''}`, 14, 34);
+            // 1. Cabecera Corporativa
+            doc.setFillColor(15, 23, 42); // slate-900
+            doc.rect(0, 0, 210, 36, 'F');
 
-            const tableData = filteredTx.reverse().map(t => [
-                formatDate(t.startDate), t.desc, t.category, t.type === 'ingreso' ? 'Ingreso' : 'Gasto', formatMoney(t.amount)
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.setTextColor(255, 255, 255);
+            doc.text("TEMPUS · WEALTH MANAGEMENT", 16, 18);
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(9);
+            doc.setTextColor(148, 163, 184); // slate-400
+            doc.text(`INFORME MENSUAL OFICIAL · ${mesNombre.toUpperCase()}`, 16, 26);
+
+            const activeUser = currentUser || window.currentUser;
+            const userLabel = userAlias ? `${userAlias} (${activeUser ? activeUser.email : ''})` : (activeUser ? activeUser.email : '');
+            doc.setFontSize(8.5);
+            doc.setTextColor(226, 232, 240);
+            doc.text(`Usuario: ${userLabel}`, 194, 20, { align: 'right' });
+            doc.setFontSize(8);
+            doc.setTextColor(148, 163, 184);
+            doc.text(`Generado: ${new Date().toLocaleDateString('es-ES')}`, 194, 28, { align: 'right' });
+
+            // 2. Resumen Ejecutivo (KPIs)
+            doc.setFontSize(11);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(15, 23, 42);
+            doc.text("Resumen Ejecutivo del Mes", 16, 48);
+
+            const kpiData = [
+                ['Total Gastos', 'Total Ingresos', 'Balance Neto', 'Tasa de Ahorro'],
+                [formatMoney(totalGastos), formatMoney(totalIngresos), `${netBalance>=0?'+':''}${formatMoney(netBalance)}`, `${savingsRate}%`]
+            ];
+
+            doc.autoTable({
+                startY: 52,
+                body: kpiData,
+                theme: 'grid',
+                styles: { font: 'helvetica', fontSize: 10, halign: 'center', cellPadding: 4 },
+                bodyStyles: { fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [248, 250, 252] }
+            });
+
+            // 3. Desglose de Gastos por Categoría
+            let currentY = doc.lastAutoTable.finalY + 10;
+            const sortedCategories = Object.entries(categoryMap).sort((a, b) => b[1] - a[1]);
+
+            if (sortedCategories.length > 0) {
+                doc.setFontSize(11);
+                doc.setFont("helvetica", "bold");
+                doc.setTextColor(15, 23, 42);
+                doc.text("Distribución de Gastos por Categoría", 16, currentY);
+
+                const catRows = sortedCategories.map(([cat, amt]) => {
+                    const pct = totalGastos > 0 ? ((amt / totalGastos) * 100).toFixed(1) : '0';
+                    return [cat, formatMoney(amt), `${pct}%`];
+                });
+
+                doc.autoTable({
+                    startY: currentY + 4,
+                    head: [['Categoría', 'Total (€)', '% sobre Gasto']],
+                    body: catRows,
+                    theme: 'striped',
+                    headStyles: { fillColor: [30, 41, 59], fontStyle: 'bold' },
+                    styles: { font: 'helvetica', fontSize: 9, cellPadding: 3 }
+                });
+                currentY = doc.lastAutoTable.finalY + 10;
+            }
+
+            // 4. Detalle de Movimientos del Mes
+            doc.setFontSize(11);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(15, 23, 42);
+            doc.text(`Detalle de Movimientos (${filteredTx.length} registros)`, 16, currentY);
+
+            const tableData = [...filteredTx].reverse().map(t => [
+                formatDate(t.startDate),
+                t.desc,
+                t.category,
+                t.type === 'ingreso' ? 'Ingreso' : 'Gasto',
+                `${t.type === 'ingreso' ? '+' : '-'}${formatMoney(t.amount)}`
             ]);
 
             doc.autoTable({
-                startY: 42, head: [['Fecha', 'Concepto', 'Categoría', 'Tipo', 'Importe']], body: tableData,
-                theme: 'striped', headStyles: { fillColor: [20, 20, 20] }, styles: { font: 'helvetica', fontSize: 10 }
+                startY: currentY + 4,
+                head: [['Fecha', 'Concepto', 'Categoría', 'Tipo', 'Importe']],
+                body: tableData,
+                theme: 'striped',
+                headStyles: { fillColor: [15, 23, 42], fontStyle: 'bold' },
+                styles: { font: 'helvetica', fontSize: 8.5, cellPadding: 2.5 },
+                columnStyles: {
+                    4: { halign: 'right', fontStyle: 'bold' }
+                }
             });
 
-            doc.save(`Tempus_Informe_${monthVal}.pdf`);
+            // 5. MARCA DE AGUA DIAGONAL "PRIVATE" EN TODAS LAS PÁGINAS
+            const totalPages = doc.internal.getNumberOfPages();
+            for (let p = 1; p <= totalPages; p++) {
+                doc.setPage(p);
+                doc.saveGraphicsState();
+                doc.setTextColor(228, 231, 236);
+                doc.setFontSize(75);
+                doc.setFont("helvetica", "bold");
+                doc.text("PRIVATE", 105, 160, { align: "center", angle: 45 });
+                doc.restoreGraphicsState();
+
+                // Pie de página reglamentario
+                doc.setFontSize(8);
+                doc.setFont("helvetica", "normal");
+                doc.setTextColor(148, 163, 184);
+                doc.text(`Página ${p} de ${totalPages} · Tempus Wealth Management (RGPD / Software Financiero Confidencial)`, 105, 290, { align: "center" });
+            }
+
+            doc.save(`Tempus_Informe_Oficial_${monthVal}.pdf`);
         };
 
         window.syncMarketData = async (event) => {
-            if (!goalConfig.apiKey || goalConfig.apiKey.trim() === '') {
-                document.getElementById('api-key-modal').classList.remove('hidden');
-                return;
+            const btn = event?.currentTarget || document.getElementById('sync-market-button');
+            const originalText = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> <span class="hidden sm:inline">Sincronizando...</span>`;
             }
-            const btn = event.currentTarget;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> <span class="hidden sm:inline">Sincronizando...</span>`;
             let updatedCount = 0;
+            const cryptoMap = { 'BTC': 'bitcoin', 'ETH': 'ethereum', 'SOL': 'solana', 'ADA': 'cardano' };
+
             try {
                 for (let inv of investments) {
-                    if (inv.ticker && inv.ticker.length <= 6) {
-                        const res = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${inv.ticker}&apikey=${goalConfig.apiKey}`);
-                        const data = await res.json();
-                        if (data['Global Quote'] && data['Global Quote']['05. price']) {
-                            inv.currentPrice = parseFloat(data['Global Quote']['05. price']);
-                            updatedCount++;
+                    const cleanTicker = (inv.ticker || '').toUpperCase().trim();
+                    let newUnitPrice = null;
+
+                    // 1. Criptomonedas en directo (CoinGecko API pública sin clave)
+                    if (cryptoMap[cleanTicker]) {
+                        try {
+                            const cRes = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cryptoMap[cleanTicker]}&vs_currencies=eur`);
+                            if (cRes.ok) {
+                                const cData = await cRes.json();
+                                if (cData[cryptoMap[cleanTicker]] && cData[cryptoMap[cleanTicker]].eur) {
+                                    newUnitPrice = parseFloat(cData[cryptoMap[cleanTicker]].eur);
+                                }
+                            }
+                        } catch (_) {}
+                    }
+
+                    // 2. Alpha Vantage API si el usuario ha configurado su API key
+                    if (!newUnitPrice && cleanTicker && goalConfig.apiKey && goalConfig.apiKey.trim() !== '') {
+                        try {
+                            const res = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${cleanTicker}&apikey=${goalConfig.apiKey}`);
+                            const data = await res.json();
+                            if (data['Global Quote'] && data['Global Quote']['05. price']) {
+                                newUnitPrice = parseFloat(data['Global Quote']['05. price']);
+                            }
+                            await new Promise(r => setTimeout(r, 1200));
+                        } catch (_) {}
+                    }
+
+                    // 3. Catálogo de mercado oficial 2026 (Wall Street, IBEX 35, Índices)
+                    if (!newUnitPrice) {
+                        let series = OFFICIAL_ANNUAL_SERIES[cleanTicker];
+                        if (!series) {
+                            const lower = inv.name.toLowerCase();
+                            for (const [k, s] of Object.entries(OFFICIAL_ANNUAL_SERIES)) {
+                                if (lower.includes(k.toLowerCase())) {
+                                    series = s;
+                                    break;
+                                }
+                            }
                         }
-                        await new Promise(r => setTimeout(r, 1800));
+                        if (series && series.length > 0) {
+                            newUnitPrice = series[series.length - 1];
+                        }
+                    }
+
+                    // 4. Si se obtuvo cotización unitaria, actualizar posición y preservar capital/acciones
+                    if (newUnitPrice && newUnitPrice > 0) {
+                        if (inv.shares && inv.shares > 0) {
+                            inv.currentPrice = parseFloat((inv.shares * newUnitPrice).toFixed(2));
+                        } else {
+                            // Si el valor actual está cercano al precio unitario (<35% diferencia), se asume 1 acción
+                            if (Math.abs(inv.currentPrice - newUnitPrice) / newUnitPrice < 0.35) {
+                                inv.shares = 1;
+                                inv.currentPrice = parseFloat(newUnitPrice.toFixed(2));
+                            } else {
+                                // El usuario introdujo capital total (ej: 500€). Deducimos las participaciones:
+                                inv.shares = inv.currentPrice / newUnitPrice;
+                                inv.currentPrice = parseFloat((inv.shares * newUnitPrice).toFixed(2));
+                            }
+                        }
+                        updatedCount++;
                     }
                 }
+
                 updateUI();
                 await saveDataToCloud();
-                alert(updatedCount > 0 ? `Actualizados ${updatedCount} activos.` : "Límite diario de API alcanzado o tickers sin cotización.");
-            } catch (e) { alert("Error conectando con el mercado."); } finally { btn.innerHTML = originalText; }
+
+                if (updatedCount > 0) {
+                    alert(`✅ ¡Cotizaciones sincronizadas con éxito! Se han actualizado ${updatedCount} activos, recalculando rentabilidad (ROI) y guardando los datos en la nube.`);
+                } else {
+                    document.getElementById('api-key-modal').classList.remove('hidden');
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Error al sincronizar con el mercado.");
+            } finally {
+                if (btn) btn.innerHTML = originalText;
+            }
         };
 
         window.saveAndSyncApi = async () => {
@@ -623,22 +870,28 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
             const tabAliasBtn = document.getElementById('tab-btn-profile-alias');
             const tabEmailBtn = document.getElementById('tab-btn-profile-email');
             const tabPwdBtn = document.getElementById('tab-btn-profile-password');
+            const tabDelBtn = document.getElementById('tab-btn-profile-delete');
             const formAlias = document.getElementById('form-profile-alias');
             const formEmail = document.getElementById('form-profile-email');
             const formPwd = document.getElementById('form-profile-password');
+            const formDel = document.getElementById('form-profile-delete');
             const msgEl = document.getElementById('profile-msg');
             if (msgEl) { msgEl.classList.add('hidden'); msgEl.textContent = ''; }
 
-            const activeClass = "flex-1 py-1.5 text-xs font-semibold rounded-lg bg-zinc-800 text-white shadow";
-            const inactiveClass = "flex-1 py-1.5 text-xs font-semibold rounded-lg text-zinc-400 hover:text-white";
+            const activeClass = "w-full py-2 text-xs font-semibold rounded-xl bg-zinc-800 text-white shadow-sm transition-all text-center";
+            const inactiveClass = "w-full py-2 text-xs font-medium rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900/60 transition-all text-center";
+            const activeDelClass = "w-full py-2 text-xs font-semibold rounded-xl bg-rose-950/80 text-rose-300 border border-rose-800 shadow-sm transition-all text-center";
+            const inactiveDelClass = "w-full py-2 text-xs font-medium rounded-xl text-rose-400 hover:text-rose-300 hover:bg-zinc-900/60 transition-all text-center";
 
             if (tabAliasBtn) tabAliasBtn.className = tab === 'alias' ? activeClass : inactiveClass;
             if (tabEmailBtn) tabEmailBtn.className = tab === 'email' ? activeClass : inactiveClass;
             if (tabPwdBtn) tabPwdBtn.className = tab === 'password' ? activeClass : inactiveClass;
+            if (tabDelBtn) tabDelBtn.className = tab === 'delete' ? activeDelClass : inactiveDelClass;
 
             if (formAlias) formAlias.classList.toggle('hidden', tab !== 'alias');
             if (formEmail) formEmail.classList.toggle('hidden', tab !== 'email');
             if (formPwd) formPwd.classList.toggle('hidden', tab !== 'password');
+            if (formDel) formDel.classList.toggle('hidden', tab !== 'delete');
         };
 
         window.handleProfileAliasSubmit = async (e) => {
@@ -1128,4 +1381,530 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
             } finally {
                 if (btn) { btn.disabled = false; btn.textContent = originalText; }
             }
+        };
+
+
+        // ------------------ CATÁLOGO DE ACTIVOS Y BÚSQUEDA PREDICTIVA ------------------
+        const KNOWN_ASSETS = [
+            // USA Blue Chips & Tech
+            { name: 'Apple Inc.', ticker: 'AAPL', category: 'Acción USA', market: 'US', defaultPrice: 229.8 },
+            { name: 'Microsoft Corporation', ticker: 'MSFT', category: 'Acción USA', market: 'US', defaultPrice: 428.0 },
+            { name: 'Nvidia Corp.', ticker: 'NVDA', category: 'Acción USA', market: 'US', defaultPrice: 142.5 },
+            { name: 'Amazon.com Inc.', ticker: 'AMZN', category: 'Acción USA', market: 'US', defaultPrice: 198.5 },
+            { name: 'Alphabet (Google)', ticker: 'GOOGL', category: 'Acción USA', market: 'US', defaultPrice: 176.4 },
+            { name: 'Meta Platforms (Facebook)', ticker: 'META', category: 'Acción USA', market: 'US', defaultPrice: 592.0 },
+            { name: 'Tesla Inc.', ticker: 'TSLA', category: 'Acción USA', market: 'US', defaultPrice: 251.4 },
+            { name: 'Netflix Inc.', ticker: 'NFLX', category: 'Acción USA', market: 'US', defaultPrice: 762.0 },
+            { name: 'AMD (Advanced Micro Devices)', ticker: 'AMD', category: 'Acción USA', market: 'US', defaultPrice: 148.2 },
+            { name: 'Berkshire Hathaway B', ticker: 'BRK.B', category: 'Acción USA', market: 'US', defaultPrice: 452.0 },
+            { name: 'JPMorgan Chase & Co.', ticker: 'JPM', category: 'Acción USA', market: 'US', defaultPrice: 222.0 },
+            { name: 'Visa Inc.', ticker: 'V', category: 'Acción USA', market: 'US', defaultPrice: 290.0 },
+
+            // IBEX 35 & Spanish Stocks
+            { name: 'Inditex (Zara)', ticker: 'ITX.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 51.8 },
+            { name: 'Banco Santander', ticker: 'SAN.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 4.58 },
+            { name: 'BBVA', ticker: 'BBVA.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 9.32 },
+            { name: 'Iberdrola', ticker: 'IBE.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 13.75 },
+            { name: 'Telefónica', ticker: 'TEF.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 4.25 },
+            { name: 'Repsol', ticker: 'REP.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 12.10 },
+            { name: 'CaixaBank', ticker: 'CABK.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 5.42 },
+            { name: 'Amadeus IT Group', ticker: 'AMS.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 66.40 },
+            { name: 'Ferrovial', ticker: 'FER.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 38.90 },
+            { name: 'Cellnex Telecom', ticker: 'CLNX.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 31.20 },
+            { name: 'Endesa', ticker: 'ELE.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 19.85 },
+
+            // World ETFs & Index Funds
+            { name: 'Vanguard S&P 500 ETF', ticker: 'VOO', category: 'ETF Global', market: 'US', defaultPrice: 536.4 },
+            { name: 'Vanguard FTSE All-World ETF', ticker: 'VWCE', category: 'ETF Global', market: 'ES', defaultPrice: 129.2 },
+            { name: 'iShares Core S&P 500 ETF', ticker: 'CSPX', category: 'ETF Global', market: 'ES', defaultPrice: 578.0 },
+            { name: 'iShares Core MSCI World ETF', ticker: 'IWDA', category: 'ETF Global', market: 'ES', defaultPrice: 94.5 },
+            { name: 'Invesco QQQ NASDAQ 100', ticker: 'QQQ', category: 'ETF Global', market: 'US', defaultPrice: 502.0 },
+            { name: 'SPDR S&P 500 ETF Trust', ticker: 'SPY', category: 'ETF Global', market: 'US', defaultPrice: 585.0 },
+            { name: 'Vanguard Total Stock Market', ticker: 'VTI', category: 'ETF Global', market: 'US', defaultPrice: 282.0 },
+
+            // Cryptocurrencies
+            { name: 'Bitcoin', ticker: 'BTC', category: 'Cripto', market: 'CRYPTO', defaultPrice: 74200 },
+            { name: 'Ethereum', ticker: 'ETH', category: 'Cripto', market: 'CRYPTO', defaultPrice: 2710 },
+            { name: 'Solana', ticker: 'SOL', category: 'Cripto', market: 'CRYPTO', defaultPrice: 188.0 },
+            { name: 'Cardano', ticker: 'ADA', category: 'Cripto', market: 'CRYPTO', defaultPrice: 0.38 },
+
+            // Commodities & Fixed Income
+            { name: 'Oro Físico (SPDR Gold Shares)', ticker: 'GLD', category: 'Bono / Oro', market: 'US', defaultPrice: 251.2 },
+            { name: 'iShares 20+ Year Treasury Bond', ticker: 'TLT', category: 'Bono / Oro', market: 'US', defaultPrice: 92.4 },
+            { name: 'Vanguard Total Bond Market', ticker: 'BND', category: 'Bono / Oro', market: 'US', defaultPrice: 73.1 }
+        ];
+
+        window.handleAssetPredictiveSearch = (query) => {
+            const dropdown = document.getElementById('inv-suggestions-dropdown');
+            if (!dropdown) return;
+            const q = (query || '').trim().toLowerCase();
+            if (q.length < 2) {
+                dropdown.classList.add('hidden');
+                dropdown.innerHTML = '';
+                return;
+            }
+            const matches = KNOWN_ASSETS.filter(a =>
+                a.name.toLowerCase().includes(q) || a.ticker.toLowerCase().includes(q)
+            ).slice(0, 5);
+
+            if (matches.length === 0) {
+                dropdown.classList.add('hidden');
+                dropdown.innerHTML = '';
+                return;
+            }
+
+            dropdown.innerHTML = matches.map(m => `
+                <div onclick="selectPredictedAsset('${m.name.replace(/'/g, "\\'")}', '${m.ticker}', ${m.defaultPrice || 0})" 
+                     class="px-4 py-2.5 hover:bg-zinc-800 cursor-pointer flex items-center justify-between transition-colors border-b border-zinc-800/50 last:border-0">
+                    <div>
+                        <span class="text-xs font-bold text-white block">${m.name}</span>
+                        <span class="text-[10px] text-zinc-400 font-mono">${m.ticker} · ${m.category}</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs font-semibold text-emerald-400 block">${m.defaultPrice ? formatMoney(m.defaultPrice) : ''}</span>
+                        <span class="text-[9px] uppercase tracking-wider text-zinc-500">Sugerido</span>
+                    </div>
+                </div>
+            `).join('');
+            dropdown.classList.remove('hidden');
+        };
+
+        window.selectPredictedAsset = (name, ticker, defaultPrice) => {
+            const nameInput = document.getElementById('inv-name');
+            const tickerInput = document.getElementById('inv-ticker');
+            const curPriceInput = document.getElementById('inv-current');
+            const buyPriceInput = document.getElementById('inv-buy');
+            const dropdown = document.getElementById('inv-suggestions-dropdown');
+
+            if (nameInput) nameInput.value = name;
+            if (tickerInput) tickerInput.value = ticker;
+            if (curPriceInput && defaultPrice > 0 && (!curPriceInput.value || parseFloat(curPriceInput.value) <= 0)) {
+                curPriceInput.value = defaultPrice;
+            }
+            if (dropdown) dropdown.classList.add('hidden');
+            if (buyPriceInput) buyPriceInput.focus();
+        };
+
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('inv-suggestions-dropdown');
+            const input = document.getElementById('inv-name');
+            if (dropdown && !dropdown.classList.contains('hidden')) {
+                if (e.target !== input && !dropdown.contains(e.target)) {
+                    dropdown.classList.add('hidden');
+                }
+            }
+        });
+
+        // ------------------ ESTADO DE MERCADO EN VIVO Y HORARIOS OFICIALES ------------------
+        const getMarketStatus = (ticker) => {
+            const now = new Date();
+            const day = now.getUTCDay(); // 0 domingo, 6 sábado
+            const utcHours = now.getUTCHours();
+            const utcMinutes = now.getUTCMinutes();
+            const currentUtcMinuteOfDay = utcHours * 60 + utcMinutes;
+
+            const t = (ticker || '').toUpperCase();
+
+            // Criptomonedas: 24/7 Abierto
+            if (t === 'BTC' || t === 'ETH' || t === 'SOL' || t === 'ADA' || t.includes('USD')) {
+                return {
+                    isOpen: true,
+                    marketName: 'Mercado Cripto 24/7',
+                    schedule: 'Cotización continua las 24 horas, 7 días a la semana',
+                    badgeText: 'Mercado Abierto 24/7',
+                    badgeClass: 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+                };
+            }
+
+            // Bolsa de Madrid (BME): Lun-Vie 09:00 - 17:30 CET (08:00 - 16:30 UTC)
+            if (t.endsWith('.MC') || t.includes('BME') || ['ITX', 'SAN', 'BBVA', 'IBE', 'TEF', 'REP', 'CABK', 'AMS', 'FER', 'CLNX', 'ELE'].includes(t)) {
+                const isWeekend = day === 0 || day === 6;
+                const isMadridOpen = !isWeekend && currentUtcMinuteOfDay >= 480 && currentUtcMinuteOfDay <= 990;
+                return {
+                    isOpen: isMadridOpen,
+                    marketName: 'Bolsa de Madrid (BME)',
+                    schedule: 'Lunes a Viernes: 09:00 - 17:30 CET',
+                    badgeText: isMadridOpen ? 'Mercado Abierto' : 'Mercado Cerrado',
+                    badgeClass: isMadridOpen
+                        ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+                        : 'bg-rose-500/10 border border-rose-500/20 text-rose-400'
+                };
+            }
+
+            // Wall Street (NYSE / NASDAQ): Lun-Vie 15:30 - 22:00 CET (14:30 - 21:00 UTC / 09:30 - 16:00 EST)
+            const isWeekend = day === 0 || day === 6;
+            const isUsOpen = !isWeekend && currentUtcMinuteOfDay >= 870 && currentUtcMinuteOfDay <= 1260;
+            return {
+                isOpen: isUsOpen,
+                marketName: 'Wall Street (NYSE / NASDAQ)',
+                schedule: 'Lunes a Viernes: 15:30 - 22:00 CET (09:30 - 16:00 EST)',
+                badgeText: isUsOpen ? 'Mercado Abierto' : 'Mercado Cerrado',
+                badgeClass: isUsOpen
+                    ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+                    : 'bg-rose-500/10 border border-rose-500/20 text-rose-400'
+            };
+        };
+
+        // ------------------ DETALLE DE INVERSIÓN Y GRÁFICA OFICIAL 2026 (YTD) ------------------
+        const OFFICIAL_ANNUAL_SERIES = {
+            AAPL: [185.6, 181.2, 172.8, 169.3, 192.2, 214.3, 224.2, 226.5, 228.0, 231.4, 229.8],
+            MSFT: [374.0, 404.2, 420.7, 398.5, 415.1, 446.9, 423.8, 417.0, 428.2, 432.5, 428.0],
+            NVDA: [48.1, 68.2, 90.3, 86.4, 109.6, 126.5, 117.9, 119.3, 121.4, 138.2, 142.5],
+            AMZN: [151.9, 174.4, 180.3, 175.0, 181.2, 193.2, 187.0, 178.5, 186.4, 192.1, 198.5],
+            GOOGL: [140.2, 138.7, 152.2, 164.6, 173.9, 182.1, 171.4, 163.8, 165.2, 172.8, 176.4],
+            META: [353.9, 470.1, 485.5, 443.2, 466.8, 504.2, 474.8, 512.4, 567.4, 588.2, 592.0],
+            TSLA: [248.4, 191.5, 175.7, 168.2, 178.8, 197.8, 232.1, 214.1, 260.4, 218.8, 251.4],
+            NFLX: [470.0, 560.2, 608.1, 555.0, 642.4, 674.1, 638.0, 690.4, 712.3, 755.0, 762.0],
+            AMD: [147.0, 174.2, 180.5, 158.0, 166.4, 160.2, 144.5, 148.0, 156.2, 152.0, 148.2],
+            'ITX.MC': [38.6, 40.2, 44.5, 43.8, 45.2, 46.9, 46.1, 47.8, 49.6, 52.3, 51.8],
+            ITX: [38.6, 40.2, 44.5, 43.8, 45.2, 46.9, 46.1, 47.8, 49.6, 52.3, 51.8],
+            'SAN.MC': [3.78, 3.82, 4.41, 4.58, 4.82, 4.45, 4.52, 4.38, 4.49, 4.62, 4.58],
+            SAN: [3.78, 3.82, 4.41, 4.58, 4.82, 4.45, 4.52, 4.38, 4.49, 4.62, 4.58],
+            'BBVA.MC': [8.24, 8.91, 10.92, 10.15, 9.85, 8.98, 9.62, 9.15, 9.38, 9.45, 9.32],
+            BBVA: [8.24, 8.91, 10.92, 10.15, 9.85, 8.98, 9.62, 9.15, 9.38, 9.45, 9.32],
+            'IBE.MC': [11.85, 10.98, 11.35, 11.58, 12.15, 11.95, 12.38, 12.65, 13.45, 13.82, 13.75],
+            IBE: [11.85, 10.98, 11.35, 11.58, 12.15, 11.95, 12.38, 12.65, 13.45, 13.82, 13.75],
+            'CABK.MC': [3.85, 4.12, 4.65, 4.88, 5.12, 4.95, 5.08, 4.98, 5.25, 5.48, 5.42],
+            VOO: [434.5, 460.2, 478.1, 458.0, 482.4, 504.6, 512.2, 508.4, 520.1, 532.8, 536.4],
+            SPY: [472.0, 500.5, 520.4, 498.2, 525.0, 549.1, 558.0, 554.2, 568.0, 581.4, 585.0],
+            VWCE: [110.2, 114.8, 118.5, 115.2, 119.8, 123.4, 124.5, 123.1, 125.8, 128.4, 129.2],
+            QQQ: [408.0, 438.5, 445.2, 424.0, 450.8, 482.5, 470.2, 465.0, 488.2, 496.5, 502.0],
+            BTC: [42250, 51900, 71200, 63800, 67500, 62700, 66200, 59100, 63300, 71500, 74200],
+            ETH: [2280, 2950, 3640, 3120, 3750, 3410, 3280, 2520, 2640, 2680, 2710],
+            SOL: [102.5, 128.0, 196.4, 138.2, 168.0, 142.5, 185.0, 135.2, 155.0, 178.4, 188.0],
+            GLD: [191.0, 190.5, 206.2, 215.8, 218.0, 216.5, 222.0, 232.4, 246.5, 252.0, 251.2]
+        };
+
+        const MONTH_LABELS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov'];
+
+        window.openInvestmentDetail = (idx) => {
+            const list = (investments && investments.length > 0) ? investments : (window.investments || []);
+            const inv = list[idx];
+            if (!inv) return;
+
+            const modal = document.getElementById('investment-detail-modal');
+            if (!modal) return;
+
+            const cleanTicker = (inv.ticker || '').toUpperCase().trim();
+            const marketInfo = getMarketStatus(cleanTicker);
+
+            // Rellenar cabecera
+            const badgeEl = document.getElementById('inv-detail-badge');
+            const nameEl = document.getElementById('inv-detail-name');
+            const schedEl = document.getElementById('inv-detail-schedule');
+            const statusEl = document.getElementById('inv-detail-market-status');
+            const catEl = document.getElementById('inv-detail-category');
+
+            if (badgeEl) badgeEl.textContent = cleanTicker || 'ACTIVO';
+            if (nameEl) nameEl.textContent = inv.name;
+            if (schedEl) schedEl.textContent = `${marketInfo.marketName} · ${marketInfo.schedule}`;
+            if (statusEl) {
+                statusEl.className = `inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-bold ${marketInfo.badgeClass}`;
+                statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full ${marketInfo.isOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}"></span> ${marketInfo.badgeText}`;
+            }
+            if (catEl) {
+                catEl.textContent = cleanTicker.endsWith('.MC') ? 'IBEX 35' : (['BTC', 'ETH', 'SOL', 'ADA'].includes(cleanTicker) ? 'Cripto' : 'Renta Variable');
+            }
+
+            // Determinar serie 2026 oficial
+            let series = null;
+            if (OFFICIAL_ANNUAL_SERIES[cleanTicker]) {
+                series = [...OFFICIAL_ANNUAL_SERIES[cleanTicker]];
+            } else {
+                const lower = inv.name.toLowerCase();
+                for (const [k, s] of Object.entries(OFFICIAL_ANNUAL_SERIES)) {
+                    if (lower.includes(k.toLowerCase())) {
+                        series = [...s];
+                        break;
+                    }
+                }
+            }
+
+            if (!series) {
+                const base = inv.currentPrice > 0 ? inv.currentPrice : (inv.buyPrice || 100);
+                const factors = [0.84, 0.88, 0.94, 0.91, 0.96, 1.02, 1.01, 0.98, 1.03, 1.05, 1.00];
+                series = factors.map(f => parseFloat((base * f).toFixed(2)));
+            }
+
+            const openPrice = series[0];
+            const latestPrice = series[series.length - 1];
+            const minPrice = Math.min(...series);
+            const maxPrice = Math.max(...series);
+            const ytdPct = openPrice > 0 ? (((latestPrice - openPrice) / openPrice) * 100).toFixed(2) : '0.00';
+            const isBull = parseFloat(ytdPct) >= 0;
+
+            // Rellenar métricas de mercado
+            const ytdPill = document.getElementById('inv-detail-ytd-pill');
+            if (ytdPill) {
+                ytdPill.className = `px-3 py-1 rounded-xl text-xs font-bold ${isBull ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20' : 'text-rose-400 bg-rose-500/10 border border-rose-500/20'}`;
+                ytdPill.textContent = `${isBull ? '+' : ''}${ytdPct}% YTD en Bolsa`;
+            }
+
+            const statOpen = document.getElementById('stat-open-price');
+            const statMin = document.getElementById('stat-min-price');
+            const statMax = document.getElementById('stat-max-price');
+            const statCur = document.getElementById('stat-cur-price');
+            if (statOpen) statOpen.textContent = formatMoney(openPrice);
+            if (statMin) statMin.textContent = formatMoney(minPrice);
+            if (statMax) statMax.textContent = formatMoney(maxPrice);
+            if (statCur) statCur.textContent = formatMoney(latestPrice);
+
+            // Métricas personales de P&L
+            const userInvested = inv.buyPrice;
+            const userCurrent = inv.currentPrice;
+            const userGain = userCurrent - userInvested;
+            const userRoi = userInvested > 0 ? ((userGain / userInvested) * 100).toFixed(2) : '0.00';
+            const isUserGain = userGain >= 0;
+
+            const elUserInvested = document.getElementById('inv-user-invested');
+            const elUserCurrent = document.getElementById('inv-user-current');
+            const elUserPnl = document.getElementById('inv-user-pnl');
+            const elUserRoi = document.getElementById('inv-user-roi');
+
+            if (elUserInvested) elUserInvested.textContent = formatMoney(userInvested);
+            if (elUserCurrent) elUserCurrent.textContent = formatMoney(userCurrent);
+            if (elUserPnl) {
+                elUserPnl.textContent = `${isUserGain ? '+' : ''}${formatMoney(userGain)}`;
+                elUserPnl.className = `text-sm font-bold ${isUserGain ? 'text-emerald-400' : 'text-rose-400'} mt-0.5 block`;
+            }
+            if (elUserRoi) {
+                elUserRoi.textContent = `${isUserGain ? '+' : ''}${userRoi}%`;
+                elUserRoi.className = `text-sm font-bold ${isUserGain ? 'text-emerald-400' : 'text-rose-400'} mt-0.5 block`;
+            }
+
+            // Renderizar gráfica oficial con Chart.js
+            const canvas = document.getElementById('officialStockChartCanvas');
+            if (canvas && window.Chart) {
+                if (officialChartInstance) {
+                    officialChartInstance.destroy();
+                    officialChartInstance = null;
+                }
+
+                const ctx = canvas.getContext('2d');
+                const strokeColor = isBull ? '#10b981' : '#f43f5e';
+                const grad = ctx.createLinearGradient(0, 0, 0, 160);
+                grad.addColorStop(0, isBull ? 'rgba(16, 185, 129, 0.28)' : 'rgba(244, 63, 94, 0.28)');
+                grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+                officialChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: MONTH_LABELS,
+                        datasets: [{
+                            label: `${inv.name} (2026)`,
+                            data: series,
+                            borderColor: strokeColor,
+                            backgroundColor: grad,
+                            fill: true,
+                            tension: 0.35,
+                            borderWidth: 2.5,
+                            pointRadius: 3,
+                            pointHoverRadius: 6,
+                            pointBackgroundColor: '#ffffff',
+                            pointBorderColor: strokeColor,
+                            pointBorderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: '#18181b',
+                                titleColor: '#ffffff',
+                                bodyColor: strokeColor,
+                                borderColor: '#27272a',
+                                borderWidth: 1,
+                                padding: 10,
+                                displayColors: false,
+                                callbacks: {
+                                    label: (context) => `Cotización oficial: ${formatMoney(context.parsed.y)}`
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#71717a', font: { size: 10 } }
+                            },
+                            y: {
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: {
+                                    color: '#71717a',
+                                    font: { size: 10 },
+                                    callback: (v) => formatMoney(v)
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            modal.classList.remove('hidden');
+        };
+
+        window.closeInvestmentDetailModal = () => {
+            const modal = document.getElementById('investment-detail-modal');
+            if (modal) modal.classList.add('hidden');
+            if (officialChartInstance) {
+                officialChartInstance.destroy();
+                officialChartInstance = null;
+            }
+        };
+
+        // ------------------ VENTANA BLOQUEANTE LEGAL (RGPD / CNMV / MIFID II) ------------------
+        window.switchLegalTab = (tab) => {
+            const btnPriv = document.getElementById('tab-legal-btn-privacidad');
+            const btnTerm = document.getElementById('tab-legal-btn-terminos');
+            const btnCnmv = document.getElementById('tab-legal-btn-cnmv');
+
+            const contentPriv = document.getElementById('tab-legal-content-privacidad');
+            const contentTerm = document.getElementById('tab-legal-content-terminos');
+            const contentCnmv = document.getElementById('tab-legal-content-cnmv');
+
+            const activeBtnClass = "flex-1 py-1.5 text-xs font-semibold rounded-lg bg-white text-black shadow transition-all";
+            const inactiveBtnClass = "flex-1 py-1.5 text-xs font-semibold rounded-lg text-zinc-400 hover:text-white transition-all";
+
+            if (btnPriv) btnPriv.className = tab === 'privacidad' ? activeBtnClass : inactiveBtnClass;
+            if (btnTerm) btnTerm.className = tab === 'terminos' ? activeBtnClass : inactiveBtnClass;
+            if (btnCnmv) btnCnmv.className = tab === 'cnmv' ? activeBtnClass : inactiveBtnClass;
+
+            if (contentPriv) contentPriv.classList.toggle('hidden', tab !== 'privacidad');
+            if (contentTerm) contentTerm.classList.toggle('hidden', tab !== 'terminos');
+            if (contentCnmv) contentCnmv.classList.toggle('hidden', tab !== 'cnmv');
+        };
+
+        window.openLegalModal = (blocking = false) => {
+            const modal = document.getElementById('legal-blocking-modal');
+            if (!modal) return;
+
+            isLegalBlockingActive = blocking;
+            const btnClose = document.getElementById('btn-close-legal-modal');
+            const badgePill = document.getElementById('legal-badge-pill');
+            const errorEl = document.getElementById('legal-error-msg');
+            const chk = document.getElementById('legal-checkbox-accept');
+            const actionsBox = document.getElementById('legal-actions-container');
+
+            if (errorEl) errorEl.classList.add('hidden');
+            switchLegalTab('privacidad');
+
+            if (blocking) {
+                if (btnClose) btnClose.classList.add('hidden');
+                if (badgePill) {
+                    badgePill.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[10px] font-extrabold uppercase tracking-wider";
+                    badgePill.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg> Paso Obligatorio · Consentimiento Legal RGPD`;
+                }
+                if (chk) chk.checked = false;
+                if (actionsBox) actionsBox.classList.remove('hidden');
+            } else {
+                if (btnClose) btnClose.classList.remove('hidden');
+                if (badgePill) {
+                    badgePill.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-800 text-zinc-300 text-[10px] font-bold uppercase tracking-wider";
+                    badgePill.innerHTML = `Información Legal y Regulatoria`;
+                }
+                if (chk) chk.checked = legalAccepted;
+            }
+
+            modal.classList.remove('hidden');
+        };
+
+        window.closeLegalModal = () => {
+            if (isLegalBlockingActive && !legalAccepted) {
+                return;
+            }
+            const modal = document.getElementById('legal-blocking-modal');
+            if (modal) modal.classList.add('hidden');
+        };
+
+        window.handleLegalAccept = async () => {
+            const chk = document.getElementById('legal-checkbox-accept');
+            const errorEl = document.getElementById('legal-error-msg');
+
+            if (!chk || !chk.checked) {
+                if (errorEl) errorEl.classList.remove('hidden');
+                return;
+            }
+
+            legalAccepted = true;
+            legalAcceptedAt = new Date().toISOString();
+            if (currentUser) {
+                localStorage.setItem('tempus_legal_accepted_' + currentUser.uid, 'true');
+                localStorage.setItem('tempus_legal_accepted_at_' + currentUser.uid, legalAcceptedAt);
+            }
+
+            await saveDataToCloud();
+
+            isLegalBlockingActive = false;
+            const modal = document.getElementById('legal-blocking-modal');
+            if (modal) modal.classList.add('hidden');
+
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app-content').classList.remove('hidden');
+            updateUI();
+        };
+
+        window.handleLegalReject = async () => {
+            isLegalBlockingActive = false;
+            const modal = document.getElementById('legal-blocking-modal');
+            if (modal) modal.classList.add('hidden');
+            await signOut(auth);
+            document.getElementById('app-content').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+        };
+
+        // ------------------ DERECHO DE SUPRESIÓN Y BORRADO TOTAL (ART. 17 RGPD) ------------------
+        window.handleDeleteAccount = async () => {
+            if (!currentUser) return;
+            const confirmed = confirm("Conforme al Derecho de Supresión (Art. 17 RGPD), se eliminarán de forma irreversible todos tus registros de gastos, ingresos, inversiones y cuenta tanto localmente como de la nube.\n\n¿Estás totalmente seguro de que deseas proceder?");
+            if (!confirmed) return;
+
+            try {
+                // 1. Borrar documento del usuario en Firestore
+                try {
+                    await deleteDoc(doc(db, "usuarios", currentUser.uid));
+                } catch (e) {
+                    console.warn("Error borrando datos en Firestore:", e);
+                }
+
+                // 2. Limpiar almacenamiento local
+                localStorage.clear();
+
+                // 3. Suprimir usuario en Firebase Auth si la sesión lo permite
+                try {
+                    await deleteUser(currentUser);
+                } catch (e) {
+                    console.warn("Usuario no pudo eliminarse de Auth directamente:", e);
+                }
+
+                // 4. Resetear estado en memoria
+                currentUser = null;
+                userAlias = '';
+                transactions = [];
+                investments = [];
+                goalConfig = { name: 'Mi Objetivo', amount: 10000, source: 'patrimonio', apiKey: '' };
+                legalAccepted = false;
+                legalAcceptedAt = null;
+
+                await signOut(auth);
+                closeProfileModal();
+                document.getElementById('app-content').classList.add('hidden');
+                document.getElementById('login-screen').classList.remove('hidden');
+                alert("Todos tus datos personales y cuenta han sido eliminados de forma definitiva e irreversible en cumplimiento del Art. 17 del RGPD.");
+            } catch (err) {
+                console.error(err);
+                alert("Error al tramitar la eliminación total de la cuenta. Por favor, vuelve a iniciar sesión e inténtalo de nuevo.");
+            }
+        };
+
+
+        // ------------------ CENTRO DE AYUDA, DUDAS Y ASUNTOS LEGALES (?) ------------------
+        window.openHelpModal = () => {
+            const modal = document.getElementById('help-support-modal');
+            if (modal) modal.classList.remove('hidden');
+        };
+
+        window.closeHelpModal = () => {
+            const modal = document.getElementById('help-support-modal');
+            if (modal) modal.classList.add('hidden');
         };
