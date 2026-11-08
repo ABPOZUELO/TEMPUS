@@ -331,7 +331,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                 if (invBadge) invBadge.innerText = `${filteredInv.length}`;
 
                 if (filteredInv.length === 0) {
-                    invBody.innerHTML = '';
+                    invBody.innerHTML = '<tr><td colspan="7" class="text-center py-6 text-zinc-500 text-xs italic">No hay inversiones registradas</td></tr>';
                 } else {
                     filteredInv.forEach((i) => {
                         let originalIdx = investments.indexOf(i);
@@ -340,12 +340,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                         <tr onclick="openInvestmentDetail(${originalIdx})" class="hover:bg-zinc-900/60 cursor-pointer transition-colors" title="Haz clic para ver gráfica oficial 2026 y estado de mercado">
                             <td class="py-3 text-white font-medium flex items-center gap-2">
                                 <span class="w-1.5 h-1.5 rounded-full ${p>=0?'bg-emerald-400':'bg-rose-400'}"></span>
-                                <div>
-                                    <span>${i.name}</span>
-                                    ${i.buyDate ? `<span class="block text-[10px] text-zinc-500 font-normal">${formatDate(i.buyDate)}</span>` : ''}
-                                </div>
+                                <span>${i.name}</span>
                             </td>
                             <td class="text-zinc-400 font-mono text-xs">${i.ticker || '-'}</td>
+                            <td class="text-zinc-400 text-xs whitespace-nowrap">${i.buyDate ? formatDate(i.buyDate) : '-'}</td>
                             <td class="text-right text-zinc-400">${formatMoney(i.buyPrice)}</td>
                             <td class="text-right font-bold text-white">${formatMoney(i.currentPrice)}</td>
                             <td class="text-right ${p>=0?'text-emerald-400':'text-rose-400'}">${p>=0?'+':''}${p.toFixed(2)}%</td>
@@ -365,18 +363,46 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
             if(canvasCartera && carteraChartInstance) carteraChartInstance.destroy();
             if(canvasCartera) {
                 const carteraMenu = document.getElementById('cartera-legend-menu');
+                const hasInvestments = investments.length > 0 && investments.some(i => (i.currentPrice || 0) > 0);
                 if (carteraMenu) {
                     carteraMenu.innerHTML = '';
-                    investments.forEach((i, idx) => {
-                        let pct = invCur > 0 ? ((i.currentPrice / invCur) * 100).toFixed(1) : 0;
-                        let color = chartColors[idx % chartColors.length];
-                        carteraMenu.innerHTML += `<div class="flex items-center justify-between gap-3"><div class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${color};"></span><span class="text-zinc-300 font-medium truncate max-w-[90px]">${i.name}</span></div><span class="text-white font-bold">${pct}%</span></div>`;
-                    });
+                    if (!hasInvestments) {
+                        carteraMenu.innerHTML = '<div class="py-2.5 text-center"><p class="text-xs text-zinc-500 italic">Sin datos registrados</p><p class="text-[10px] text-zinc-600 mt-0.5">Añade activos en Inversiones</p></div>';
+                    } else {
+                        investments.forEach((i, idx) => {
+                            let pct = invCur > 0 ? ((i.currentPrice / invCur) * 100).toFixed(1) : 0;
+                            let color = chartColors[idx % chartColors.length];
+                            carteraMenu.innerHTML += `<div class="flex items-center justify-between gap-3"><div class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${color};"></span><span class="text-zinc-300 font-medium truncate max-w-[90px]">${i.name}</span></div><span class="text-white font-bold">${pct}%</span></div>`;
+                        });
+                    }
                 }
+                const carteraLabels = hasInvestments ? investments.map(i=>i.name) : ['Sin datos registrados'];
+                const carteraData = hasInvestments ? investments.map(i=>i.currentPrice) : [1];
+                const carteraColors = hasInvestments ? chartColors : ['rgba(255, 255, 255, 0.15)'];
+                const carteraBorders = hasInvestments ? 'rgba(24, 24, 28, 1)' : 'rgba(255, 255, 255, 0.25)';
+
                 carteraChartInstance = new Chart(canvasCartera.getContext('2d'), {
                     type: 'doughnut',
-                    data: { labels: investments.map(i=>i.name), datasets: [{ data: investments.map(i=>i.currentPrice), backgroundColor: chartColors, borderColor: 'rgba(24, 24, 28, 1)', borderWidth: 3 }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display:false }, tooltip: { callbacks: { label: function(c) { let v = c.parsed; let t = c.dataset.data.reduce((a,b)=>a+b,0); let p = t>0?((v/t)*100).toFixed(1):0; return ` ${formatMoney(v)} (${p}%)`; }}}}, cutout: '75%' }
+                    data: { labels: carteraLabels, datasets: [{ data: carteraData, backgroundColor: carteraColors, borderColor: carteraBorders, borderWidth: 2 }] },
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        plugins: { 
+                            legend: { display:false }, 
+                            tooltip: { 
+                                enabled: hasInvestments,
+                                callbacks: { 
+                                    label: function(c) { 
+                                        let v = c.parsed; 
+                                        let t = c.dataset.data.reduce((a,b)=>a+b,0); 
+                                        let p = t>0?((v/t)*100).toFixed(1):0; 
+                                        return ` ${formatMoney(v)} (${p}%)`; 
+                                    }
+                                }
+                            }
+                        }, 
+                        cutout: '75%' 
+                    }
                 });
             }
 
@@ -387,23 +413,51 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                 transactions.filter(t => t.type === 'gasto').forEach(t => { gastosMap[t.category] = (gastosMap[t.category] || 0) + t.amount; });
                 const gastoKeys = Object.keys(gastosMap);
                 const gastoValues = Object.values(gastosMap);
+                const hasGastos = gastoKeys.length > 0 && gastoValues.some(v => v > 0);
 
                 const gastosMenu = document.getElementById('gastos-legend-menu');
                 if (gastosMenu) {
                     gastosMenu.innerHTML = '';
-                    let totalGastos = gastoValues.reduce((a, b) => a + b, 0);
-                    gastoKeys.forEach((key, idx) => {
-                        let val = gastoValues[idx];
-                        let pct = totalGastos > 0 ? ((val / totalGastos) * 100).toFixed(1) : 0;
-                        let color = chartColors[idx % chartColors.length];
-                        gastosMenu.innerHTML += `<div class="flex items-center justify-between gap-3"><div class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${color};"></span><span class="text-zinc-300 font-medium truncate max-w-[90px]">${key}</span></div><span class="text-white font-bold">${pct}%</span></div>`;
-                    });
+                    if (!hasGastos) {
+                        gastosMenu.innerHTML = '<div class="py-2.5 text-center"><p class="text-xs text-zinc-500 italic">Sin datos registrados</p><p class="text-[10px] text-zinc-600 mt-0.5">Registra gastos en Flujo de Caja</p></div>';
+                    } else {
+                        let totalGastos = gastoValues.reduce((a, b) => a + b, 0);
+                        gastoKeys.forEach((key, idx) => {
+                            let val = gastoValues[idx];
+                            let pct = totalGastos > 0 ? ((val / totalGastos) * 100).toFixed(1) : 0;
+                            let color = chartColors[idx % chartColors.length];
+                            gastosMenu.innerHTML += `<div class="flex items-center justify-between gap-3"><div class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${color};"></span><span class="text-zinc-300 font-medium truncate max-w-[90px]">${key}</span></div><span class="text-white font-bold">${pct}%</span></div>`;
+                        });
+                    }
                 }
+
+                const gastosLabels = hasGastos ? gastoKeys : ['Sin datos registrados'];
+                const gastosData = hasGastos ? gastoValues : [1];
+                const gastosColors = hasGastos ? chartColors.slice(0, gastoKeys.length) : ['rgba(255, 255, 255, 0.15)'];
+                const gastosBorders = hasGastos ? 'rgba(24, 24, 28, 1)' : 'rgba(255, 255, 255, 0.25)';
 
                 gastosChartInstance = new Chart(canvasGastos.getContext('2d'), {
                     type: 'doughnut',
-                    data: { labels: gastoKeys.length > 0 ? gastoKeys : ['Sin gastos'], datasets: [{ data: gastoKeys.length > 0 ? gastoValues : [1], backgroundColor: chartColors.slice(0, gastoKeys.length > 0 ? gastoKeys.length : 1), borderColor: 'rgba(24, 24, 28, 1)', borderWidth: 3 }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display:false }, tooltip: { callbacks: { label: function(c) { let v = c.parsed; let t = c.dataset.data.reduce((a,b)=>a+b,0); let p = t>0?((v/t)*100).toFixed(1):0; return ` ${formatMoney(v)} (${p}%)`; }}}}, cutout: '75%' }
+                    data: { labels: gastosLabels, datasets: [{ data: gastosData, backgroundColor: gastosColors, borderColor: gastosBorders, borderWidth: 2 }] },
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        plugins: { 
+                            legend: { display:false }, 
+                            tooltip: { 
+                                enabled: hasGastos,
+                                callbacks: { 
+                                    label: function(c) { 
+                                        let v = c.parsed; 
+                                        let t = c.dataset.data.reduce((a,b)=>a+b,0); 
+                                        let p = t>0?((v/t)*100).toFixed(1):0; 
+                                        return ` ${formatMoney(v)} (${p}%)`; 
+                                    }
+                                }
+                            }
+                        }, 
+                        cutout: '75%' 
+                    }
                 });
             }
 
@@ -461,7 +515,191 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
             renderCalendar();
         };
 
+        // ------------------ ESTRATEGIA: SIMULADOR DE INTERÉS COMPUESTO ------------------
+        window.selectedCompoundYears = 20;
+
+        window.setCompoundYears = (years) => {
+            window.selectedCompoundYears = years;
+            [5, 10, 15, 20, 30].forEach(y => {
+                const btn = document.getElementById(`btn-comp-${y}`);
+                if (btn) {
+                    if (y === years) {
+                        btn.className = "px-3 py-1 text-xs rounded-lg bg-white text-black font-bold transition-all shadow";
+                    } else {
+                        btn.className = "px-3 py-1 text-xs rounded-lg text-zinc-400 hover:text-white transition-all";
+                    }
+                }
+            });
+            window.runCompoundSimulation();
+        };
+
+        window.runCompoundSimulation = () => {
+            const initialInput = document.getElementById('sim-initial-input');
+            const monthlyRange = document.getElementById('sim-monthly-range');
+            const returnRange = document.getElementById('sim-return-range');
+
+            if (!initialInput || !monthlyRange || !returnRange) return;
+
+            let initial = parseFloat(initialInput.value) || 0;
+            let monthly = parseFloat(monthlyRange.value) || 0;
+            let annualReturn = (parseFloat(returnRange.value) || 0) / 100;
+            let years = window.selectedCompoundYears || 20;
+            let months = years * 12;
+
+            const labelInit = document.getElementById('label-sim-initial');
+            const labelMonthly = document.getElementById('label-sim-monthly');
+            const labelReturn = document.getElementById('label-sim-return');
+
+            if (labelInit) labelInit.textContent = formatMoney(initial);
+            if (labelMonthly) labelMonthly.textContent = `${formatMoney(monthly)} / mes`;
+            if (labelReturn) {
+                let note = '';
+                if (annualReturn === 0.08) note = ' (Histórico S&P 500)';
+                else if (annualReturn >= 0.10) note = ' (Alto rendimiento)';
+                else if (annualReturn <= 0.04) note = ' (Conservador)';
+                labelReturn.textContent = `${(annualReturn * 100).toFixed(1)}%${note}`;
+            }
+
+            // Fórmula matemática de interés compuesto con aportaciones mensuales recurrentes
+            let monthlyRate = annualReturn / 12;
+            let futureValue = initial;
+            if (monthlyRate > 0) {
+                let compoundFactor = Math.pow(1 + monthlyRate, months);
+                let pmtCompound = monthly * ((compoundFactor - 1) / monthlyRate);
+                futureValue = (initial * compoundFactor) + pmtCompound;
+            } else {
+                futureValue = initial + (monthly * months);
+            }
+
+            let totalContributions = initial + (monthly * months);
+            let totalInterest = Math.max(0, futureValue - totalContributions);
+            let multiplier = totalContributions > 0 ? (futureValue / totalContributions).toFixed(2) : '1.00';
+
+            const elContrib = document.getElementById('sim-total-contributions');
+            const elInterest = document.getElementById('sim-total-interest');
+            const elFinal = document.getElementById('sim-final-wealth');
+            const elYears = document.getElementById('sim-years-label');
+            const elMultiplier = document.getElementById('sim-multiplier-pill');
+
+            if (elContrib) elContrib.textContent = formatMoney(totalContributions);
+            if (elInterest) elInterest.textContent = `+${formatMoney(totalInterest)}`;
+            if (elFinal) elFinal.textContent = formatMoney(futureValue);
+            if (elYears) elYears.textContent = `Al cabo de ${years} años`;
+            if (elMultiplier) elMultiplier.textContent = `Multiplica tu esfuerzo por x${multiplier}`;
+
+            let pctContrib = futureValue > 0 ? Math.round((totalContributions / futureValue) * 100) : 100;
+            let pctInterest = 100 - pctContrib;
+
+            const elPctC = document.getElementById('sim-pct-contributed');
+            const elPctI = document.getElementById('sim-pct-interest');
+            const barC = document.getElementById('sim-bar-contributed');
+            const barI = document.getElementById('sim-bar-interest');
+
+            if (elPctC) elPctC.textContent = `${pctContrib}%`;
+            if (elPctI) elPctI.textContent = `${pctInterest}%`;
+            if (barC) barC.style.width = `${pctContrib}%`;
+            if (barI) barI.style.width = `${pctInterest}%`;
+        };
+
         function updateGoalProgress(pat, liq, gas, ing) {
+            // Inicializar capital del simulador si aún no ha sido editado por el usuario
+            const simInitInput = document.getElementById('sim-initial-input');
+            if (simInitInput && (!simInitInput.dataset.userEdited || simInitInput.value === '')) {
+                simInitInput.value = Math.round(pat > 0 ? pat : liq);
+            }
+            window.runCompoundSimulation();
+
+            // Diagnóstico 50/30/20
+            const needsCategories = ['Vivienda', 'Alimentación', 'Supermercado', 'Transporte', 'Salud', 'Educación', 'Suministros', 'Hogar', 'Facturas', 'Luz', 'Agua', 'Gas', 'Internet'];
+            let totalGastos = 0;
+            let needsSpend = 0;
+            let wantsSpend = 0;
+
+            transactions.filter(t => t.type === 'gasto').forEach(t => {
+                totalGastos += t.amount;
+                const catLower = (t.category || '').toLowerCase();
+                if (needsCategories.some(c => catLower.includes(c.toLowerCase()))) {
+                    needsSpend += t.amount;
+                } else {
+                    wantsSpend += t.amount;
+                }
+            });
+
+            let monthlyIncome = ing > 0 ? ing : (totalGastos > 0 ? totalGastos : 1);
+            let savings = Math.max(0, monthlyIncome - totalGastos);
+
+            let pctNeeds = Math.min(100, Math.round((needsSpend / monthlyIncome) * 100));
+            let pctWants = Math.min(100, Math.round((wantsSpend / monthlyIncome) * 100));
+            let pctSavings = Math.min(100, Math.round((savings / monthlyIncome) * 100));
+
+            const bar50 = document.getElementById('rule-50-bar');
+            const bar30 = document.getElementById('rule-30-bar');
+            const bar20 = document.getElementById('rule-20-bar');
+            const val50 = document.getElementById('rule-50-val');
+            const val30 = document.getElementById('rule-30-val');
+            const val20 = document.getElementById('rule-20-val');
+            const diagText = document.getElementById('rule-diagnostic-text');
+            const statusBadge = document.getElementById('rule-status-badge');
+
+            if (val50) val50.textContent = `${pctNeeds}% (ideal: ≤50%)`;
+            if (val30) val30.textContent = `${pctWants}% (ideal: ≤30%)`;
+            if (val20) val20.textContent = `${pctSavings}% (ideal: ≥20%)`;
+            if (bar50) bar50.style.width = `${pctNeeds}%`;
+            if (bar30) bar30.style.width = `${pctWants}%`;
+            if (bar20) bar20.style.width = `${pctSavings}%`;
+
+            if (diagText && statusBadge) {
+                if (totalGastos === 0 && ing === 0) {
+                    statusBadge.textContent = "Sin datos de flujo";
+                    statusBadge.className = "px-2.5 py-0.5 rounded-lg text-xs font-bold bg-zinc-900 border border-zinc-800 text-zinc-400";
+                    diagText.textContent = "Registra tus ingresos y gastos en Flujo de Caja para obtener un diagnóstico en vivo de la regla 50/30/20 adaptado a tu estilo de vida.";
+                } else if (pctNeeds <= 50 && pctSavings >= 20) {
+                    statusBadge.textContent = "🟢 Excelente Salud";
+                    statusBadge.className = "px-2.5 py-0.5 rounded-lg text-xs font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400";
+                    diagText.textContent = `Cumples la regla con creces: destinas el ${pctNeeds}% a necesidades y ahorras el ${pctSavings}%, lo que te permite acelerar tu libertad financiera.`;
+                } else if (pctNeeds > 50) {
+                    statusBadge.textContent = "⚠️ Necesidades elevadas";
+                    statusBadge.className = "px-2.5 py-0.5 rounded-lg text-xs font-bold bg-amber-500/10 border border-amber-500/30 text-amber-400";
+                    diagText.textContent = `Tus gastos fijos (${pctNeeds}%) superan el 50% recomendado. Analiza tus facturas y costes fijos para aumentar tu margen de maniobra.`;
+                } else {
+                    statusBadge.textContent = "ℹ️ Ajuste recomendable";
+                    statusBadge.className = "px-2.5 py-0.5 rounded-lg text-xs font-bold bg-sky-500/10 border border-sky-500/30 text-sky-400";
+                    diagText.textContent = `Tu distribución actual es ${pctNeeds}% básicas, ${pctWants}% deseos y ${pctSavings}% ahorro. Busca optimizar los caprichos hacia ahorro patrimonial.`;
+                }
+            }
+
+            // Diagnóstico Fondo de Emergencia
+            const avgExpense = totalGastos > 0 ? totalGastos : 1500;
+            const monthsCovered = avgExpense > 0 ? (liq / avgExpense) : 0;
+            const monthsFormatted = monthsCovered >= 12 ? '12+' : monthsCovered.toFixed(1);
+            const optimalTarget = avgExpense * 6;
+
+            const elMonths = document.getElementById('emergency-months');
+            const elAvgExp = document.getElementById('emergency-avg-expense');
+            const elLiq = document.getElementById('emergency-liquidity');
+            const elOptTarget = document.getElementById('emergency-target-val');
+            const elAdv = document.getElementById('emergency-advice');
+            const elShield = document.getElementById('emergency-shield-icon');
+
+            if (elMonths) elMonths.textContent = monthsFormatted;
+            if (elAvgExp) elAvgExp.textContent = formatMoney(avgExpense);
+            if (elLiq) elLiq.textContent = formatMoney(liq);
+            if (elOptTarget) elOptTarget.textContent = formatMoney(optimalTarget);
+
+            if (elAdv && elShield) {
+                if (monthsCovered < 3) {
+                    elShield.innerHTML = '⚠️';
+                    elAdv.innerHTML = `<span class="text-amber-400 font-semibold">Colchón vulnerable (${monthsFormatted} meses):</span> Se recomienda priorizar liquidez en cuenta bancaria hasta cubrir al menos 3 a 6 meses de gastos antes de realizar nuevas inversiones de riesgo.`;
+                } else if (monthsCovered <= 6) {
+                    elShield.innerHTML = '🛡️';
+                    elAdv.innerHTML = `<span class="text-emerald-400 font-semibold">Colchón óptimo (${monthsFormatted} meses):</span> Tienes una cobertura sólida de imprevistos sin exponer tus activos financieros a retiradas forzosas.`;
+                } else {
+                    elShield.innerHTML = '💎';
+                    elAdv.innerHTML = `<span class="text-sky-400 font-semibold">Excelente solvencia (${monthsFormatted} meses):</span> Tu seguridad está garantizada. Considera destinar el excedente de liquidez a activos generadores de rentabilidad para batir la inflación.`;
+                }
+            }
+
+            // Planificador de Objetivos Personalizado
             let currentAmount = goalConfig.source === 'patrimonio' ? pat : liq;
             let targetAmount = goalConfig.amount;
 
@@ -1604,6 +1842,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
             }
             if (catEl) {
                 catEl.textContent = cleanTicker.endsWith('.MC') ? 'IBEX 35' : (['BTC', 'ETH', 'SOL', 'ADA'].includes(cleanTicker) ? 'Cripto' : 'Renta Variable');
+            }
+
+            const dateBadgeEl = document.getElementById('inv-detail-date');
+            if (dateBadgeEl) {
+                dateBadgeEl.textContent = `Comprado: ${inv.buyDate ? formatDate(inv.buyDate) : 'Fecha no registrada'}`;
             }
 
             // Determinar serie 2026 oficial

@@ -12,9 +12,9 @@
     <style>
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background-color: #0b0c10;
+            background-color: #060709;
             background-image: 
-                radial-gradient(circle at 50% 0%, rgba(20, 24, 32, 0.45) 0%, rgba(10, 11, 14, 0.75) 100%),
+                radial-gradient(circle at 50% 0%, rgba(12, 14, 20, 0.72) 0%, rgba(5, 6, 8, 0.94) 100%),
                 url('./background.jpg');
             background-size: cover;
             background-position: center;
@@ -22,16 +22,17 @@
             background-repeat: no-repeat;
         }
         .apple-card {
-            background: rgba(18, 18, 22, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: rgba(22, 23, 30, 0.95);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 18px 40px -6px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.04);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
         }
         .apple-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 15px 30px -10px rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 24px 48px -8px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.22);
+            border-color: rgba(255, 255, 255, 0.25);
         }
         .apple-button { transition: transform 0.1s ease; }
         .apple-button:active { transform: scale(0.96); }
@@ -88,6 +89,7 @@
                         <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                         <span>Aviso Legal, Privacidad RGPD & CNMV</span>
                     </button>
+                    <p class="text-[10px] text-zinc-600 text-center pt-1 font-medium">© 2026 Tempus Wealth Management by Jorge Abella Pozuelo</p>
                 </div>
             </form>
         </div>
@@ -443,6 +445,7 @@
                                     <tr class="border-b border-zinc-800 text-xs uppercase text-zinc-400">
                                         <th class="py-3">Activo</th>
                                         <th>Ticker</th>
+                                        <th>Fecha Compra</th>
                                         <th class="text-right">Invertido</th>
                                         <th class="text-right">Actual</th>
                                         <th class="text-right">ROI</th>
@@ -460,18 +463,222 @@
             <section id="tab-estrategia" class="tab-content hidden space-y-8">
                 <div class="flex justify-between items-center flex-wrap gap-4">
                     <div>
-                        <h1 class="text-3xl font-bold text-white" title="Simulador matemático para calcular cuándo lograrás tus metas">Planificador de Objetivos</h1>
-                        <p class="text-zinc-400 mt-1 hidden sm:block">Establece tu meta financiera y recibe recomendaciones matemáticas.</p>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="px-2.5 py-0.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs font-bold text-zinc-400 uppercase tracking-wider">Laboratorio Patrimonial</span>
+                            <span class="px-2.5 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-400">Inteligencia Soberana</span>
+                        </div>
+                        <h1 class="text-3xl font-bold text-white">Estrategia & Proyección</h1>
+                        <p class="text-zinc-400 mt-1">Simuladores matemáticos, diagnóstico 50/30/20 y proyecciones de interés compuesto a largo plazo.</p>
                     </div>
                 </div>
 
+                <!-- TARJETA 1: SIMULADOR DE INTERÉS COMPUESTO (BOLA DE NIEVE) -->
+                <div class="apple-card p-6 sm:p-8 rounded-3xl space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800/80 pb-5">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center text-emerald-400">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                                </div>
+                                <h2 class="text-xl font-bold text-white">Simulador de Interés Compuesto</h2>
+                            </div>
+                            <p class="text-xs text-zinc-400 mt-1">Calcula el poder multiplicador del tiempo y el efecto bola de nieve en tu patrimonio.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-zinc-400">Horizonte:</span>
+                            <div class="flex bg-zinc-950 p-1 rounded-xl border border-zinc-800">
+                                <button type="button" onclick="setCompoundYears(5)" id="btn-comp-5" class="px-3 py-1 text-xs rounded-lg text-zinc-400 hover:text-white transition-all">5a</button>
+                                <button type="button" onclick="setCompoundYears(10)" id="btn-comp-10" class="px-3 py-1 text-xs rounded-lg text-zinc-400 hover:text-white transition-all">10a</button>
+                                <button type="button" onclick="setCompoundYears(15)" id="btn-comp-15" class="px-3 py-1 text-xs rounded-lg text-zinc-400 hover:text-white transition-all">15a</button>
+                                <button type="button" onclick="setCompoundYears(20)" id="btn-comp-20" class="px-3 py-1 text-xs rounded-lg bg-white text-black font-bold transition-all shadow">20a</button>
+                                <button type="button" onclick="setCompoundYears(30)" id="btn-comp-30" class="px-3 py-1 text-xs rounded-lg text-zinc-400 hover:text-white transition-all">30a</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Controles y Sliders -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-xs">
+                                <label class="font-bold uppercase text-zinc-400">Capital Inicial</label>
+                                <span id="label-sim-initial" class="font-bold text-white">0 €</span>
+                            </div>
+                            <input type="number" id="sim-initial-input" oninput="this.dataset.userEdited='true'; runCompoundSimulation()" placeholder="0" class="w-full bg-black/70 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-zinc-500 font-mono">
+                            <p class="text-[10px] text-zinc-500">Se inicializa con tu patrimonio neto.</p>
+                        </div>
+
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-xs">
+                                <label class="font-bold uppercase text-zinc-400">Aportación Mensual</label>
+                                <span id="label-sim-monthly" class="font-bold text-white">250 € / mes</span>
+                            </div>
+                            <input type="range" id="sim-monthly-range" min="0" max="3000" step="50" value="250" oninput="runCompoundSimulation()" class="w-full accent-white cursor-pointer">
+                            <div class="flex justify-between text-[10px] text-zinc-500 font-mono">
+                                <span>0 €</span>
+                                <span>1.500 €</span>
+                                <span>3.000 €</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-xs">
+                                <label class="font-bold uppercase text-zinc-400">Rentabilidad Anual</label>
+                                <span id="label-sim-return" class="font-bold text-emerald-400">8.0% (S&P 500)</span>
+                            </div>
+                            <input type="range" id="sim-return-range" min="1" max="15" step="0.5" value="8" oninput="runCompoundSimulation()" class="w-full accent-emerald-400 cursor-pointer">
+                            <div class="flex justify-between text-[10px] text-zinc-500 font-mono">
+                                <span>1%</span>
+                                <span>8% (Histórico S&P)</span>
+                                <span>15%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resultados de la Proyección -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                        <div class="bg-zinc-950/70 border border-zinc-800/80 p-4 rounded-2xl">
+                            <span class="text-[11px] font-semibold uppercase text-zinc-400 block">Tu Esfuerzo (Aportado)</span>
+                            <span id="sim-total-contributions" class="text-xl sm:text-2xl font-bold text-white mt-1 block">60.000 €</span>
+                            <span class="text-[10px] text-zinc-500 mt-0.5 block">Capital total ahorrado</span>
+                        </div>
+
+                        <div class="bg-zinc-950/70 border border-emerald-900/40 p-4 rounded-2xl relative overflow-hidden">
+                            <div class="absolute -right-2 -bottom-2 w-16 h-16 bg-emerald-500/5 rounded-full blur-xl pointer-events-none"></div>
+                            <span class="text-[11px] font-semibold uppercase text-emerald-400 block">Intereses Ganados (Mercado)</span>
+                            <span id="sim-total-interest" class="text-xl sm:text-2xl font-bold text-emerald-400 mt-1 block">+87.250 €</span>
+                            <span id="sim-multiplier-pill" class="text-[10px] text-zinc-400 mt-0.5 block">Multiplica tu ahorro por x2.45</span>
+                        </div>
+
+                        <div class="bg-zinc-950 border border-zinc-700/80 p-4 rounded-2xl shadow-lg">
+                            <span class="text-[11px] font-semibold uppercase text-zinc-300 block">Patrimonio Futuro Estimado</span>
+                            <span id="sim-final-wealth" class="text-xl sm:text-2xl font-bold text-white mt-1 block">147.250 €</span>
+                            <span id="sim-years-label" class="text-[10px] text-zinc-400 mt-0.5 block">Al cabo de 20 años</span>
+                        </div>
+                    </div>
+
+                    <!-- Barra Visual de Proporción Aportado vs Intereses -->
+                    <div class="space-y-2 pt-2">
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-zinc-400 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-zinc-400"></span> Capital Aportado: <strong id="sim-pct-contributed" class="text-white ml-1">41%</strong></span>
+                            <span class="text-emerald-400 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> Interés Compuesto Generado: <strong id="sim-pct-interest" class="text-emerald-300 ml-1">59%</strong></span>
+                        </div>
+                        <div class="w-full h-3 rounded-full bg-zinc-800 overflow-hidden flex">
+                            <div id="sim-bar-contributed" class="h-full bg-zinc-400 transition-all duration-300" style="width: 41%;"></div>
+                            <div id="sim-bar-interest" class="h-full bg-emerald-400 transition-all duration-300" style="width: 59%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TARJETA 2 & 3: SALUD FINANCIERA 50/30/20 & COLCHÓN DE SEGURIDAD -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- DIAGNÓSTICO 50/30/20 -->
+                    <div class="apple-card p-6 rounded-3xl space-y-5">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center text-sky-400">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-bold text-white">Regla 50 / 30 / 20</h2>
+                                    <span class="text-[11px] text-zinc-400">Distribución de tu presupuesto real</span>
+                                </div>
+                            </div>
+                            <span id="rule-status-badge" class="px-2.5 py-0.5 rounded-lg text-xs font-bold bg-zinc-900 border border-zinc-800 text-zinc-300">En análisis</span>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-xs mb-1.5">
+                                    <span class="text-zinc-400 font-medium">50% Necesidades Básicas (Vivienda, Comida, Facturas)</span>
+                                    <span id="rule-50-val" class="font-bold text-white">0%</span>
+                                </div>
+                                <div class="w-full h-2 rounded-full bg-zinc-900 overflow-hidden">
+                                    <div id="rule-50-bar" class="h-full bg-amber-400 transition-all duration-300" style="width: 0%;"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs mb-1.5">
+                                    <span class="text-zinc-400 font-medium">30% Deseos y Estilo de Vida (Ocio, Viajes, Compras)</span>
+                                    <span id="rule-30-val" class="font-bold text-white">0%</span>
+                                </div>
+                                <div class="w-full h-2 rounded-full bg-zinc-900 overflow-hidden">
+                                    <div id="rule-30-bar" class="h-full bg-indigo-400 transition-all duration-300" style="width: 0%;"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs mb-1.5">
+                                    <span class="text-zinc-400 font-medium">20% Ahorro & Inversión (Construcción Patrimonial)</span>
+                                    <span id="rule-20-val" class="font-bold text-white">0%</span>
+                                </div>
+                                <div class="w-full h-2 rounded-full bg-zinc-900 overflow-hidden">
+                                    <div id="rule-20-bar" class="h-full bg-emerald-400 transition-all duration-300" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p id="rule-diagnostic-text" class="text-xs text-zinc-400 bg-zinc-950/70 border border-zinc-800/80 rounded-2xl p-3.5 leading-relaxed">
+                            Calculando con tus movimientos registrados...
+                        </p>
+                    </div>
+
+                    <!-- COLCHÓN DE SEGURIDAD / FONDO DE EMERGENCIA -->
+                    <div class="apple-card p-6 rounded-3xl space-y-5 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-2 mb-4">
+                                <div class="w-8 h-8 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center text-teal-400">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-bold text-white">Fondo de Emergencia</h2>
+                                    <span class="text-[11px] text-zinc-400">Solvencia de tu liquidez frente a imprevistos</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-zinc-950/70 border border-zinc-800 rounded-2xl p-4 flex items-center justify-between mb-4">
+                                <div>
+                                    <span class="text-[11px] text-zinc-400 font-medium uppercase block">Cobertura de Gastos</span>
+                                    <div class="flex items-baseline gap-2 mt-1">
+                                        <span id="emergency-months" class="text-3xl font-bold text-white">0.0</span>
+                                        <span class="text-sm text-zinc-400">meses cubiertos</span>
+                                    </div>
+                                </div>
+                                <div id="emergency-shield-icon" class="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-700 flex items-center justify-center text-zinc-300">
+                                    🛡️
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-xs text-zinc-400">
+                                    <span>Gasto mensual promedio:</span>
+                                    <span id="emergency-avg-expense" class="text-white font-semibold">0,00 €</span>
+                                </div>
+                                <div class="flex justify-between text-xs text-zinc-400">
+                                    <span>Liquidez disponible en banco:</span>
+                                    <span id="emergency-liquidity" class="text-white font-semibold">0,00 €</span>
+                                </div>
+                                <div class="flex justify-between text-xs text-zinc-400">
+                                    <span>Fondo óptimo recomendado (6 meses):</span>
+                                    <span id="emergency-target-val" class="text-emerald-400 font-semibold">0,00 €</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="emergency-advice" class="text-xs text-zinc-400 bg-zinc-950/70 border border-zinc-800/80 rounded-2xl p-3.5 leading-relaxed mt-2">
+                            Mantener entre 3 y 6 meses de gastos en liquidez te blinda ante imprevistos sin necesidad de liquidar inversiones antes de tiempo.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TARJETA 4: PLANIFICADOR DE OBJETIVO PERSONALIZADO -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div class="apple-card p-6 rounded-3xl h-fit">
-                        <h2 class="text-lg font-bold text-white mb-4">Definir Meta</h2>
+                        <h2 class="text-lg font-bold text-white mb-4">Definir Meta Específica</h2>
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Nombre del Objetivo</label>
-                                <input type="text" id="goal-name" placeholder="Ej: Mi objetivo financiero" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500" oninput="saveGoalConfig()">
+                                <input type="text" id="goal-name" placeholder="Ej: Compra de vivienda o Jubilación" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500" oninput="saveGoalConfig()">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Importe Necesario (€)</label>
@@ -515,23 +722,67 @@
                     </div>
                 </div>
             </section>
+
+            <!-- PIE DE PÁGINA FORMAL (FOOTER) -->
+            <footer class="mt-20 pt-8 pb-12 border-t border-zinc-800/80 text-center text-xs text-zinc-500 space-y-4">
+                <div class="flex items-center justify-center gap-2.5">
+                    <div class="w-6 h-6 rounded-lg bg-zinc-900 border border-zinc-700 flex items-center justify-center">
+                        <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13h2v8H3v-8zm4-6h2v14H7V7zm4-4h2v18h-2V3zm4 8h2v10h-2V11zm4 4h2v6h-2v-6z"></path></svg>
+                    </div>
+                    <span class="font-bold text-sm tracking-widest text-white">TEMPUS</span>
+                    <span class="text-zinc-600 font-light">|</span>
+                    <span class="text-xs text-zinc-400 font-medium tracking-wide uppercase">Wealth Management</span>
+                </div>
+                <p class="font-normal text-zinc-400 text-xs">
+                    Copyright © 2026 Tempus by Jorge Abella Pozuelo. Todos los derechos reservados.
+                </p>
+                <div class="flex flex-wrap justify-center items-center gap-3 sm:gap-6 text-xs text-zinc-400">
+                    <button type="button" onclick="openHelpModal()" class="hover:text-white transition-colors underline-offset-4 hover:underline">Centro de Ayuda & FAQ</button>
+                    <span class="text-zinc-700">•</span>
+                    <button type="button" onclick="openLegalModal()" class="hover:text-white transition-colors underline-offset-4 hover:underline">Aviso Legal & Privacidad RGPD</button>
+                    <span class="text-zinc-700">•</span>
+                    <button type="button" onclick="openLegalModal()" class="hover:text-white transition-colors underline-offset-4 hover:underline">Cumplimiento CNMV</button>
+                    <span class="text-zinc-700">•</span>
+                    <a href="mailto:jorge.abellapozuelo@gmail.com?subject=Contacto%20Tempus%20Wealth%20Management" class="hover:text-white transition-colors underline-offset-4 hover:underline">Contacto Directo</a>
+                </div>
+                <p class="text-[11px] text-zinc-600 max-w-2xl mx-auto leading-relaxed px-4">
+                    Plataforma privada de gestión financiera e inteligencia patrimonial. Software soberano y confidencial de acuerdo con el Reglamento General de Protección de Datos (UE 2016/679) y la Ley Orgánica 3/2018 (LOPDGDD).
+                </p>
+            </footer>
         </main>
     </div>
 
     <!-- SCRIPT TIPO MODULE PARA FIREBASE -->
     <script type="module" src="app.js"></script>
     <div id="api-key-modal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-sm hidden">
-        <div class="apple-card p-8 rounded-3xl w-full max-w-md mx-4">
-            <h2 class="text-2xl font-bold text-white mb-3">Configurar Conexión API</h2>
-            <p class="text-zinc-400 text-sm mb-6">
-                Introduce tu clave personal de Alpha Vantage para sincronizar las cotizaciones de tu cartera.
-                Puedes obtenerla gratuitamente en
-                <a href="https://www.alphavantage.co/support/#api-key" target="_blank" rel="noopener noreferrer" class="text-white underline hover:text-zinc-300">Alpha Vantage</a>.
+        <div class="apple-card p-6 sm:p-8 rounded-3xl w-full max-w-md mx-4">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center text-amber-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-white">Clave de API Personal</h2>
+                    <span class="text-[11px] text-emerald-400 font-semibold">100% Privada · No compartida</span>
+                </div>
+            </div>
+            <p class="text-zinc-400 text-xs leading-relaxed mb-4">
+                Cada inversor debe configurar su propia clave personal y gratuita de <strong>Alpha Vantage</strong> para sincronizar precios de mercado en directo.
             </p>
-            <input type="text" id="user-api-key" placeholder="Pega tu API key" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500">
+            <div class="bg-zinc-900/70 border border-zinc-800 rounded-2xl p-3 text-xs text-zinc-300 space-y-1.5 mb-5">
+                <div class="flex items-start gap-2">
+                    <span class="text-emerald-400 font-bold">✓</span>
+                    <span>Tu clave se almacena de forma estrictamente privada en tu perfil cifrado y jamás se comparte.</span>
+                </div>
+                <div class="flex items-start gap-2">
+                    <span class="text-emerald-400 font-bold">✓</span>
+                    <span>Puedes obtener tu clave gratuita en 1 minuto en <a href="https://www.alphavantage.co/support/#api-key" target="_blank" rel="noopener noreferrer" class="text-white underline hover:text-zinc-300">Alpha Vantage</a>.</span>
+                </div>
+            </div>
+            <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Tu Clave API</label>
+            <input type="text" id="user-api-key" placeholder="Pega aquí tu clave personal de Alpha Vantage" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500 font-mono text-xs">
             <div class="flex justify-end gap-3 mt-6">
-                <button type="button" onclick="document.getElementById('api-key-modal').classList.add('hidden')" class="apple-button px-4 py-3 rounded-xl text-zinc-300 hover:text-white">Cancelar</button>
-                <button type="button" onclick="saveAndSyncApi()" class="apple-button bg-white text-black font-bold px-4 py-3 rounded-xl">Guardar y Sincronizar</button>
+                <button type="button" onclick="document.getElementById('api-key-modal').classList.add('hidden')" class="apple-button px-4 py-2.5 rounded-xl text-zinc-400 hover:text-white text-xs">Cancelar</button>
+                <button type="button" onclick="saveAndSyncApi()" class="apple-button bg-white text-black font-bold px-4 py-2.5 rounded-xl text-xs">Guardar y Sincronizar</button>
             </div>
         </div>
     </div>
@@ -860,6 +1111,10 @@
                         <span id="inv-detail-badge" class="px-2.5 py-0.5 rounded-lg bg-zinc-800 text-white font-mono text-xs font-bold uppercase">AAPL</span>
                         <span id="inv-detail-category" class="px-2.5 py-0.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs">Acción</span>
                         <div id="inv-detail-market-status" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-bold"></div>
+                        <span id="inv-detail-date-badge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-medium bg-zinc-900 border border-zinc-800 text-zinc-300">
+                            <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <span id="inv-detail-date">Comprado: -</span>
+                        </span>
                     </div>
                     <h2 id="inv-detail-name" class="text-xl sm:text-2xl font-bold text-white tracking-tight">Apple Inc.</h2>
                     <p id="inv-detail-schedule" class="text-xs text-zinc-400 mt-0.5">Lunes a Viernes: 15:30 - 22:00 CET</p>
