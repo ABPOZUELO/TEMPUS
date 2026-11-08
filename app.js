@@ -499,6 +499,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                 title: 'El BCE prepara nuevas bajadas de tipos tras situarse la inflación en el 2.1%',
                 summary: 'La moderación de precios en la Eurozona consolida el ciclo expansivo, estabilizando el Euribor.',
                 impact: '🟢 Favorable para hipotecas y deuda soberana',
+                source: 'Banco Central Europeo (BCE)',
+                url: 'https://www.ecb.europa.eu/press/pr/date/2024/html/index.es.html',
                 fullAnalysis: 'El Banco Central Europeo confirma que la inflación en la Eurozona converge hacia su objetivo oficial del 2%. Esto reduce la presión sobre el coste de financiación para particulares y empresas, estabilizando los tipos del Euribor en el entorno del 2.5%.'
             },
             {
@@ -510,6 +512,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                 title: 'El S&P 500 y el Nasdaq consolidan máximos anuales con balances tecnológicos récord',
                 summary: 'Los beneficios empresariales del trimestre superan las previsiones de Wall Street en más de un 7%.',
                 impact: '▲ Alcista en fondos indexados globales',
+                source: 'Bloomberg Markets',
+                url: 'https://www.bloomberg.com/markets',
                 fullAnalysis: 'Los resultados empresariales superan las previsiones del consenso en más de un 7%. El flujo de capital hacia fondos cotizados (ETFs) indexados al MSCI World y S&P 500 alcanza cifras récord en 2026.'
             },
             {
@@ -521,6 +525,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                 title: 'La rentabilidad de cuentas remuneradas y letras del tesoro se sitúa en el 2.8% - 3.2%',
                 summary: 'La banca mantiene tipos atractivos para captar pasivo antes del próximo ajuste monetario.',
                 impact: '★ Oportunidad de rentabilidad en liquidez',
+                source: 'Tesoro Público & Banco de España',
+                url: 'https://www.tesoro.es/',
                 fullAnalysis: 'Los ahorradores pueden seguir aprovechando rendimientos reales positivos en sus colchones de liquidez y fondos de emergencia, superando la tasa de inflación subyacente.'
             },
             {
@@ -532,6 +538,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                 title: 'Fondos institucionales y tesorerías aceleran su asignación a Bitcoin y Ethereum',
                 summary: 'La madurez regulatoria internacional consolida a los criptoactivos en carteras multiactivo.',
                 impact: '▲ Incremento de volumen institucional',
+                source: 'CoinDesk Financial Markets',
+                url: 'https://www.coindesk.com/markets/',
                 fullAnalysis: 'La consolidación de productos cotizados oficiales bajo supervisión de reguladores globales continúa atrayendo capital que antes estaba excluido por mandatos de inversión tradicionales.'
             },
             {
@@ -543,6 +551,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                 title: 'El IBEX 35 lidera la rentabilidad por dividendo en Europa con retornos superiores al 4.8%',
                 summary: 'La banca española y las energéticas retribuyen con dividendos récord a sus accionistas.',
                 impact: '💰 Flujo recurrente para carteras DGI',
+                source: 'Bolsas y Mercados Españoles (BME)',
+                url: 'https://www.bolsasymercados.es/bme-exchange/es/Mercados-y-Cotizaciones/Acciones/Ibex-35',
                 fullAnalysis: 'El índice bursátil español se posiciona como uno de los más atractivos de Europa para inversores enfocados en retornos por dividendo en efectivo y flujos de caja recurrentes.'
             }
         ];
@@ -573,9 +583,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                     </div>
                     <h3 class="text-xs font-semibold text-zinc-200 group-hover:text-white leading-snug line-clamp-2 transition-colors">${n.title}</h3>
                     <p class="text-[11px] text-zinc-400 mt-1 line-clamp-1">${n.summary}</p>
-                    <div class="flex items-center gap-1.5 mt-1.5 text-[10px] text-zinc-400">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                        <span class="truncate">${n.impact}</span>
+                    <div class="flex items-center justify-between gap-2 mt-2 pt-1.5 border-t border-zinc-800/60 text-[10px]">
+                        <span class="text-emerald-400 flex items-center gap-1 truncate"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> ${n.impact}</span>
+                        <a href="${n.url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="text-zinc-400 hover:text-white flex items-center gap-1 font-semibold group-hover:text-emerald-400 transition-colors shrink-0" title="Abrir noticia original">
+                            <span>Leer ↗</span>
+                        </a>
                     </div>
                 </div>`;
             });
@@ -614,6 +626,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
             const title = document.getElementById('news-modal-title');
             const analysis = document.getElementById('news-modal-analysis');
             const impact = document.getElementById('news-modal-impact');
+            const link = document.getElementById('news-modal-link');
 
             if (badge) {
                 badge.className = `px-2.5 py-0.5 rounded-lg text-xs font-bold border ${item.badgeColor}`;
@@ -623,6 +636,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
             if (title) title.textContent = item.title;
             if (analysis) analysis.textContent = item.fullAnalysis;
             if (impact) impact.textContent = item.impact;
+
+            if (link) {
+                link.href = item.url;
+                link.innerHTML = `<span>Leer en ${item.source}</span> <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>`;
+            }
 
             if (modal) modal.classList.remove('hidden');
         };
