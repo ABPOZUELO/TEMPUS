@@ -17,6 +17,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
         const db = getFirestore(app);
 
         let currentUser = null;
+        let isDemoMode = false;
         let userAlias = '';
         let transactions = [];
         let investments = [];
@@ -42,8 +43,47 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 
         // ------------------ AUTENTICACIÓN ------------------
 
+        window.loadDemoMode = () => {
+            isDemoMode = true;
+            currentUser = { email: 'demo@tempus.wealth', uid: 'demo_user' };
+            userAlias = 'Inversor Demo';
+            legalAccepted = true;
+
+            transactions = [
+                { type: 'ingreso', desc: 'Nómina Mensual', category: 'Nómina', amount: 3500, startDate: '2026-11-01' },
+                { type: 'gasto', desc: 'Alquiler / Hipoteca', category: 'Vivienda', amount: 1100, startDate: '2026-11-02' },
+                { type: 'gasto', desc: 'Supermercado y Alimentación', category: 'Alimentación', amount: 480, startDate: '2026-11-03' },
+                { type: 'gasto', desc: 'Suministros (Luz, Agua, Gas)', category: 'Suministros', amount: 145, startDate: '2026-11-04' },
+                { type: 'gasto', desc: 'Restaurantes y Ocio Fin de Semana', category: 'Restauración', amount: 320, startDate: '2026-11-05' },
+                { type: 'gasto', desc: 'Suscripciones & Gimnasio', category: 'Suscripciones', amount: 80, startDate: '2026-11-06' }
+            ];
+
+            investments = [
+                { name: 'Apple Inc.', ticker: 'AAPL', buyPrice: 4500, currentPrice: 5350, buyDate: '2026-01-15', shares: 25 },
+                { name: 'Vanguard S&P 500 ETF', ticker: 'VOO', buyPrice: 10000, currentPrice: 11450, buyDate: '2026-02-10', shares: 25 },
+                { name: 'Banco Santander', ticker: 'SAN.MC', buyPrice: 3200, currentPrice: 3680, buyDate: '2026-03-05', shares: 800 },
+                { name: 'Bitcoin', ticker: 'BTC', buyPrice: 6000, currentPrice: 7850, buyDate: '2026-04-12', shares: 0.12 }
+            ];
+
+            goalConfig = {
+                name: 'Vivienda Propia & Independencia',
+                amount: 60000,
+                source: 'patrimonio',
+                apiKey: ''
+            };
+
+            const loginScreen = document.getElementById('login-screen');
+            if (loginScreen) loginScreen.classList.add('hidden');
+            const appContent = document.getElementById('app-content');
+            if (appContent) appContent.classList.remove('hidden');
+
+            updateAliasDisplay();
+            updateUI();
+        };
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
+                isDemoMode = false;
                 currentUser = user;
                 document.getElementById('login-screen').classList.add('hidden');
                 updateAliasDisplay();
@@ -67,6 +107,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                     closeLegalModal();
                 }
             } else {
+                if (isDemoMode) return;
                 currentUser = null;
                 userAlias = '';
                 legalAccepted = false;
@@ -182,7 +223,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
         }
 
         async function saveDataToCloud() {
-            if (!currentUser) return;
+            if (!currentUser || isDemoMode) return;
             try {
                 await setDoc(doc(db, "usuarios", currentUser.uid), {
                     email: currentUser.email,
