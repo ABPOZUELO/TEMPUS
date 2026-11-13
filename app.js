@@ -1093,15 +1093,21 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                 }
             });
 
-            // 5. MARCA DE AGUA DIAGONAL "PRIVATE" EN TODAS LAS PÁGINAS
+            // 5. MARCA DE AGUA DIAGONAL "TEMPUS" EN TODAS LAS PÁGINAS (SUTIL Y ELEGANTE)
             const totalPages = doc.internal.getNumberOfPages();
+            const GStateClass = doc.GState || (window.jspdf && window.jspdf.GState);
             for (let p = 1; p <= totalPages; p++) {
                 doc.setPage(p);
                 doc.saveGraphicsState();
-                doc.setTextColor(228, 231, 236);
-                doc.setFontSize(75);
+                if (GStateClass) {
+                    doc.setGState(new GStateClass({ opacity: 0.035 }));
+                    doc.setTextColor(15, 23, 42);
+                } else {
+                    doc.setTextColor(246, 248, 250);
+                }
+                doc.setFontSize(72);
                 doc.setFont("helvetica", "bold");
-                doc.text("PRIVATE", 105, 160, { align: "center", angle: 45 });
+                doc.text("TEMPUS", 105, 175, { align: "center", angle: 45 });
                 doc.restoreGraphicsState();
 
                 // Pie de página reglamentario
