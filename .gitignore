@@ -40,6 +40,8 @@ Thumbs.db
 # Entorno y Bases de datos locales
 .env
 *.env
+automation/email_config.json
+VIDEOS_DIARIOS/
 *.sql
 *.db
 .dev-db.json
@@ -53,3 +55,4 @@ tempus_linkedin*.jpg
 tempus_articulo*.jpg
 TEMPUS_APP_PC/
 *.zip
+*.mp4
