@@ -431,14 +431,14 @@
                         <form onsubmit="handleInvestmentSubmit(event)" class="space-y-4">
                             <div class="relative">
                                 <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Nombre Comercial o Activo</label>
-                                <input type="text" id="inv-name" required placeholder="Ej: Apple, Santander, Nvidia, Bitcoin..." autocomplete="off" oninput="handleAssetPredictiveSearch(this.value)" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500">
+                                <input type="text" id="inv-name" required placeholder="Ej: Apple, Santander, Nvidia, Bitcoin..." autocomplete="off" oninput="handleAssetPredictiveSearch(this.value)" onfocus="if(this.value) handleAssetPredictiveSearch(this.value)" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500">
                                 <!-- Desplegable de sugerencias predictivas -->
-                                <div id="inv-suggestions-dropdown" class="hidden absolute top-full left-0 right-0 z-30 mt-1 max-h-56 overflow-y-auto bg-zinc-950 border border-zinc-700 rounded-2xl shadow-2xl divide-y divide-zinc-800/80 p-1"></div>
+                                <div id="inv-suggestions-dropdown" class="hidden absolute top-full left-0 right-0 z-50 mt-1 max-h-60 overflow-y-auto bg-zinc-950 border border-zinc-700 rounded-2xl shadow-2xl divide-y divide-zinc-800/80 p-1"></div>
                             </div>
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-xs font-bold uppercase text-zinc-400 mb-2" title="Código oficial del activo en bolsa">Ticker Oficial</label>
-                                    <input type="text" id="inv-ticker" placeholder="Ej: AAPL" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500 font-mono text-xs uppercase">
+                                    <input type="text" id="inv-ticker" placeholder="Ej: AAPL" autocomplete="off" oninput="handleAssetPredictiveSearch(this.value)" onfocus="if(this.value) handleAssetPredictiveSearch(this.value)" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500 font-mono text-xs uppercase">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Fecha Compra</label>
@@ -791,7 +791,7 @@
     </div>
 
     <!-- SCRIPT TIPO MODULE PARA FIREBASE -->
-    <script type="module" src="app.js?v=2.5.2"></script>
+    <script type="module" src="app.js?v=2.6.0"></script>
     <div id="api-key-modal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-sm hidden">
         <div class="apple-card p-6 sm:p-8 rounded-3xl w-full max-w-md mx-4">
             <div class="flex items-center gap-3 mb-3">

@@ -2193,8 +2193,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
         document.addEventListener('click', (e) => {
             const dropdown = document.getElementById('inv-suggestions-dropdown');
             const input = document.getElementById('inv-name');
+            const tickerInput = document.getElementById('inv-ticker');
             if (dropdown && !dropdown.classList.contains('hidden')) {
-                if (e.target !== input && !dropdown.contains(e.target)) {
+                if (e.target !== input && e.target !== tickerInput && !dropdown.contains(e.target)) {
                     dropdown.classList.add('hidden');
                 }
             }
