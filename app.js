@@ -1765,74 +1765,372 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 
         // ------------------ CATÁLOGO DE ACTIVOS Y BÚSQUEDA PREDICTIVA ------------------
         const KNOWN_ASSETS = [
-            // USA Blue Chips & Tech
-            { name: 'Apple Inc.', ticker: 'AAPL', category: 'Acción USA', market: 'US', defaultPrice: 229.8 },
-            { name: 'Microsoft Corporation', ticker: 'MSFT', category: 'Acción USA', market: 'US', defaultPrice: 428.0 },
-            { name: 'Nvidia Corp.', ticker: 'NVDA', category: 'Acción USA', market: 'US', defaultPrice: 142.5 },
-            { name: 'Amazon.com Inc.', ticker: 'AMZN', category: 'Acción USA', market: 'US', defaultPrice: 198.5 },
-            { name: 'Alphabet (Google)', ticker: 'GOOGL', category: 'Acción USA', market: 'US', defaultPrice: 176.4 },
-            { name: 'Meta Platforms (Facebook)', ticker: 'META', category: 'Acción USA', market: 'US', defaultPrice: 592.0 },
-            { name: 'Tesla Inc.', ticker: 'TSLA', category: 'Acción USA', market: 'US', defaultPrice: 251.4 },
-            { name: 'Netflix Inc.', ticker: 'NFLX', category: 'Acción USA', market: 'US', defaultPrice: 762.0 },
-            { name: 'AMD (Advanced Micro Devices)', ticker: 'AMD', category: 'Acción USA', market: 'US', defaultPrice: 148.2 },
-            { name: 'Berkshire Hathaway B', ticker: 'BRK.B', category: 'Acción USA', market: 'US', defaultPrice: 452.0 },
-            { name: 'JPMorgan Chase & Co.', ticker: 'JPM', category: 'Acción USA', market: 'US', defaultPrice: 222.0 },
-            { name: 'Visa Inc.', ticker: 'V', category: 'Acción USA', market: 'US', defaultPrice: 290.0 },
+// --- USA MID & SMALL CAPS / GROWTH & SPECIALTY ---
+    { name: 'PPG Industries, Inc.', ticker: 'PPG', category: 'Acción USA', market: 'US', defaultPrice: 128.5 },
+    { name: 'Palantir Technologies', ticker: 'PLTR', category: 'Acción USA', market: 'US', defaultPrice: 62.0 },
+    { name: 'CrowdStrike Holdings', ticker: 'CRWD', category: 'Acción USA', market: 'US', defaultPrice: 345.0 },
+    { name: 'Uber Technologies', ticker: 'UBER', category: 'Acción USA', market: 'US', defaultPrice: 72.5 },
+    { name: 'Airbnb, Inc.', ticker: 'ABNB', category: 'Acción USA', market: 'US', defaultPrice: 138.0 },
+    { name: 'Coinbase Global', ticker: 'COIN', category: 'Acción USA', market: 'US', defaultPrice: 295.0 },
+    { name: 'Snowflake Inc.', ticker: 'SNOW', category: 'Acción USA', market: 'US', defaultPrice: 165.0 },
+    { name: 'Robinhood Markets', ticker: 'HOOD', category: 'Acción USA', market: 'US', defaultPrice: 32.0 },
+    { name: 'Block, Inc. (Square)', ticker: 'SQ', category: 'Acción USA', market: 'US', defaultPrice: 85.0 },
+    { name: 'Spotify Technology', ticker: 'SPOT', category: 'Acción USA', market: 'US', defaultPrice: 470.0 },
+    { name: 'MercadoLibre', ticker: 'MELI', category: 'Acción USA', market: 'US', defaultPrice: 1980.0 },
+    { name: 'Sea Limited', ticker: 'SE', category: 'Acción USA', market: 'US', defaultPrice: 105.0 },
+    { name: 'Enphase Energy', ticker: 'ENPH', category: 'Acción USA', market: 'US', defaultPrice: 68.0 },
+    { name: 'SolarEdge Technologies', ticker: 'SEDG', category: 'Acción USA', market: 'US', defaultPrice: 14.5 },
+    { name: 'Occidental Petroleum', ticker: 'OXY', category: 'Acción USA', market: 'US', defaultPrice: 51.0 },
+    { name: 'Super Micro Computer', ticker: 'SMCI', category: 'Acción USA', market: 'US', defaultPrice: 28.0 },
+    { name: 'ARM Holdings', ticker: 'ARM', category: 'Acción USA', market: 'US', defaultPrice: 135.0 },
+    { name: 'MicroStrategy', ticker: 'MSTR', category: 'Acción USA', market: 'US', defaultPrice: 385.0 },
+    { name: 'Cloudflare, Inc.', ticker: 'NET', category: 'Acción USA', market: 'US', defaultPrice: 105.0 },
+    { name: 'Datadog, Inc.', ticker: 'DDOG', category: 'Acción USA', market: 'US', defaultPrice: 142.0 },
+    { name: 'MongoDB, Inc.', ticker: 'MDB', category: 'Acción USA', market: 'US', defaultPrice: 290.0 },
+    { name: 'Twilio Inc.', ticker: 'TWLO', category: 'Acción USA', market: 'US', defaultPrice: 95.0 },
+    { name: 'UiPath Inc.', ticker: 'PATH', category: 'Acción USA', market: 'US', defaultPrice: 13.0 },
+    { name: 'Zoom Video Communications', ticker: 'ZM', category: 'Acción USA', market: 'US', defaultPrice: 78.0 },
+    { name: 'Fastly, Inc.', ticker: 'FSLY', category: 'Acción USA', market: 'US', defaultPrice: 8.5 },
+    { name: 'Etsy, Inc.', ticker: 'ETSY', category: 'Acción USA', market: 'US', defaultPrice: 52.0 },
+    { name: 'Chewy, Inc.', ticker: 'CHWY', category: 'Acción USA', market: 'US', defaultPrice: 31.0 },
+    { name: 'Carvana Co.', ticker: 'CVNA', category: 'Acción USA', market: 'US', defaultPrice: 220.0 },
+    { name: 'Celsius Holdings', ticker: 'CELH', category: 'Acción USA', market: 'US', defaultPrice: 31.5 },
+    { name: 'Monster Beverage', ticker: 'MNST', category: 'Acción USA', market: 'US', defaultPrice: 52.0 },
+    { name: 'Lululemon Athletica', ticker: 'LULU', category: 'Acción USA', market: 'US', defaultPrice: 320.0 },
+    { name: 'Deckers Outdoor (HOKA / UGG)', ticker: 'DECK', category: 'Acción USA', market: 'US', defaultPrice: 175.0 },
+    { name: 'Crocs, Inc.', ticker: 'CROX', category: 'Acción USA', market: 'US', defaultPrice: 110.0 },
+    { name: 'Duolingo, Inc.', ticker: 'DUOL', category: 'Acción USA', market: 'US', defaultPrice: 310.0 },
+    { name: 'AppLovin Corporation', ticker: 'APP', category: 'Acción USA', market: 'US', defaultPrice: 320.0 },
+    { name: 'Cava Group', ticker: 'CAVA', category: 'Acción USA', market: 'US', defaultPrice: 140.0 },
+    { name: 'On Holding AG', ticker: 'ONON', category: 'Acción USA', market: 'US', defaultPrice: 52.0 },
+    { name: 'Vertiv Holdings', ticker: 'VRT', category: 'Acción USA', market: 'US', defaultPrice: 135.0 },
+    { name: 'Symbotic Inc.', ticker: 'SYM', category: 'Acción USA', market: 'US', defaultPrice: 32.0 },
+    { name: 'IonQ, Inc.', ticker: 'IONQ', category: 'Acción USA', market: 'US', defaultPrice: 28.0 },
+    { name: 'SoundHound AI', ticker: 'SOUN', category: 'Acción USA', market: 'US', defaultPrice: 7.5 },
+    { name: 'Pinterest, Inc.', ticker: 'PINS', category: 'Acción USA', market: 'US', defaultPrice: 32.0 },
+    { name: 'Snap Inc.', ticker: 'SNAP', category: 'Acción USA', market: 'US', defaultPrice: 11.5 },
+    { name: 'Roku, Inc.', ticker: 'ROKU', category: 'Acción USA', market: 'US', defaultPrice: 72.0 },
+    { name: 'The Trade Desk', ticker: 'TTD', category: 'Acción USA', market: 'US', defaultPrice: 122.0 },
+    { name: 'Unity Software', ticker: 'U', category: 'Acción USA', market: 'US', defaultPrice: 21.0 },
+    { name: 'Roblox Corporation', ticker: 'RBLX', category: 'Acción USA', market: 'US', defaultPrice: 52.0 },
+    { name: 'DraftKings Inc.', ticker: 'DKNG', category: 'Acción USA', market: 'US', defaultPrice: 42.0 },
+    { name: 'SoFi Technologies', ticker: 'SOFI', category: 'Acción USA', market: 'US', defaultPrice: 14.5 },
+    { name: 'Rivian Automotive', ticker: 'RIVN', category: 'Acción USA', market: 'US', defaultPrice: 10.5 },
+    { name: 'Lucid Group', ticker: 'LCID', category: 'Acción USA', market: 'US', defaultPrice: 2.1 },
 
-            // IBEX 35 & Spanish Stocks
-            { name: 'Inditex (Zara)', ticker: 'ITX.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 51.8 },
-            { name: 'Banco Santander', ticker: 'SAN.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 4.58 },
-            { name: 'BBVA', ticker: 'BBVA.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 9.32 },
-            { name: 'Iberdrola', ticker: 'IBE.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 13.75 },
-            { name: 'Telefónica', ticker: 'TEF.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 4.25 },
-            { name: 'Repsol', ticker: 'REP.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 12.10 },
-            { name: 'CaixaBank', ticker: 'CABK.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 5.42 },
-            { name: 'Amadeus IT Group', ticker: 'AMS.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 66.40 },
-            { name: 'Ferrovial', ticker: 'FER.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 38.90 },
-            { name: 'Cellnex Telecom', ticker: 'CLNX.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 31.20 },
-            { name: 'Endesa', ticker: 'ELE.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 19.85 },
+    // --- USA BLUE CHIPS & S&P 500 GIANTS ---
+    { name: 'Apple Inc.', ticker: 'AAPL', category: 'Acción USA', market: 'US', defaultPrice: 229.8 },
+    { name: 'Microsoft Corporation', ticker: 'MSFT', category: 'Acción USA', market: 'US', defaultPrice: 428.0 },
+    { name: 'Nvidia Corp.', ticker: 'NVDA', category: 'Acción USA', market: 'US', defaultPrice: 142.5 },
+    { name: 'Amazon.com Inc.', ticker: 'AMZN', category: 'Acción USA', market: 'US', defaultPrice: 198.5 },
+    { name: 'Alphabet (Google)', ticker: 'GOOGL', category: 'Acción USA', market: 'US', defaultPrice: 176.4 },
+    { name: 'Meta Platforms (Facebook)', ticker: 'META', category: 'Acción USA', market: 'US', defaultPrice: 592.0 },
+    { name: 'Tesla Inc.', ticker: 'TSLA', category: 'Acción USA', market: 'US', defaultPrice: 251.4 },
+    { name: 'Netflix Inc.', ticker: 'NFLX', category: 'Acción USA', market: 'US', defaultPrice: 762.0 },
+    { name: 'AMD (Advanced Micro Devices)', ticker: 'AMD', category: 'Acción USA', market: 'US', defaultPrice: 148.2 },
+    { name: 'Berkshire Hathaway B', ticker: 'BRK.B', category: 'Acción USA', market: 'US', defaultPrice: 452.0 },
+    { name: 'JPMorgan Chase & Co.', ticker: 'JPM', category: 'Acción USA', market: 'US', defaultPrice: 222.0 },
+    { name: 'Visa Inc.', ticker: 'V', category: 'Acción USA', market: 'US', defaultPrice: 290.0 },
+    { name: 'Mastercard Inc.', ticker: 'MA', category: 'Acción USA', market: 'US', defaultPrice: 510.0 },
+    { name: 'Johnson & Johnson', ticker: 'JNJ', category: 'Acción USA', market: 'US', defaultPrice: 156.0 },
+    { name: 'Eli Lilly and Company', ticker: 'LLY', category: 'Acción USA', market: 'US', defaultPrice: 810.0 },
+    { name: 'Exxon Mobil Corp.', ticker: 'XOM', category: 'Acción USA', market: 'US', defaultPrice: 118.0 },
+    { name: 'UnitedHealth Group', ticker: 'UNH', category: 'Acción USA', market: 'US', defaultPrice: 580.0 },
+    { name: 'Procter & Gamble Co.', ticker: 'PG', category: 'Acción USA', market: 'US', defaultPrice: 168.0 },
+    { name: 'The Home Depot', ticker: 'HD', category: 'Acción USA', market: 'US', defaultPrice: 395.0 },
+    { name: 'Chevron Corporation', ticker: 'CVX', category: 'Acción USA', market: 'US', defaultPrice: 155.0 },
+    { name: 'AbbVie Inc.', ticker: 'ABBV', category: 'Acción USA', market: 'US', defaultPrice: 172.0 },
+    { name: 'Costco Wholesale', ticker: 'COST', category: 'Acción USA', market: 'US', defaultPrice: 915.0 },
+    { name: 'Walmart Inc.', ticker: 'WMT', category: 'Acción USA', market: 'US', defaultPrice: 85.0 },
+    { name: 'The Coca-Cola Company', ticker: 'KO', category: 'Acción USA', market: 'US', defaultPrice: 64.0 },
+    { name: 'PepsiCo, Inc.', ticker: 'PEP', category: 'Acción USA', market: 'US', defaultPrice: 162.0 },
+    { name: 'Bank of America Corp.', ticker: 'BAC', category: 'Acción USA', market: 'US', defaultPrice: 44.0 },
+    { name: 'Salesforce, Inc.', ticker: 'CRM', category: 'Acción USA', market: 'US', defaultPrice: 315.0 },
+    { name: 'Broadcom Inc.', ticker: 'AVGO', category: 'Acción USA', market: 'US', defaultPrice: 165.0 },
+    { name: 'Cisco Systems', ticker: 'CSCO', category: 'Acción USA', market: 'US', defaultPrice: 58.0 },
+    { name: 'Adobe Inc.', ticker: 'ADBE', category: 'Acción USA', market: 'US', defaultPrice: 495.0 },
+    { name: 'McDonald\'s Corp.', ticker: 'MCD', category: 'Acción USA', market: 'US', defaultPrice: 295.0 },
+    { name: 'Qualcomm Inc.', ticker: 'QCOM', category: 'Acción USA', market: 'US', defaultPrice: 162.0 },
+    { name: 'The Walt Disney Company', ticker: 'DIS', category: 'Acción USA', market: 'US', defaultPrice: 112.0 },
+    { name: 'Nike, Inc.', ticker: 'NKE', category: 'Acción USA', market: 'US', defaultPrice: 78.0 },
+    { name: 'Intel Corporation', ticker: 'INTC', category: 'Acción USA', market: 'US', defaultPrice: 24.5 },
+    { name: 'Texas Instruments', ticker: 'TXN', category: 'Acción USA', market: 'US', defaultPrice: 202.0 },
+    { name: 'Verizon Communications', ticker: 'VZ', category: 'Acción USA', market: 'US', defaultPrice: 42.0 },
+    { name: 'AT&T Inc.', ticker: 'T', category: 'Acción USA', market: 'US', defaultPrice: 22.5 },
+    { name: 'Pfizer Inc.', ticker: 'PFE', category: 'Acción USA', market: 'US', defaultPrice: 26.0 },
+    { name: 'Merck & Co.', ticker: 'MRK', category: 'Acción USA', market: 'US', defaultPrice: 102.0 },
+    { name: 'Thermo Fisher Scientific', ticker: 'TMO', category: 'Acción USA', market: 'US', defaultPrice: 520.0 },
+    { name: 'Abbott Laboratories', ticker: 'ABT', category: 'Acción USA', market: 'US', defaultPrice: 115.0 },
+    { name: 'Danaher Corporation', ticker: 'DHR', category: 'Acción USA', market: 'US', defaultPrice: 235.0 },
+    { name: 'Philip Morris International', ticker: 'PM', category: 'Acción USA', market: 'US', defaultPrice: 128.0 },
+    { name: 'Goldman Sachs Group', ticker: 'GS', category: 'Acción USA', market: 'US', defaultPrice: 560.0 },
+    { name: 'Morgan Stanley', ticker: 'MS', category: 'Acción USA', market: 'US', defaultPrice: 125.0 },
+    { name: 'BlackRock, Inc.', ticker: 'BLK', category: 'Acción USA', market: 'US', defaultPrice: 1020.0 },
+    { name: 'Caterpillar Inc.', ticker: 'CAT', category: 'Acción USA', market: 'US', defaultPrice: 385.0 },
+    { name: 'Deere & Company', ticker: 'DE', category: 'Acción USA', market: 'US', defaultPrice: 410.0 },
+    { name: 'General Electric', ticker: 'GE', category: 'Acción USA', market: 'US', defaultPrice: 185.0 },
+    { name: 'The Boeing Company', ticker: 'BA', category: 'Acción USA', market: 'US', defaultPrice: 145.0 },
+    { name: 'Honeywell International', ticker: 'HON', category: 'Acción USA', market: 'US', defaultPrice: 225.0 },
+    { name: '3M Company', ticker: 'MMM', category: 'Acción USA', market: 'US', defaultPrice: 130.0 },
+    { name: 'Lockheed Martin Corp.', ticker: 'LMT', category: 'Acción USA', market: 'US', defaultPrice: 540.0 },
+    { name: 'RTX Corporation (Raytheon)', ticker: 'RTX', category: 'Acción USA', market: 'US', defaultPrice: 120.0 },
+    { name: 'Northrop Grumman', ticker: 'NOC', category: 'Acción USA', market: 'US', defaultPrice: 505.0 },
+    { name: 'General Dynamics', ticker: 'GD', category: 'Acción USA', market: 'US', defaultPrice: 295.0 },
+    { name: 'United Parcel Service (UPS)', ticker: 'UPS', category: 'Acción USA', market: 'US', defaultPrice: 132.0 },
+    { name: 'FedEx Corporation', ticker: 'FDX', category: 'Acción USA', market: 'US', defaultPrice: 285.0 },
+    { name: 'Union Pacific Corp.', ticker: 'UNP', category: 'Acción USA', market: 'US', defaultPrice: 235.0 },
+    { name: 'IBM (International Business Machines)', ticker: 'IBM', category: 'Acción USA', market: 'US', defaultPrice: 215.0 },
+    { name: 'Oracle Corporation', ticker: 'ORCL', category: 'Acción USA', market: 'US', defaultPrice: 185.0 },
+    { name: 'ServiceNow, Inc.', ticker: 'NOW', category: 'Acción USA', market: 'US', defaultPrice: 1020.0 },
+    { name: 'Intuit Inc.', ticker: 'INTU', category: 'Acción USA', market: 'US', defaultPrice: 660.0 },
+    { name: 'Autodesk, Inc.', ticker: 'ADSK', category: 'Acción USA', market: 'US', defaultPrice: 295.0 },
+    { name: 'Palo Alto Networks', ticker: 'PANW', category: 'Acción USA', market: 'US', defaultPrice: 385.0 },
+    { name: 'Fortinet, Inc.', ticker: 'FTNT', category: 'Acción USA', market: 'US', defaultPrice: 92.0 },
+    { name: 'Synopsys, Inc.', ticker: 'SNPS', category: 'Acción USA', market: 'US', defaultPrice: 540.0 },
+    { name: 'Cadence Design Systems', ticker: 'CDNS', category: 'Acción USA', market: 'US', defaultPrice: 295.0 },
+    { name: 'Applied Materials', ticker: 'AMAT', category: 'Acción USA', market: 'US', defaultPrice: 175.0 },
+    { name: 'Lam Research Corp.', ticker: 'LRCX', category: 'Acción USA', market: 'US', defaultPrice: 75.0 },
+    { name: 'KLA Corporation', ticker: 'KLAC', category: 'Acción USA', market: 'US', defaultPrice: 640.0 },
+    { name: 'Micron Technology', ticker: 'MU', category: 'Acción USA', market: 'US', defaultPrice: 102.0 },
+    { name: 'Starbucks Corporation', ticker: 'SBUX', category: 'Acción USA', market: 'US', defaultPrice: 98.0 },
+    { name: 'Target Corporation', ticker: 'TGT', category: 'Acción USA', market: 'US', defaultPrice: 135.0 },
+    { name: 'Lowe\'s Companies', ticker: 'LOW', category: 'Acción USA', market: 'US', defaultPrice: 265.0 },
+    { name: 'Booking Holdings', ticker: 'BKNG', category: 'Acción USA', market: 'US', defaultPrice: 4750.0 },
+    { name: 'Charles Schwab Corp.', ticker: 'SCHW', category: 'Acción USA', market: 'US', defaultPrice: 78.0 },
+    { name: 'American Express Co.', ticker: 'AXP', category: 'Acción USA', market: 'US', defaultPrice: 285.0 },
+    { name: 'Citigroup Inc.', ticker: 'C', category: 'Acción USA', market: 'US', defaultPrice: 68.0 },
+    { name: 'Wells Fargo & Co.', ticker: 'WFC', category: 'Acción USA', market: 'US', defaultPrice: 72.0 },
+    { name: 'S&P Global Inc.', ticker: 'SPGI', category: 'Acción USA', market: 'US', defaultPrice: 510.0 },
+    { name: 'Moody\'s Corporation', ticker: 'MCO', category: 'Acción USA', market: 'US', defaultPrice: 475.0 },
+    { name: 'CME Group Inc.', ticker: 'CME', category: 'Acción USA', market: 'US', defaultPrice: 228.0 },
+    { name: 'Intercontinental Exchange', ticker: 'ICE', category: 'Acción USA', market: 'US', defaultPrice: 155.0 },
+    { name: 'Bristol-Myers Squibb', ticker: 'BMY', category: 'Acción USA', market: 'US', defaultPrice: 56.0 },
+    { name: 'Amgen Inc.', ticker: 'AMGN', category: 'Acción USA', market: 'US', defaultPrice: 295.0 },
+    { name: 'Gilead Sciences', ticker: 'GILD', category: 'Acción USA', market: 'US', defaultPrice: 88.0 },
+    { name: 'Vertex Pharmaceuticals', ticker: 'VRTX', category: 'Acción USA', market: 'US', defaultPrice: 460.0 },
+    { name: 'Stryker Corporation', ticker: 'SYK', category: 'Acción USA', market: 'US', defaultPrice: 380.0 },
+    { name: 'Boston Scientific', ticker: 'BSX', category: 'Acción USA', market: 'US', defaultPrice: 88.0 },
+    { name: 'Intuitive Surgical', ticker: 'ISRG', category: 'Acción USA', market: 'US', defaultPrice: 520.0 },
+    { name: 'Medtronic plc', ticker: 'MDT', category: 'Acción USA', market: 'US', defaultPrice: 86.0 },
+    { name: 'Regeneron Pharmaceuticals', ticker: 'REGN', category: 'Acción USA', market: 'US', defaultPrice: 760.0 },
+    { name: 'Zoetis Inc.', ticker: 'ZTS', category: 'Acción USA', market: 'US', defaultPrice: 175.0 },
+    { name: 'Ford Motor Company', ticker: 'F', category: 'Acción USA', market: 'US', defaultPrice: 11.0 },
+    { name: 'General Motors', ticker: 'GM', category: 'Acción USA', market: 'US', defaultPrice: 54.0 },
+    { name: 'Whirlpool Corp.', ticker: 'WHR', category: 'Acción USA', market: 'US', defaultPrice: 105.0 },
+    { name: 'Stanley Black & Decker', ticker: 'SWK', category: 'Acción USA', market: 'US', defaultPrice: 88.0 },
+    { name: 'Albemarle Corporation (Litio)', ticker: 'ALB', category: 'Acción USA', market: 'US', defaultPrice: 98.0 },
+    { name: 'Newmont Corporation (Oro)', ticker: 'NEM', category: 'Acción USA', market: 'US', defaultPrice: 42.0 },
+    { name: 'Freeport-McMoRan (Cobre)', ticker: 'FCX', category: 'Acción USA', market: 'US', defaultPrice: 45.0 },
 
-            // World ETFs & Index Funds
-            { name: 'Vanguard S&P 500 ETF', ticker: 'VOO', category: 'ETF Global', market: 'US', defaultPrice: 536.4 },
-            { name: 'Vanguard FTSE All-World ETF', ticker: 'VWCE', category: 'ETF Global', market: 'ES', defaultPrice: 129.2 },
-            { name: 'iShares Core S&P 500 ETF', ticker: 'CSPX', category: 'ETF Global', market: 'ES', defaultPrice: 578.0 },
-            { name: 'iShares Core MSCI World ETF', ticker: 'IWDA', category: 'ETF Global', market: 'ES', defaultPrice: 94.5 },
-            { name: 'Invesco QQQ NASDAQ 100', ticker: 'QQQ', category: 'ETF Global', market: 'US', defaultPrice: 502.0 },
-            { name: 'SPDR S&P 500 ETF Trust', ticker: 'SPY', category: 'ETF Global', market: 'US', defaultPrice: 585.0 },
-            { name: 'Vanguard Total Stock Market', ticker: 'VTI', category: 'ETF Global', market: 'US', defaultPrice: 282.0 },
+    // --- EUROPA & NÓRDICAS (INCLUYENDO INTRUM) ---
+    { name: 'Intrum AB', ticker: 'INTRUM.ST', category: 'Acción Europa', market: 'EU', defaultPrice: 3.2 },
+    { name: 'Intrum (Ticker Simple)', ticker: 'INTRUM', category: 'Acción Europa', market: 'EU', defaultPrice: 3.2 },
+    { name: 'ASML Holding', ticker: 'ASML', category: 'Acción Europa', market: 'EU', defaultPrice: 650.0 },
+    { name: 'LVMH Moët Hennessy', ticker: 'MC.PA', category: 'Acción Europa', market: 'EU', defaultPrice: 610.0 },
+    { name: 'SAP SE', ticker: 'SAP', category: 'Acción Europa', market: 'EU', defaultPrice: 220.0 },
+    { name: 'Novo Nordisk', ticker: 'NVO', category: 'Acción Europa', market: 'EU', defaultPrice: 105.0 },
+    { name: 'Nestlé S.A.', ticker: 'NESN.SW', category: 'Acción Europa', market: 'EU', defaultPrice: 78.0 },
+    { name: 'Roche Holding', ticker: 'ROG.SW', category: 'Acción Europa', market: 'EU', defaultPrice: 255.0 },
+    { name: 'Novartis AG', ticker: 'NOVN.SW', category: 'Acción Europa', market: 'EU', defaultPrice: 92.0 },
+    { name: 'AstraZeneca plc', ticker: 'AZN', category: 'Acción Europa', market: 'EU', defaultPrice: 130.0 },
+    { name: 'Shell plc', ticker: 'SHEL', category: 'Acción Europa', market: 'EU', defaultPrice: 31.0 },
+    { name: 'TotalEnergies SE', ticker: 'TTE.PA', category: 'Acción Europa', market: 'EU', defaultPrice: 58.0 },
+    { name: 'Siemens AG', ticker: 'SIE.DE', category: 'Acción Europa', market: 'EU', defaultPrice: 182.0 },
+    { name: 'Allianz SE', ticker: 'ALV.DE', category: 'Acción Europa', market: 'EU', defaultPrice: 285.0 },
+    { name: 'Sanofi', ticker: 'SAN.PA', category: 'Acción Europa', market: 'EU', defaultPrice: 92.0 },
+    { name: 'L\'Oréal S.A.', ticker: 'OR.PA', category: 'Acción Europa', market: 'EU', defaultPrice: 330.0 },
+    { name: 'Hermès International', ticker: 'RMS.PA', category: 'Acción Europa', market: 'EU', defaultPrice: 2050.0 },
+    { name: 'Schneider Electric', ticker: 'SU.PA', category: 'Acción Europa', market: 'EU', defaultPrice: 240.0 },
+    { name: 'Air Liquide', ticker: 'AI.PA', category: 'Acción Europa', market: 'EU', defaultPrice: 165.0 },
+    { name: 'Ferrari N.V.', ticker: 'RACE', category: 'Acción Europa', market: 'EU', defaultPrice: 415.0 },
+    { name: 'Enel S.p.A.', ticker: 'ENEL.MI', category: 'Acción Europa', market: 'EU', defaultPrice: 6.8 },
+    { name: 'Eni S.p.A.', ticker: 'ENI.MI', category: 'Acción Europa', market: 'EU', defaultPrice: 14.0 },
+    { name: 'BNP Paribas', ticker: 'BNP.PA', category: 'Acción Europa', market: 'EU', defaultPrice: 62.0 },
+    { name: 'Intesa Sanpaolo', ticker: 'ISP.MI', category: 'Acción Europa', market: 'EU', defaultPrice: 3.85 },
+    { name: 'ING Groep N.V.', ticker: 'INGA.AS', category: 'Acción Europa', market: 'EU', defaultPrice: 15.5 },
+    { name: 'UBS Group AG', ticker: 'UBSG.SW', category: 'Acción Europa', market: 'EU', defaultPrice: 28.0 },
+    { name: 'Deutsche Telekom', ticker: 'DTE.DE', category: 'Acción Europa', market: 'EU', defaultPrice: 28.5 },
+    { name: 'Mercedes-Benz Group', ticker: 'MBG.DE', category: 'Acción Europa', market: 'EU', defaultPrice: 54.0 },
+    { name: 'Bayerische Motoren Werke (BMW)', ticker: 'BMW.DE', category: 'Acción Europa', market: 'EU', defaultPrice: 71.0 },
+    { name: 'Volkswagen AG', ticker: 'VOW3.DE', category: 'Acción Europa', market: 'EU', defaultPrice: 82.0 },
+    { name: 'Dr. Ing. h.c. F. Porsche AG', ticker: 'P911.DE', category: 'Acción Europa', market: 'EU', defaultPrice: 62.0 },
+    { name: 'Bayer AG', ticker: 'BAYN.DE', category: 'Acción Europa', market: 'EU', defaultPrice: 21.0 },
+    { name: 'BASF SE', ticker: 'BAS.DE', category: 'Acción Europa', market: 'EU', defaultPrice: 44.0 },
+    { name: 'Infineon Technologies', ticker: 'IFX.DE', category: 'Acción Europa', market: 'EU', defaultPrice: 30.0 },
+    { name: 'Adyen N.V.', ticker: 'ADYEN.AS', category: 'Acción Europa', market: 'EU', defaultPrice: 1420.0 },
+    { name: 'Prosus N.V.', ticker: 'PRX.AS', category: 'Acción Europa', market: 'EU', defaultPrice: 38.0 },
+    { name: 'BAE Systems plc', ticker: 'BA.L', category: 'Acción Europa', market: 'EU', defaultPrice: 13.5 },
+    { name: 'Rio Tinto plc', ticker: 'RIO', category: 'Acción Europa', market: 'EU', defaultPrice: 62.0 },
+    { name: 'Glencore plc', ticker: 'GLEN.L', category: 'Acción Europa', market: 'EU', defaultPrice: 3.9 },
+    { name: 'BP p.l.c.', ticker: 'BP', category: 'Acción Europa', market: 'EU', defaultPrice: 29.5 },
+    { name: 'Unilever PLC', ticker: 'UL', category: 'Acción Europa', market: 'EU', defaultPrice: 57.0 },
+    { name: 'Diageo plc', ticker: 'DEO', category: 'Acción Europa', market: 'EU', defaultPrice: 118.0 },
+    { name: 'GSK plc', ticker: 'GSK', category: 'Acción Europa', market: 'EU', defaultPrice: 34.0 },
+    { name: 'RELX PLC', ticker: 'REL.L', category: 'Acción Europa', market: 'EU', defaultPrice: 36.0 },
+    { name: 'Compass Group plc', ticker: 'CPG.L', category: 'Acción Europa', market: 'EU', defaultPrice: 26.0 },
+    { name: 'Volvo Group', ticker: 'VOLV-B.ST', category: 'Acción Europa', market: 'EU', defaultPrice: 25.0 },
+    { name: 'Atlas Copco AB', ticker: 'ATCO-A.ST', category: 'Acción Europa', market: 'EU', defaultPrice: 16.5 },
+    { name: 'Hennes & Mauritz (H&M)', ticker: 'HMB.ST', category: 'Acción Europa', market: 'EU', defaultPrice: 14.0 },
+    { name: 'Telefonaktiebolaget LM Ericsson', ticker: 'ERIC-B.ST', category: 'Acción Europa', market: 'EU', defaultPrice: 7.2 },
+    { name: 'EssilorLuxottica', ticker: 'EL.PA', category: 'Acción Europa', market: 'EU', defaultPrice: 218.0 },
+    { name: 'Kering (Gucci, Balenciaga)', ticker: 'KER.PA', category: 'Acción Europa', market: 'EU', defaultPrice: 220.0 },
+    { name: 'Danone S.A.', ticker: 'BN.PA', category: 'Acción Europa', market: 'EU', defaultPrice: 65.0 },
+    { name: 'Pernod Ricard', ticker: 'RI.PA', category: 'Acción Europa', market: 'EU', defaultPrice: 115.0 },
+    { name: 'Heineken N.V.', ticker: 'HEIA.AS', category: 'Acción Europa', market: 'EU', defaultPrice: 72.0 },
+    { name: 'Koninklijke Philips N.V.', ticker: 'PHIA.AS', category: 'Acción Europa', market: 'EU', defaultPrice: 25.0 },
+    { name: 'Stellantis N.V.', ticker: 'STLAM.MI', category: 'Acción Europa', market: 'EU', defaultPrice: 12.5 },
 
-            // Cryptocurrencies
-            { name: 'Bitcoin', ticker: 'BTC', category: 'Cripto', market: 'CRYPTO', defaultPrice: 74200 },
-            { name: 'Ethereum', ticker: 'ETH', category: 'Cripto', market: 'CRYPTO', defaultPrice: 2710 },
-            { name: 'Solana', ticker: 'SOL', category: 'Cripto', market: 'CRYPTO', defaultPrice: 188.0 },
-            { name: 'Cardano', ticker: 'ADA', category: 'Cripto', market: 'CRYPTO', defaultPrice: 0.38 },
+    // --- IBEX 35 & MERCADO CONTINUO ESPAÑOL ---
+    { name: 'Inditex (Zara, Pull&Bear, Massimo Dutti)', ticker: 'ITX.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 51.8 },
+    { name: 'Banco Santander', ticker: 'SAN.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 4.58 },
+    { name: 'BBVA', ticker: 'BBVA.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 9.32 },
+    { name: 'Iberdrola', ticker: 'IBE.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 13.75 },
+    { name: 'Telefónica', ticker: 'TEF.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 4.25 },
+    { name: 'Repsol', ticker: 'REP.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 12.10 },
+    { name: 'CaixaBank', ticker: 'CABK.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 5.42 },
+    { name: 'Amadeus IT Group', ticker: 'AMS.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 66.40 },
+    { name: 'Ferrovial', ticker: 'FER.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 38.90 },
+    { name: 'Cellnex Telecom', ticker: 'CLNX.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 31.20 },
+    { name: 'Endesa', ticker: 'ELE.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 19.85 },
+    { name: 'Naturgy Energy Group', ticker: 'NTGY.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 23.40 },
+    { name: 'Aena S.M.E.', ticker: 'AENA.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 202.0 },
+    { name: 'Grifols', ticker: 'GRF.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 10.60 },
+    { name: 'ACS (Actividades de Construcción y Servicios)', ticker: 'ACS.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 44.50 },
+    { name: 'Banco Sabadell', ticker: 'SAB.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 1.85 },
+    { name: 'Bankinter', ticker: 'BKT.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 7.65 },
+    { name: 'Mapfre', ticker: 'MAP.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 2.52 },
+    { name: 'Enagás', ticker: 'ENG.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 13.20 },
+    { name: 'Redeia (Red Eléctrica)', ticker: 'RED.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 16.40 },
+    { name: 'Inmobiliaria Colonial', ticker: 'COL.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 5.35 },
+    { name: 'Merlin Properties', ticker: 'MRL.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 10.20 },
+    { name: 'Sacyr', ticker: 'SCYR.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 3.15 },
+    { name: 'Acerinox', ticker: 'ACX.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 9.45 },
+    { name: 'ArcelorMittal', ticker: 'MTS.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 23.50 },
+    { name: 'Fluidra', ticker: 'FDR.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 23.80 },
+    { name: 'Laboratorios Rovi', ticker: 'ROVI.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 78.50 },
+    { name: 'Indra Sistemas', ticker: 'IDR.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 17.20 },
+    { name: 'Solaria Energía', ticker: 'SLR.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 9.85 },
+    { name: 'Acciona', ticker: 'ANA.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 118.0 },
+    { name: 'Acciona Energía', ticker: 'ANE.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 19.50 },
+    { name: 'Unicaja Banco', ticker: 'UNI.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 1.18 },
+    { name: 'Logista', ticker: 'LOG.MC', category: 'IBEX 35', market: 'ES', defaultPrice: 28.50 },
+    { name: 'Almirall', ticker: 'ALM.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 9.15 },
+    { name: 'Vidrala', ticker: 'VID.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 95.0 },
+    { name: 'CAF (Construcciones y Auxiliar de Ferrocarriles)', ticker: 'CAF.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 35.0 },
+    { name: 'Viscofan', ticker: 'VIS.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 62.0 },
+    { name: 'CIE Automotive', ticker: 'CIE.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 26.0 },
+    { name: 'Gestamp Automoción', ticker: 'GEST.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 2.65 },
+    { name: 'Técnicas Reunidas', ticker: 'TRE.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 12.80 },
+    { name: 'Talgo', ticker: 'TLGO.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 3.75 },
+    { name: 'DIA (Distribuidora Internacional de Alimentación)', ticker: 'DIA.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 0.013 },
+    { name: 'PharmaMar', ticker: 'PHM.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 72.0 },
+    { name: 'Meliá Hotels International', ticker: 'MEL.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 7.10 },
+    { name: 'Atresmedia', ticker: 'A3M.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 4.85 },
+    { name: 'Oryzon Genomics', ticker: 'ORY.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 2.10 },
+    { name: 'Tubacex', ticker: 'TUB.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 3.10 },
+    { name: 'Audax Renovables', ticker: 'ADX.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 1.85 },
+    { name: 'eDreams ODIGEO', ticker: 'EDR.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 7.20 },
+    { name: 'Grenergy Renovables', ticker: 'GRE.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 33.0 },
+    { name: 'Faes Farma', ticker: 'FAE.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 3.45 },
+    { name: 'Ebro Foods', ticker: 'EBRO.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 16.0 },
+    { name: 'Prosegur', ticker: 'PSG.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 1.85 },
+    { name: 'Prosegur Cash', ticker: 'CASH.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 0.52 },
+    { name: 'Línea Directa Aseguradora', ticker: 'LDA.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 1.12 },
+    { name: 'Neinor Homes', ticker: 'HOME.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 14.5 },
+    { name: 'Metrovacesa', ticker: 'MVC.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 9.80 },
+    { name: 'Aedas Homes', ticker: 'AEDAS.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 24.5 },
+    { name: 'Lar España Real Estate', ticker: 'LRE.MC', category: 'Mercado Continuo', market: 'ES', defaultPrice: 8.25 },
 
-            // Commodities & Fixed Income
-            { name: 'Oro Físico (SPDR Gold Shares)', ticker: 'GLD', category: 'Bono / Oro', market: 'US', defaultPrice: 251.2 },
-            { name: 'iShares 20+ Year Treasury Bond', ticker: 'TLT', category: 'Bono / Oro', market: 'US', defaultPrice: 92.4 },
-            { name: 'Vanguard Total Bond Market', ticker: 'BND', category: 'Bono / Oro', market: 'US', defaultPrice: 73.1 }
+    // --- WORLD ETFS & INDEX FUNDS ---
+    { name: 'Vanguard S&P 500 ETF', ticker: 'VOO', category: 'ETF Global', market: 'US', defaultPrice: 536.4 },
+    { name: 'Vanguard FTSE All-World ETF (VWCE)', ticker: 'VWCE', category: 'ETF Global', market: 'ES', defaultPrice: 129.2 },
+    { name: 'iShares Core S&P 500 ETF (CSPX)', ticker: 'CSPX', category: 'ETF Global', market: 'ES', defaultPrice: 578.0 },
+    { name: 'iShares Core MSCI World ETF (IWDA)', ticker: 'IWDA', category: 'ETF Global', market: 'ES', defaultPrice: 94.5 },
+    { name: 'Invesco QQQ NASDAQ 100', ticker: 'QQQ', category: 'ETF Global', market: 'US', defaultPrice: 502.0 },
+    { name: 'SPDR S&P 500 ETF Trust', ticker: 'SPY', category: 'ETF Global', market: 'US', defaultPrice: 585.0 },
+    { name: 'iShares Core S&P 500 ETF (IVV)', ticker: 'IVV', category: 'ETF Global', market: 'US', defaultPrice: 586.0 },
+    { name: 'Vanguard Total Stock Market (VTI)', ticker: 'VTI', category: 'ETF Global', market: 'US', defaultPrice: 282.0 },
+    { name: 'Vanguard Total International Stock (VXUS)', ticker: 'VXUS', category: 'ETF Global', market: 'US', defaultPrice: 62.0 },
+    { name: 'Vanguard FTSE Developed Markets (VEA)', ticker: 'VEA', category: 'ETF Global', market: 'US', defaultPrice: 52.0 },
+    { name: 'Vanguard FTSE Emerging Markets (VWO)', ticker: 'VWO', category: 'ETF Global', market: 'US', defaultPrice: 44.5 },
+    { name: 'iShares Core MSCI EM IMI (EMIM)', ticker: 'EMIM', category: 'ETF Global', market: 'ES', defaultPrice: 32.5 },
+    { name: 'iShares Core MSCI Europe (IMAE / MEUD)', ticker: 'IMAE', category: 'ETF Global', market: 'ES', defaultPrice: 72.0 },
+    { name: 'iShares S&P 500 Info Tech ETF (IUIT)', ticker: 'IUIT', category: 'ETF Global', market: 'ES', defaultPrice: 31.0 },
+    { name: 'iShares Global Clean Energy (INRG)', ticker: 'INRG', category: 'ETF Global', market: 'ES', defaultPrice: 8.5 },
+    { name: 'iShares Automation & Robotics (RBOT)', ticker: 'RBOT', category: 'ETF Global', market: 'ES', defaultPrice: 13.8 },
+    { name: 'Schwab U.S. Dividend Equity ETF (SCHD)', ticker: 'SCHD', category: 'ETF Global', market: 'US', defaultPrice: 28.5 },
+    { name: 'Vanguard Dividend Appreciation (VIG)', ticker: 'VIG', category: 'ETF Global', market: 'US', defaultPrice: 195.0 },
+    { name: 'JPMorgan Equity Premium Income (JEPI)', ticker: 'JEPI', category: 'ETF Global', market: 'US', defaultPrice: 58.0 },
+    { name: 'JPMorgan Nasdaq Equity Premium (JEPQ)', ticker: 'JEPQ', category: 'ETF Global', market: 'US', defaultPrice: 55.0 },
+    { name: 'SPDR Gold Shares (Oro Físico)', ticker: 'GLD', category: 'Bono / Oro', market: 'US', defaultPrice: 251.2 },
+    { name: 'iShares Gold Trust (IAU)', ticker: 'IAU', category: 'Bono / Oro', market: 'US', defaultPrice: 49.0 },
+    { name: 'iShares Silver Trust (SLV)', ticker: 'SLV', category: 'Bono / Oro', market: 'US', defaultPrice: 28.5 },
+    { name: 'iShares 20+ Year Treasury Bond (TLT)', ticker: 'TLT', category: 'Bono / Oro', market: 'US', defaultPrice: 92.4 },
+    { name: 'Vanguard Total Bond Market (BND)', ticker: 'BND', category: 'Bono / Oro', market: 'US', defaultPrice: 73.1 },
+    { name: 'iShares Core U.S. Aggregate Bond (AGG)', ticker: 'AGG', category: 'Bono / Oro', market: 'US', defaultPrice: 99.5 },
+    { name: 'iShares € Govt Bond 1-3yr (IBGS)', ticker: 'IBGS', category: 'Bono / Oro', market: 'ES', defaultPrice: 135.0 },
+
+    // --- CRYPTOCURRENCIES ---
+    { name: 'Bitcoin', ticker: 'BTC', category: 'Cripto', market: 'CRYPTO', defaultPrice: 96000 },
+    { name: 'Ethereum', ticker: 'ETH', category: 'Cripto', market: 'CRYPTO', defaultPrice: 3400 },
+    { name: 'Solana', ticker: 'SOL', category: 'Cripto', market: 'CRYPTO', defaultPrice: 240.0 },
+    { name: 'Cardano', ticker: 'ADA', category: 'Cripto', market: 'CRYPTO', defaultPrice: 0.85 },
+    { name: 'Ripple (XRP)', ticker: 'XRP', category: 'Cripto', market: 'CRYPTO', defaultPrice: 1.45 },
+    { name: 'Binance Coin (BNB)', ticker: 'BNB', category: 'Cripto', market: 'CRYPTO', defaultPrice: 650.0 },
+    { name: 'Dogecoin', ticker: 'DOGE', category: 'Cripto', market: 'CRYPTO', defaultPrice: 0.38 },
+    { name: 'Avalanche', ticker: 'AVAX', category: 'Cripto', market: 'CRYPTO', defaultPrice: 38.0 },
+    { name: 'Polkadot', ticker: 'DOT', category: 'Cripto', market: 'CRYPTO', defaultPrice: 8.5 },
+    { name: 'Chainlink', ticker: 'LINK', category: 'Cripto', market: 'CRYPTO', defaultPrice: 18.0 },
+    { name: 'Polygon / POL', ticker: 'POL', category: 'Cripto', market: 'CRYPTO', defaultPrice: 0.55 },
+    { name: 'Near Protocol', ticker: 'NEAR', category: 'Cripto', market: 'CRYPTO', defaultPrice: 6.8 },
+    { name: 'Sui Network', ticker: 'SUI', category: 'Cripto', market: 'CRYPTO', defaultPrice: 3.4 },
+    { name: 'Uniswap', ticker: 'UNI', category: 'Cripto', market: 'CRYPTO', defaultPrice: 11.5 },
+    { name: 'Toncoin', ticker: 'TON', category: 'Cripto', market: 'CRYPTO', defaultPrice: 5.6 },
+    { name: 'Render Token', ticker: 'RENDER', category: 'Cripto', market: 'CRYPTO', defaultPrice: 8.2 },
+    { name: 'Bittensor', ticker: 'TAO', category: 'Cripto', market: 'CRYPTO', defaultPrice: 520.0 }
         ];
+
+        const normalizeStr = (str) => (str || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
         window.handleAssetPredictiveSearch = (query) => {
             const dropdown = document.getElementById('inv-suggestions-dropdown');
             if (!dropdown) return;
-            const q = (query || '').trim().toLowerCase();
-            if (q.length < 2) {
-                dropdown.classList.add('hidden');
-                dropdown.innerHTML = '';
-                return;
-            }
-            const matches = KNOWN_ASSETS.filter(a =>
-                a.name.toLowerCase().includes(q) || a.ticker.toLowerCase().includes(q)
-            ).slice(0, 5);
-
-            if (matches.length === 0) {
+            const raw = (query || '').trim();
+            const q = normalizeStr(raw);
+            if (q.length < 1) {
                 dropdown.classList.add('hidden');
                 dropdown.innerHTML = '';
                 return;
             }
 
-            dropdown.innerHTML = matches.map(m => `
+            // Filtrado inteligente con puntuación
+            const scoredMatches = [];
+            for (const asset of KNOWN_ASSETS) {
+                const nameNorm = normalizeStr(asset.name);
+                const tickerNorm = normalizeStr(asset.ticker);
+                let score = -1;
+
+                if (tickerNorm === q) {
+                    score = 100;
+                } else if (tickerNorm.startsWith(q)) {
+                    score = 80;
+                } else if (nameNorm.startsWith(q)) {
+                    score = 60;
+                } else if (tickerNorm.includes(q)) {
+                    score = 40;
+                } else if (nameNorm.includes(q)) {
+                    score = 20;
+                }
+
+                if (score > 0) {
+                    scoredMatches.push({ asset, score });
+                }
+            }
+
+            scoredMatches.sort((a, b) => b.score - a.score);
+            const topMatches = scoredMatches.slice(0, 8).map(m => m.asset);
+
+            let html = topMatches.map(m => `
                 <div onclick="selectPredictedAsset('${m.name.replace(/'/g, "\\'")}', '${m.ticker}', ${m.defaultPrice || 0})" 
                      class="px-4 py-2.5 hover:bg-zinc-800 cursor-pointer flex items-center justify-between transition-colors border-b border-zinc-800/50 last:border-0">
                     <div>
@@ -1845,6 +2143,34 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                     </div>
                 </div>
             `).join('');
+
+            // Opción personalizada para permitir añadir CUALQUIER acción, empresa pequeña o ticker
+            if (raw.length >= 2) {
+                const cleanTickerCandidate = raw.toUpperCase().replace(/[^A-Z0-9\.\-]/g, '').slice(0, 10);
+                html += `
+                    <div onclick="selectPredictedAsset('${raw.replace(/'/g, "\\'")}', '${cleanTickerCandidate}', 0)"
+                         class="px-4 py-2.5 hover:bg-zinc-800 cursor-pointer flex items-center justify-between transition-colors border-t border-zinc-700 bg-zinc-900/80">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-emerald-400 font-bold">➕</span>
+                            <div>
+                                <span class="text-xs font-bold text-white block">Usar "${raw}"</span>
+                                <span class="text-[10px] text-zinc-400 font-mono">Activo / Empresa personalizada</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[9px] uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 font-bold">Añadir libre</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (!html.trim()) {
+                dropdown.classList.add('hidden');
+                dropdown.innerHTML = '';
+                return;
+            }
+
+            dropdown.innerHTML = html;
             dropdown.classList.remove('hidden');
         };
 

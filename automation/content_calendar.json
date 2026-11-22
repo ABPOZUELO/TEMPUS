@@ -1,0 +1,290 @@
+[
+  {
+    "id": 1,
+    "category": "Concepto Financiero #1",
+    "hookBadge": "Interés Compuesto",
+    "hookTitle": "¿Cómo funciona realmente el interés compuesto?",
+    "hookSubtitle": "El efecto multiplicador que transforma pequeñas aportaciones en una fortuna con el tiempo.",
+    "scene2Title": "La magia de reinvertir",
+    "scene2Text": "No necesitas ser millonario para empezar: el tiempo multiplica tu capital de forma exponencial.",
+    "chartType": "growthCurve",
+    "chartData": {
+      "finalAmount": "58.902 €",
+      "contributedAmount": "24.000 €",
+      "interestEarned": "+34.902 €",
+      "yearsText": "20 Años",
+      "rateText": "8% Anual"
+    },
+    "featureTitle": "Las 3 leyes de este efecto",
+    "points": [
+      { "icon": "⏳", "title": "El tiempo es el rey", "desc": "Empezar pronto importa mucho más que la cantidad aportada." },
+      { "icon": "📈", "title": "Crecimiento parabólico", "desc": "El 80% de los beneficios se concentran en los últimos años." },
+      { "icon": "⚡", "title": "Simúlalo en Tempus", "desc": "Ajusta tu aportación mensual y calcula tu curva en segundos." }
+    ],
+    "voiceScripts": [
+      "¿Cómo funciona realmente el interés compuesto y por qué todos los millonarios lo utilizan?",
+      "No se trata de cuánto dinero inviertes hoy, sino de reinvertir los intereses para crear un efecto bola de nieve.",
+      "Aportando solo cien euros al mes con un ocho por ciento anual, superas los cincuenta y ocho mil euros.",
+      "Más de la mitad de todo ese capital final son intereses generados de forma automática con los años.",
+      "Simula tu propio efecto bola de nieve en tiempo real dentro de Tempus. Pruébalo gratis en el enlace de la bio."
+    ],
+    "caption": "El interés compuesto explicado de forma visual con gráficas 📈 La fuerza matemática más potente para construir patrimonio. Pruébalo en Tempus con tus propios números (link en bio) ⚡\n.\n.\n#finanzaspersonales #interescompuesto #educacionfinanciera #inversiones #patrimonio #libertadfinanciera"
+  },
+  {
+    "id": 2,
+    "category": "Concepto Financiero #2",
+    "hookBadge": "Inflación Silenciosa",
+    "hookTitle": "¿Cuánto dinero pierdes si lo dejas en el banco?",
+    "hookSubtitle": "El impuesto invisible que destruye el poder adquisitivo de tus ahorros cada año.",
+    "scene2Title": "El peligro de no hacer nada",
+    "scene2Text": "Tener el dinero en una cuenta corriente no es seguro: te garantiza perder un tercio de tu valor en 10 años.",
+    "chartType": "comparisonBars",
+    "chartData": {
+      "title": "Evolución de 10.000 € en 10 Años",
+      "subtitle": "Efectivo vs Inversión Indexada diversificada",
+      "bars": [
+        {
+          "label": "Parado en el Banco",
+          "sublabel": "Inflación media (3% anual)",
+          "value": "7.374 €",
+          "percentage": 35,
+          "color": "#EF4444",
+          "secondaryColor": "#991B1B",
+          "badge": "-26.3% Pérdida Real",
+          "badgeColor": "#F87171",
+          "isWinner": false
+        },
+        {
+          "label": "Inversión Indexada",
+          "sublabel": "Rentabilidad histórica (8%)",
+          "value": "21.589 €",
+          "percentage": 95,
+          "color": "#10B981",
+          "secondaryColor": "#059669",
+          "badge": "+115% Ganancia Real",
+          "badgeColor": "#34D399",
+          "isWinner": true
+        }
+      ]
+    },
+    "featureTitle": "Cómo proteger tu patrimonio",
+    "points": [
+      { "icon": "🛡️", "title": "Bate a la inflación", "desc": "Tus ahorros deben rendir siempre por encima del IPC anual." },
+      { "icon": "💧", "title": "Mantén solo tu colchón", "desc": "Deja en la cuenta de 3 a 6 meses de gastos y pon a trabajar el resto." },
+      { "icon": "📊", "title": "Mídelo en Tempus", "desc": "Calcula tu rentabilidad neta descontando la inflación real." }
+    ],
+    "voiceScripts": [
+      "¿Sabías que dejar tu dinero quieto en el banco te garantiza perder una fortuna con el tiempo?",
+      "La inflación es un impuesto silencioso que reduce tu poder de compra día tras día.",
+      "Diez mil euros guardados en el banco valdrán apenas siete mil trescientos en diez años, mientras que invertidos se duplican.",
+      "La única forma matemática de defender tu patrimonio es invertir en activos productivos que batan al IPC.",
+      "Protege tus ahorros y calcula tu patrimonio real en Tempus. Tienes el acceso gratuito en el link de la bio."
+    ],
+    "caption": "Dejar el dinero parado debajo del colchón o en la cuenta te hace perder poder de compra todos los días 📉 Protégete con Tempus (link en bio) 🛡️\n.\n.\n#inflacion #finanzaspersonales #educacionfinanciera #ahorro #inversiones #patrimonio"
+  },
+  {
+    "id": 3,
+    "category": "Concepto Financiero #3",
+    "hookBadge": "Regla 50/30/20",
+    "hookTitle": "¿Cómo repartir tu sueldo mes a mes?",
+    "hookSubtitle": "El sistema universal para ahorrar e invertir sin recortar tu estilo de vida.",
+    "scene2Title": "Estructura tus ingresos",
+    "scene2Text": "La regla 50/30/20 divide tus ingresos en tres categorías claras para que nunca llegues ahogado a fin de mes.",
+    "chartType": "donutChart",
+    "chartData": {
+      "title": "Distribución Ideal de Ingresos",
+      "subtitle": "Equilibrio financiero mensual",
+      "centerText": "100%",
+      "centerSubtext": "Tu Nómina",
+      "slices": [
+        { "label": "Necesidades", "sublabel": "Casa, facturas y comida", "percentage": 50, "color": "#3B82F6", "icon": "🏠" },
+        { "label": "Estilo de Vida", "sublabel": "Cenas, ocio y viajes", "percentage": 30, "color": "#F59E0B", "icon": "☕" },
+        { "label": "Ahorro e Inversión", "sublabel": "Tu libertad a futuro", "percentage": 20, "color": "#10B981", "icon": "🚀" }
+      ]
+    },
+    "featureTitle": "Por qué este método funciona",
+    "points": [
+      { "icon": "🎯", "title": "Cero culpas al gastar", "desc": "El 30% está reservado para disfrutar de tu vida hoy." },
+      { "icon": "🔄", "title": "Págate a ti primero", "desc": "Aparta el 20% el mismo día que cobras la nómina." },
+      { "icon": "⚡", "title": "Diagnóstico Tempus", "desc": "Introduce tus ingresos y obtén tu desglose automático." }
+    ],
+    "voiceScripts": [
+      "¿Cómo deberías repartir tu sueldo cada mes para no llegar ahogado a fin de mes?",
+      "La regla cincuenta treinta veinte es el sistema más efectivo para organizar tu economía personal sin frustraciones.",
+      "Destina la mitad a gastos básicos, un treinta por ciento a ocio y salidas, y un veinte por ciento a ahorro e inversión.",
+      "Al apartar ese veinte por ciento el primer día de mes, construyes tranquilidad financiera sin privarte de tus hobbies.",
+      "Haz tu diagnóstico cincuenta treinta veinte gratis en Tempus. Entra en el enlace de la bio."
+    ],
+    "caption": "La regla 50/30/20 explicada de forma clara y visual 📊 Conoce tu desglose personal en Tempus (link en bio) 🚀\n.\n.\n#finanzaspersonales #regla503020 #ahorro #educacionfinanciera #libertadfinanciera #sueldo"
+  },
+  {
+    "id": 4,
+    "category": "Concepto Financiero #4",
+    "hookBadge": "La Regla del 72",
+    "hookTitle": "¿En cuántos años duplicarás tu dinero?",
+    "hookSubtitle": "El cálculo mental más rápido que utilizan los analistas financieros de Wall Street.",
+    "scene2Title": "La fórmula mágica",
+    "scene2Text": "Divide 72 entre tu rentabilidad anual esperada. El resultado son los años exactos que tardará tu dinero en multiplicarse por dos.",
+    "chartType": "comparisonBars",
+    "chartData": {
+      "title": "Años para Duplicar tu Capital",
+      "subtitle": "Fórmula: 72 dividido entre rentabilidad anual",
+      "bars": [
+        {
+          "label": "Depósito (2%)",
+          "sublabel": "72 / 2 = 36 años",
+          "value": "36 Años",
+          "percentage": 90,
+          "color": "#64748B",
+          "secondaryColor": "#334155",
+          "badge": "Demasiado Lento",
+          "badgeColor": "#94A3B8",
+          "isWinner": false
+        },
+        {
+          "label": "S&P 500 (10%)",
+          "sublabel": "72 / 10 = 7.2 años",
+          "value": "7.2 Años",
+          "percentage": 25,
+          "color": "#10B981",
+          "secondaryColor": "#059669",
+          "badge": "5 Veces más Rápido",
+          "badgeColor": "#34D399",
+          "isWinner": true
+        }
+      ]
+    },
+    "featureTitle": "El poder de unos pocos puntos",
+    "points": [
+      { "icon": "💡", "title": "Matemática simple", "desc": "Al 7% duplicas cada 10 años; al 10% duplicas cada 7 años." },
+      { "icon": "⚡", "title": "Acelera tus metas", "desc": "Un 2% extra en rentabilidad recorta años de trabajo." },
+      { "icon": "🔮", "title": "Calculadora Tempus", "desc": "Calcula tus años de duplicación con gráficos en vivo." }
+    ],
+    "voiceScripts": [
+      "¿Sabías que existe un truco mental para calcular en cuántos años vas a duplicar tu dinero?",
+      "Se llama la regla del setenta y dos: divides setenta y dos entre tu rentabilidad anual y obtienes los años exactos.",
+      "Con un depósito bancario al dos por ciento tardas treinta y seis años, mientras que con un índice al diez tardas solo siete.",
+      "Unos pocos puntos porcentuales de rendimiento pueden adelantarte décadas en la consecución de tus objetivos.",
+      "Aplica la regla del setenta y dos a tu propia cartera con el simulador de Tempus. Link en la bio."
+    ],
+    "caption": "El truco mental para saber cuándo duplicarás tu dinero 🧠 La Regla del 72 explicada en 30 segundos. Pruébalo en Tempus (link en bio) ✨\n.\n.\n#regladel72 #inversiones #educacionfinanciera #rentabilidad #finanzaspersonales #trucosfinancieros"
+  },
+  {
+    "id": 5,
+    "category": "Concepto Financiero #5",
+    "hookBadge": "Renta Fija vs Variable",
+    "hookTitle": "¿Renta Fija o Renta Variable?",
+    "hookSubtitle": "Las dos mitades del mundo de la inversión explicadas de forma sencilla y directa.",
+    "scene2Title": "Estabilidad frente a crecimiento",
+    "scene2Text": "La renta fija te presta dinero con intereses pactados. La renta variable te hace dueño de las mejores empresas del planeta.",
+    "chartType": "comparisonBars",
+    "chartData": {
+      "title": "Perfil de Riesgo y Rentabilidad",
+      "subtitle": "Rendimiento medio anual histórico",
+      "bars": [
+        {
+          "label": "Renta Fija (Bonos)",
+          "sublabel": "Menor volatilidad, ingresos fijos",
+          "value": "3.5 %",
+          "percentage": 40,
+          "color": "#3B82F6",
+          "secondaryColor": "#1D4ED8",
+          "badge": "Seguridad y Calma",
+          "badgeColor": "#60A5FA",
+          "isWinner": false
+        },
+        {
+          "label": "Renta Variable (Acciones)",
+          "sublabel": "Mayor fluctuación a corto, récord a largo",
+          "value": "9.5 %",
+          "percentage": 90,
+          "color": "#10B981",
+          "secondaryColor": "#059669",
+          "badge": "Crecimiento Exponencial",
+          "badgeColor": "#34D399",
+          "isWinner": true
+        }
+      ]
+    },
+    "featureTitle": "Cómo equilibrarlas en tu cartera",
+    "points": [
+      { "icon": "🎯", "title": "Horizonte temporal", "desc": "A más de 10 años, la renta variable bate históricamente a cualquier activo." },
+      { "icon": "🛡️", "title": "Estabilidad emocional", "desc": "La renta fija te ayuda a soportar las caídas temporales de mercado." },
+      { "icon": "📊", "title": "Monitóralo en Tempus", "desc": "Comprueba el peso exacto de renta fija y variable en tu patrimonio." }
+    ],
+    "voiceScripts": [
+      "¿Cuál es la diferencia real entre renta fija y renta variable y cuál necesitas en tu cartera?",
+      "La renta fija consiste en prestar tu dinero a cambio de un interés pactado con muy baja volatilidad.",
+      "La renta variable te convierte en accionista de las mejores empresas del mundo, ofreciendo históricamente casi un diez por ciento anual.",
+      "La clave está en combinarlas según tus años hasta la jubilación y tu tolerancia al riesgo.",
+      "Monitorea el peso exacto de tus activos en tiempo real con Tempus. Pruébalo gratis en el enlace de la bio."
+    ],
+    "caption": "Renta fija vs Renta variable explicadas para principiantes 📊 Descubre qué porcentaje te conviene según tu edad en Tempus (link en bio) ⚡\n.\n.\n#rentafija #rentavariable #inversiones #bolsa #finanzaspersonales #patrimonio"
+  },
+  {
+    "id": 6,
+    "category": "Concepto Financiero #6",
+    "hookBadge": "Diversificación Total",
+    "hookTitle": "El único almuerzo gratis en finanzas",
+    "hookSubtitle": "Por qué concentrar tus ahorros en una sola empresa o país es un error que puede arruinarte.",
+    "scene2Title": "No pongas todos los huevos en una cesta",
+    "scene2Text": "Diversificar entre cientos de empresas globales reduce tu riesgo al mínimo manteniendo la rentabilidad del mercado.",
+    "chartType": "donutChart",
+    "chartData": {
+      "title": "Cartera Global Diversificada",
+      "subtitle": "Asignación equilibrada para batir la inflación",
+      "centerText": "Global",
+      "centerSubtext": "Multi-Activo",
+      "slices": [
+        { "label": "Acciones Globales", "sublabel": "S&P 500 y MSCI World", "percentage": 60, "color": "#10B981", "icon": "🌍" },
+        { "label": "Bonos Soberanos", "sublabel": "Deuda pública de calidad", "percentage": 30, "color": "#3B82F6", "icon": "🏛️" },
+        { "label": "Oro y Liquidez", "sublabel": "Protección contra crisis", "percentage": 10, "color": "#F59E0B", "icon": "🥇" }
+      ]
+    },
+    "featureTitle": "Las ventajas de la diversificación",
+    "points": [
+      { "icon": "🛡️", "title": "Inmunidad ante quiebras", "desc": "Si una empresa quiebra, las otras 1.500 compensan el resultado." },
+      { "icon": "🌐", "title": "Exposición mundial", "desc": "Capturas el crecimiento de Estados Unidos, Europa y mercados emergentes." },
+      { "icon": "📈", "title": "Control en Tempus", "desc": "Rebalancea tu cartera visualmente con gráficos de asignación en vivo." }
+    ],
+    "voiceScripts": [
+      "Los premios Nobel llaman a la diversificación el único almuerzo gratis que existe en el mundo financiero.",
+      "Apostar todo tu dinero a una sola empresa o criptomoneda es un riesgo innecesario que puede destruirte.",
+      "Diversificando en más de mil quinientas compañías globales proteges tu patrimonio mientras capturas el crecimiento mundial.",
+      "Si una empresa cae, cientos de otras suben y compensan el rendimiento de tu cartera a largo plazo.",
+      "Visualiza la diversificación de todos tus bancos e inversiones en una sola pantalla con Tempus. Link en bio."
+    ],
+    "caption": "Por qué la diversificación es la regla de oro para no perder dinero 🌍 Organiza tu patrimonio en un solo lugar con Tempus (link en bio) 🚀\n.\n.\n#diversificacion #fondosindexados #inversiones #patrimonio #educacionfinanciera #sp500"
+  },
+  {
+    "id": 7,
+    "category": "Concepto Financiero #7",
+    "hookBadge": "Fondos Indexados",
+    "hookTitle": "¿Por qué los fondos indexados baten al 90%?",
+    "hookSubtitle": "La estrategia recomendada por Warren Buffett para invertir con mínimas comisiones.",
+    "scene2Title": "Comprar el mercado entero",
+    "scene2Text": "En lugar de intentar adivinar qué acción subirá mañana, compras un trozo de toda la economía mundial con comisiones casi nulas.",
+    "chartType": "growthCurve",
+    "chartData": {
+      "finalAmount": "103.450 €",
+      "contributedAmount": "36.000 €",
+      "interestEarned": "+67.450 €",
+      "yearsText": "25 Años",
+      "rateText": "MSCI World (8.5%)"
+    },
+    "featureTitle": "El secreto de la indexación",
+    "points": [
+      { "icon": "💰", "title": "Comisiones mínimas", "desc": "Ahorras hasta un 2% anual en comisiones de bancos tradicionales." },
+      { "icon": "🏆", "title": "Bate a los expertos", "desc": "A 10 años, el 90% de los gestores activos pierde frente al índice." },
+      { "icon": "⚡", "title": "Radar Tempus", "desc": "Sigue las cotizaciones del S&P 500 y mercados en tiempo real." }
+    ],
+    "voiceScripts": [
+      "¿Por qué el noventa por ciento de los gestores profesionales pierde dinero contra los fondos indexados?",
+      "Los bancos tradicionales te cobran altas comisiones de gestión que destruyen tu rentabilidad a largo plazo.",
+      "Comprando un fondo indexado global te conviertes en dueño de la economía mundial con comisiones prácticamente de cero.",
+      "Aportar con constancia al mercado global ha sido históricamente la fórmula más rentable y desatendida para crear riqueza.",
+      "Sigue la cotización de los índices y tu patrimonio en vivo dentro de Tempus. Pruébalo gratis en el enlace de la bio."
+    ],
+    "caption": "Por qué los fondos indexados baten a la mayoría de expertos de Wall Street 📈 Visualiza tus inversiones en Tempus (link en bio) ⚡\n.\n.\n#fondosindexados #sp500 #msciworld #inversiones #patrimonio #educacionfinanciera"
+  }
+]
