@@ -2210,7 +2210,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
             let nameOpts = '';
             let tickerOpts = '';
             for (const a of KNOWN_ASSETS) {
+                // Sugerencias múltiples para que coincida tanto si el usuario escribe el ticker (ej: PPG) como el nombre completo
+                nameOpts += `<option value="${a.ticker}">${a.name} (${a.category})</option>`;
                 nameOpts += `<option value="${a.name}">${a.ticker} · ${a.category}</option>`;
+                nameOpts += `<option value="${a.ticker} - ${a.name}">${a.category}</option>`;
                 tickerOpts += `<option value="${a.ticker}">${a.name}</option>`;
             }
             nameDatalist.innerHTML = nameOpts;
@@ -2224,14 +2227,40 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 
             const handleAutoResolve = (val) => {
                 if (!val) return;
-                const q = normalizeStr(val);
-                const exact = KNOWN_ASSETS.find(a => normalizeStr(a.name) === q || normalizeStr(a.ticker) === q);
+                const clean = (val || '').trim();
+                const q = normalizeStr(clean);
+                
+                // Si viene en formato "PPG - PPG Industries, Inc."
+                let tickerFromDash = '';
+                if (clean.includes('-')) {
+                    const parts = clean.split('-');
+                    tickerFromDash = parts[0].trim().toUpperCase();
+                }
+
+                const exact = KNOWN_ASSETS.find(a => 
+                    normalizeStr(a.name) === q || 
+                    normalizeStr(a.ticker) === q ||
+                    (tickerFromDash && a.ticker === tickerFromDash)
+                );
                 if (exact) {
                     selectPredictedAsset(exact.name, exact.ticker, exact.defaultPrice);
                 }
             };
 
             if (nameInput) {
+                nameInput.addEventListener('input', (e) => {
+                    const raw = (e.target.value || '').trim();
+                    const q = normalizeStr(raw);
+                    // Detección en vivo al teclear ticker exacto
+                    const exact = KNOWN_ASSETS.find(a => normalizeStr(a.ticker) === q);
+                    if (exact && tickerInput) {
+                        tickerInput.value = exact.ticker;
+                        const curPriceInput = document.getElementById('inv-current');
+                        if (curPriceInput && exact.defaultPrice > 0 && (!curPriceInput.value || parseFloat(curPriceInput.value) <= 0)) {
+                            curPriceInput.value = exact.defaultPrice;
+                        }
+                    }
+                });
                 nameInput.addEventListener('change', (e) => handleAutoResolve(e.target.value));
             }
             if (tickerInput) {

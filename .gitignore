@@ -59,6 +59,7 @@ TEMPUS_APP_PC/
 
 # Video pipeline y herramientas auxiliares
 tempus-video/
+tempus-hyperframes/.hyperframes/
 guia-editar-videos-claude.pdf
 data/
 
