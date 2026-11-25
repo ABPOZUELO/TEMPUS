@@ -81,7 +81,7 @@ function getMp3DurationInSeconds(buffer) {
   return totalDuration;
 }
 
-async function generateSlideAudio(slideNum, text, targetDir, voice = "es-ES-AlvaroNeural") {
+async function generateSlideAudio(slideNum, text, targetDir, voice = "es-ES-ElviraNeural") {
   let attempts = 0;
   while (attempts < 3) {
     try {
@@ -94,8 +94,8 @@ async function generateSlideAudio(slideNum, text, targetDir, voice = "es-ES-Alva
         fs.mkdirSync(tempDir, { recursive: true });
       }
       
-      // Prosodia ajustada: ritmo más dinámico (+6%) y natural para sonar conversacional y menos robótico
-      await tts.toFile(tempDir, text, { rate: '+6%', pitch: '+0Hz' });
+      // Prosodia ajustada: ritmo más dinámico (+4%) y natural para sonar conversacional y humana
+      await tts.toFile(tempDir, text, { rate: '+4%', pitch: '+0Hz' });
       const srcFile = path.join(tempDir, 'audio.mp3');
       const destFile = path.join(targetDir, `slide${slideNum}.mp3`);
       
@@ -131,7 +131,7 @@ async function generateSlideAudio(slideNum, text, targetDir, voice = "es-ES-Alva
   return { durationSec: 5.0, frames: 168 };
 }
 
-async function generateAllVoiceovers(scripts, targetDir, voice = "es-ES-AlvaroNeural") {
+async function generateAllVoiceovers(scripts, targetDir, voice = "es-ES-ElviraNeural") {
   console.log(`[+] Generando locución por slide con voz española neuronal de alta definición (${voice})...`);
   const durations = [];
   const slideDurations = [];
