@@ -9,7 +9,7 @@ async function main() {
     process.exit(1);
   }
   const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-  const videoPath = path.join(rootDir, 'tempus-hyperframes', 'tempus_fondos_indexados_master.mp4');
+  const videoPath = path.join(rootDir, 'tempus-hyperframes', 'tempus_fondos_indexados_v2.mp4');
 
   if (!fs.existsSync(videoPath)) {
     console.error('Vídeo no encontrado en:', videoPath);
@@ -28,33 +28,30 @@ async function main() {
   });
 
   const recipient = config.recipient || 'tempuswealthmanagement@gmail.com';
-  console.log(`[+] Enviando nuevo vídeo interactivo de alta calidad a ${recipient}...`);
+  console.log(`[+] Enviando nuevo vídeo corregido (Voz Joven + Cero Cortes + Sin Solapamientos) a ${recipient}...`);
 
   const info = await transporter.sendMail({
     from: `"Tempus Video Studio" <${config.smtpUser.trim()}>`,
     to: recipient,
-    subject: `🔥 [NUEVA PRUEBA MAESTRA] Fondos Indexados: La Regla del Pajar (1080x1920 HD)`,
+    subject: `🎙️ [VERSIÓN MEJORADA] Fondos Indexados: Voz Masculina Joven (Sin Cortes y Layout Limpio)`,
     text: `¡Hola Jorge!\n\n` +
-          `Aquí tienes el NUEVO vídeo de prueba interactivo de máxima calidad, diseñado para ser súper atractivo, dinámico y fácil de comprender para cualquier persona.\n\n` +
-          `📌 TEMA: ¿Por qué los Fondos Indexados baten al 90% de los inversores? (La regla del pajar de John Bogle)\n\n` +
-          `✨ NOVEDADES Y ANIMACIONES DE ALTO IMPACTO:\n` +
-          `1. Gancho de apertura: El peligro de jugarse todo a 1 sola acción con gráfica de quiebra cayendo en picado (-64%).\n` +
-          `2. Metáfora simple del pajar: En vez de buscar la aguja, compra el pajar entero. Red interconectada de empresas líderes mundiales (Apple, Microsoft, Nvidia, Google, Amazon).\n` +
-          `3. Gráfica histórica animada en vivo: Curva interactiva del S&P 500 trazándose en directo con +10.4% de media anual y marcadores de hitos históricos (Crisis 2008, Pandemia 2020, Récord 2026).\n` +
-          `4. Ejemplo visual tangible con 100€/mes: Odómetro gigante subiendo a 75.800€ y barras de crecimiento comparando lo aportado (24.000€) vs el 68% de beneficios generados solos (+51.800€).\n` +
-          `5. Subtítulos dinámicos estilo Karaoke sincronizados palabra por palabra con destacados en amarillo.\n` +
-          `6. Locución neural natural y entusiasta (es-ES-ElviraNeural a 96 kbps) y banda sonora envolvente.\n\n` +
-          `📱 TEXTO SUGERIDO PARA TIKTOK / INSTAGRAM REELS:\n` +
-          `--------------------------------------------------\n` +
-          `¿Invertir en una sola empresa o ser dueño del mundo entero? 🌍\n` +
-          `John Bogle revolucionó Wall Street con una idea brutal: no busques la aguja en el pajar, ¡compra el pajar entero!\n\n` +
-          `Descubre cómo 100€ al mes pueden convertirse en más de 75.000€ con fondos indexados en @tempuswealth.\n\n` +
-          `#EducacionFinanciera #Inversiones #FondosIndexados #FinanzasPersonales #Tempus\n` +
-          `--------------------------------------------------\n\n` +
-          `¡Dime qué te parece este nuevo formato!`,
+          `Aquí tienes el nuevo vídeo con TODAS las correcciones solicitadas aplicadas:\n\n` +
+          `✅ 1. VOZ DE HOMBRE JOVEN Y ENÉRGICO:\n` +
+          `   - Locución cambiada a una voz masculina joven española (Álvaro Neural a 96 kbps con tono +1Hz y ritmo dinámico).\n` +
+          `   - Suena como un creador de contenido joven explicando finanzas de forma cercana y entusiasta.\n\n` +
+          `✅ 2. CERO CORTES DE VOZ:\n` +
+          `   - Duraciones medidas milisegundo a milisegundo con FFprobe.\n` +
+          `   - Añadido un margen de respiración visual de entre 0.8s y 1.2s DESPUÉS de que termina cada frase antes de que la imagen cambie.\n` +
+          `   - Ya no se corta ninguna sílaba ni resulta abrupto el paso entre escenas.\n\n` +
+          `✅ 3. SOLAPAMIENTOS ARREGLADOS:\n` +
+          `   - El HUD superior (la cabecera) se ha fijado a 60px y todo el contenido empieza a 170px.\n` +
+          `   - Hay un margen limpio de más de 60px entre la barra superior y cualquier título o etiqueta.\n` +
+          `   - Los textos y tarjetas de la gráfica SVG están ajustados dentro de sus márgenes sin salirse de la pantalla.\n\n` +
+          `Duración total: 46 segundos en 1080x1920 HD a 30 fps.\n\n` +
+          `¡Dime qué te parece el resultado con estos ajustes!`,
     attachments: [
       {
-        filename: 'TEMPUS_FONDOS_INDEXADOS_MASTER.mp4',
+        filename: 'TEMPUS_FONDOS_INDEXADOS_V2.mp4',
         path: videoPath
       }
     ]
