@@ -13,7 +13,7 @@
         --blue: #38bdf8;
         --gold: #fbbf24;
         --danger: #f43f5e;
-        --card-bg: rgba(14, 17, 26, 0.90);
+        --card-bg: rgba(14, 17, 26, 0.92);
         --card-border: rgba(255, 255, 255, 0.14);
         --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       }
@@ -39,39 +39,22 @@
         overflow: hidden;
       }
 
-      /* Scene Base with Guaranteed Top Padding */
-      .scene {
+      /* Base Background Layers (Persistent Cross-Fade Behind Transforming Content) */
+      .bg-container {
         position: absolute;
-        inset: 0;
-        width: 1080px;
-        height: 1920px;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-        padding-top: 170px;
-        padding-bottom: 180px;
-        padding-left: 60px;
-        padding-right: 60px;
-        opacity: 0;
-      }
-
-      /* Backgrounds & Ken Burns */
-      .bg-layer {
-        position: absolute;
-        top: -40px;
-        left: -40px;
-        right: -40px;
-        bottom: -40px;
+        inset: -40px;
         z-index: 1;
         overflow: hidden;
       }
-      .bg-img {
+      .bg-slide {
+        position: absolute;
+        inset: 0;
         width: 100%;
         height: 100%;
         object-fit: cover;
-        filter: brightness(0.52) contrast(1.22);
+        filter: brightness(0.50) contrast(1.22);
+        opacity: 0;
+        transform: scale(1.0);
       }
       .vignette {
         position: absolute;
@@ -79,8 +62,8 @@
         z-index: 2;
         background: linear-gradient(180deg, 
           rgba(4, 5, 8, 0.90) 0%, 
-          rgba(4, 5, 8, 0.65) 25%,
-          rgba(4, 5, 8, 0.84) 70%,
+          rgba(4, 5, 8, 0.60) 25%,
+          rgba(4, 5, 8, 0.82) 70%,
           rgba(4, 5, 8, 0.98) 100%
         );
       }
@@ -94,19 +77,7 @@
           linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
       }
 
-      /* Content Container */
-      .content {
-        position: relative;
-        z-index: 10;
-        width: 100%;
-        max-width: 960px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-      }
-
-      /* Fixed Top HUD Header - Sleek Status Bar at top 60px */
+      /* Fixed Persistent Top HUD (No overlapping) */
       .top-hud {
         position: absolute;
         top: 60px;
@@ -116,7 +87,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        z-index: 50;
+        z-index: 60;
       }
       .hud-pill {
         display: inline-flex;
@@ -156,6 +127,35 @@
         box-shadow: 0 0 10px var(--accent);
       }
 
+      /* Scene Viewports - Positioned in the exact same 3D stage */
+      .stage-scene {
+        position: absolute;
+        inset: 0;
+        width: 1080px;
+        height: 1920px;
+        padding-top: 170px;
+        padding-bottom: 180px;
+        padding-left: 60px;
+        padding-right: 60px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        z-index: 20;
+        perspective: 1400px;
+      }
+
+      /* Content Container */
+      .content {
+        position: relative;
+        width: 100%;
+        max-width: 960px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
       /* Badges & Titles */
       .badge {
         display: inline-flex;
@@ -167,7 +167,7 @@
         font-weight: 900;
         letter-spacing: 2px;
         text-transform: uppercase;
-        margin-bottom: 20px;
+        margin-bottom: 18px;
       }
       .badge-danger {
         background: rgba(244, 63, 94, 0.15);
@@ -193,7 +193,7 @@
         font-weight: 900;
         line-height: 1.12;
         letter-spacing: -2px;
-        margin-bottom: 18px;
+        margin-bottom: 16px;
         text-shadow: 0 10px 40px rgba(0, 0, 0, 0.9);
       }
       .gradient-danger {
@@ -218,10 +218,10 @@
         line-height: 1.45;
         color: #d4d4d8;
         max-width: 860px;
-        margin-bottom: 38px;
+        margin-bottom: 34px;
       }
 
-      /* Glass Card */
+      /* Glass Morphing Cards */
       .glass-card {
         background: var(--card-bg);
         backdrop-filter: blur(28px);
@@ -231,28 +231,40 @@
         box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.12);
         padding: 38px;
         width: 100%;
+        transform-origin: center center;
       }
 
-      /* Dynamic Subtitle Karaoke Pill */
-      .karaoke-pill {
+      /* Persistent Karaoke Pill at bottom */
+      .karaoke-pill-fixed {
         position: absolute;
         bottom: 140px;
         left: 60px;
         right: 60px;
+        height: 94px;
         background: rgba(10, 12, 18, 0.94);
         border: 1.5px solid rgba(255, 255, 255, 0.22);
         border-radius: 30px;
-        padding: 24px 36px;
-        font-size: 28px;
-        font-weight: 700;
-        line-height: 1.4;
-        text-align: center;
+        padding: 0 36px;
         box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
-        z-index: 40;
+        z-index: 55;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+      .karaoke-text-row {
+        position: absolute;
+        inset: 0;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 14px;
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1.4;
+        text-align: center;
+        opacity: 0;
+        transform: translateY(40px);
       }
       .karaoke-highlight {
         color: #fde047;
@@ -290,6 +302,7 @@
         border-radius: 22px;
         padding: 22px 16px;
         text-align: center;
+        transform-origin: center center;
       }
       .stock-node.highlight-node {
         background: rgba(16, 185, 129, 0.12);
@@ -343,23 +356,37 @@
         width: 0%;
       }
 
-      /* Tempus Monogram Bars */
+      /* Tempus Monogram Bars (Morph target from Growth Bars) */
       .logo-bars {
         display: flex;
         align-items: flex-end;
         gap: 12px;
         height: 85px;
         margin-bottom: 24px;
+        transform-origin: bottom center;
       }
       .logo-bar {
         width: 18px;
         border-radius: 999px;
+        transform-origin: bottom center;
       }
     </style>
   </head>
   <body>
-    <div id="root" data-composition-id="main" data-width="1080" data-height="1920" data-duration="46" data-fps="30">
-      <!-- Fixed Top HUD Header (Isolated and elevated above content) -->
+    <div id="root" data-composition-id="main" data-width="1080" data-height="1920" data-duration="45" data-fps="30">
+      
+      <!-- Continuous Background Layer (Never cuts to black, smooth Ken Burns cross-fade) -->
+      <div class="bg-container">
+        <img id="bg1" class="bg-slide" src="assets/images/slide1_bg.jpg" alt="Slide 1" style="opacity: 1;" />
+        <img id="bg2" class="bg-slide" src="assets/images/slide2_bg.jpg" alt="Slide 2" />
+        <img id="bg3" class="bg-slide" src="assets/images/slide3_bg.jpg" alt="Slide 3" />
+        <img id="bg4" class="bg-slide" src="assets/images/slide4_bg.jpg" alt="Slide 4" />
+        <img id="bg5" class="bg-slide" src="assets/images/slide5_bg.jpg" alt="Slide 5" />
+        <div class="vignette"></div>
+        <div class="grid-overlay"></div>
+      </div>
+
+      <!-- Persistent Top HUD Header -->
       <div class="top-hud">
         <div class="hud-pill">
           <span>🏛️ TEMPUS MASTERCLASS</span>
@@ -369,14 +396,8 @@
         </div>
       </div>
 
-      <!-- ================= ESCENA 1: EL ERROR DE UNA SOLA ACCIÓN (0.0s - 7.0s) ================= -->
-      <div id="scene1" class="scene clip" data-start="0" data-duration="7.0" data-track-index="0" style="opacity: 1;">
-        <div class="bg-layer" id="bg1">
-          <img class="bg-img" src="assets/images/slide1_bg.jpg" alt="Wall Street Bear Market" />
-          <div class="vignette"></div>
-          <div class="grid-overlay"></div>
-        </div>
-
+      <!-- ================= SCENE 1: UNA SOLA ACCIÓN (RUINED CRASH) ================= -->
+      <div id="scene1" class="stage-scene" style="opacity: 1; z-index: 21;">
         <div class="content" id="content1">
           <div class="badge badge-danger" id="s1-badge">
             <span>⚠️ EL PELIGRO MÁS COMÚN</span>
@@ -423,21 +444,10 @@
             </div>
           </div>
         </div>
-
-        <div class="karaoke-pill" id="s1-karaoke">
-          <span>🎯</span>
-          <span>"Si metes todo a una sola empresa, <span class="karaoke-highlight">estás jugando a la ruleta rusa</span>"</span>
-        </div>
       </div>
 
-      <!-- ================= ESCENA 2: LA REGLA DEL PAJAR (6.8s - 14.6s) ================= -->
-      <div id="scene2" class="scene clip" data-start="6.8" data-duration="7.8" data-track-index="0">
-        <div class="bg-layer" id="bg2">
-          <img class="bg-img" src="assets/images/slide2_bg.jpg" alt="Global Network Economy" />
-          <div class="vignette"></div>
-          <div class="grid-overlay"></div>
-        </div>
-
+      <!-- ================= SCENE 2: LA REGLA DEL PAJAR (CONSTELLATION 500) ================= -->
+      <div id="scene2" class="stage-scene" style="opacity: 0; z-index: 22;">
         <div class="content" id="content2">
           <div class="badge badge-accent" id="s2-badge">
             <span>💡 LA SOLUCIÓN DE JOHN BOGLE</span>
@@ -463,34 +473,34 @@
               </div>
             </div>
 
-            <!-- Constellation Cards -->
+            <!-- Constellation Cards (Morph target from single card) -->
             <div class="constellation-grid" id="s2-nodes">
-              <div class="stock-node highlight-node">
+              <div class="stock-node highlight-node" id="node-1">
                 <span style="font-size: 30px; display: block; margin-bottom: 4px;">🍏</span>
                 <b style="font-size: 19px; color: #ffffff;">Apple</b>
                 <span style="font-size: 13px; color: #10b981; display: block;">Tecnología</span>
               </div>
-              <div class="stock-node highlight-node">
+              <div class="stock-node highlight-node" id="node-2">
                 <span style="font-size: 30px; display: block; margin-bottom: 4px;">💻</span>
                 <b style="font-size: 19px; color: #ffffff;">Microsoft</b>
                 <span style="font-size: 13px; color: #10b981; display: block;">Software & IA</span>
               </div>
-              <div class="stock-node highlight-node">
+              <div class="stock-node highlight-node" id="node-3">
                 <span style="font-size: 30px; display: block; margin-bottom: 4px;">⚡</span>
                 <b style="font-size: 19px; color: #ffffff;">Nvidia</b>
                 <span style="font-size: 13px; color: #10b981; display: block;">Semiconductores</span>
               </div>
-              <div class="stock-node">
+              <div class="stock-node" id="node-4">
                 <span style="font-size: 30px; display: block; margin-bottom: 4px;">🌐</span>
                 <b style="font-size: 19px; color: #ffffff;">Google</b>
                 <span style="font-size: 13px; color: #38bdf8; display: block;">Búsqueda & Cloud</span>
               </div>
-              <div class="stock-node">
+              <div class="stock-node" id="node-5">
                 <span style="font-size: 30px; display: block; margin-bottom: 4px;">📦</span>
                 <b style="font-size: 19px; color: #ffffff;">Amazon</b>
                 <span style="font-size: 13px; color: #fbbf24; display: block;">Consumo & AWS</span>
               </div>
-              <div class="stock-node">
+              <div class="stock-node" id="node-6">
                 <span style="font-size: 30px; display: block; margin-bottom: 4px;">🌐</span>
                 <b style="font-size: 19px; color: #ffffff;">+ 495 más</b>
                 <span style="font-size: 13px; color: #a1a1aa; display: block;">Líderes globales</span>
@@ -504,21 +514,10 @@
             </div>
           </div>
         </div>
-
-        <div class="karaoke-pill" id="s2-karaoke">
-          <span>🌾</span>
-          <span>"No busques la aguja en el pajar: <span class="karaoke-highlight">¡Compra el pajar entero!</span>"</span>
-        </div>
       </div>
 
-      <!-- ================= ESCENA 3: LA GRÁFICA INTERACTIVA S&P 500 (14.4s - 25.2s) ================= -->
-      <div id="scene3" class="scene clip" data-start="14.4" data-duration="10.8" data-track-index="0">
-        <div class="bg-layer" id="bg3">
-          <img class="bg-img" src="assets/images/slide3_bg.jpg" alt="Financial Charts Wall Street" />
-          <div class="vignette"></div>
-          <div class="grid-overlay"></div>
-        </div>
-
+      <!-- ================= SCENE 3: S&P 500 INTERACTIVE CURVE ================= -->
+      <div id="scene3" class="stage-scene" style="opacity: 0; z-index: 23;">
         <div class="content" id="content3">
           <div class="badge badge-accent" id="s3-badge">
             <span>📈 50 AÑOS DE HISTORIA REAL</span>
@@ -539,7 +538,7 @@
               <span style="font-size: 22px; font-weight: 900; color: #10b981; background: rgba(16,185,129,0.15); padding: 6px 18px; border-radius: 999px; border: 1px solid #10b981;">+10.4% Anual</span>
             </div>
 
-            <!-- Interactive SVG Curve (All tooltips strictly within viewBox) -->
+            <!-- SVG Chart with Nodes -->
             <div class="chart-container">
               <svg viewBox="0 0 860 380" style="width: 100%; height: 100%;">
                 <defs>
@@ -554,7 +553,6 @@
                   </linearGradient>
                 </defs>
 
-                <!-- Grid lines -->
                 <line x1="40" y1="80" x2="820" y2="80" class="chart-grid-line" />
                 <line x1="40" y1="160" x2="820" y2="160" class="chart-grid-line" />
                 <line x1="40" y1="240" x2="820" y2="240" class="chart-grid-line" />
@@ -566,7 +564,7 @@
                 <!-- Animated Curve -->
                 <path id="s3-curve" d="M 60 330 Q 240 300, 360 230 T 600 150 T 800 80" class="chart-curve" />
 
-                <!-- Milestone Points (All comfortably inside bounds) -->
+                <!-- Milestone Points -->
                 <g id="s3-p1" opacity="0">
                   <circle cx="280" cy="270" r="8" class="chart-point" />
                   <rect x="210" y="215" width="140" height="40" rx="8" fill="#18181b" stroke="#3f3f46" />
@@ -592,21 +590,10 @@
             </div>
           </div>
         </div>
-
-        <div class="karaoke-pill" id="s3-karaoke">
-          <span>📊</span>
-          <span>"Si una quiebra, <span class="karaoke-highlight">las otras 499 tiran de ti hacia arriba</span>"</span>
-        </div>
       </div>
 
-      <!-- ================= ESCENA 4: EL PODER DE LOS 100€ AL MES (25.0s - 36.5s) ================= -->
-      <div id="scene4" class="scene clip" data-start="25.0" data-duration="11.5" data-track-index="0">
-        <div class="bg-layer" id="bg4">
-          <img class="bg-img" src="assets/images/slide4_bg.jpg" alt="Compounding Wealth Compound" />
-          <div class="vignette"></div>
-          <div class="grid-overlay"></div>
-        </div>
-
+      <!-- ================= SCENE 4: 100€ AL MES GROWTH WATERFALL ================= -->
+      <div id="scene4" class="stage-scene" style="opacity: 0; z-index: 24;">
         <div class="content" id="content4">
           <div class="badge badge-gold" id="s4-badge">
             <span>💰 CASO REAL: 100€ AL MES</span>
@@ -623,16 +610,16 @@
 
           <div class="glass-card" id="s4-card">
             <!-- Big Capital Display -->
-            <div style="background: rgba(251, 191, 36, 0.1); border: 2px solid rgba(251, 191, 36, 0.4); border-radius: 26px; padding: 22px; margin-bottom: 26px;">
+            <div id="s4-counter-box" style="background: rgba(251, 191, 36, 0.1); border: 2px solid rgba(251, 191, 36, 0.4); border-radius: 26px; padding: 22px; margin-bottom: 26px; transform-origin: center center;">
               <span style="font-size: 17px; font-weight: 800; color: #fbbf24; text-transform: uppercase; letter-spacing: 2px;">Capital Acumulado en 20 Años</span>
               <div id="s4-counter" style="font-size: 78px; font-weight: 900; color: #ffffff; margin-top: 4px; letter-spacing: -2px;">
                 75.800 €
               </div>
             </div>
 
-            <!-- Comparative Bars -->
-            <div class="growth-box">
-              <div>
+            <!-- Comparative Bars (Morph source for Scene 5 monogram) -->
+            <div class="growth-box" id="s4-bars-box">
+              <div id="s4-row-contrib">
                 <div style="display: flex; justify-content: space-between; font-size: 19px; font-weight: 800; margin-bottom: 8px;">
                   <span style="color: #7dd3fc;">📥 Tu Dinero Aportado (100€ / mes)</span>
                   <span style="color: #ffffff;">24.000 € (32%)</span>
@@ -642,7 +629,7 @@
                 </div>
               </div>
 
-              <div>
+              <div id="s4-row-interest">
                 <div style="display: flex; justify-content: space-between; font-size: 19px; font-weight: 800; margin-bottom: 8px;">
                   <span style="color: #6ee7b7;">🚀 Intereses de las 500 Empresas</span>
                   <span style="color: #10b981;">+51.800 € (68%)</span>
@@ -659,38 +646,27 @@
             </div>
           </div>
         </div>
-
-        <div class="karaoke-pill" id="s4-karaoke">
-          <span>💎</span>
-          <span>"Convierte 24.000€ en <span class="karaoke-highlight">más de 75.000€ sin mirar noticias</span>"</span>
-        </div>
       </div>
 
-      <!-- ================= ESCENA 5: CIERRE DE MARCA TEMPUS (36.3s - 46.0s) ================= -->
-      <div id="scene5" class="scene clip" data-start="36.3" data-duration="9.7" data-track-index="0">
-        <div class="bg-layer" id="bg5">
-          <img class="bg-img" src="assets/images/slide5_bg.jpg" alt="Wealth & Freedom Skyline" />
-          <div class="vignette"></div>
-          <div class="grid-overlay"></div>
-        </div>
-
+      <!-- ================= SCENE 5: TEMPUS BRAND CTA ================= -->
+      <div id="scene5" class="stage-scene" style="opacity: 0; z-index: 25;">
         <div class="content" id="content5" style="margin-top: 40px;">
-          <!-- Animated Monogram Logo -->
+          <!-- Animated Monogram Logo (Morphed directly from the energy bars) -->
           <div class="logo-bars" id="s5-logo">
-            <div class="logo-bar" style="height: 35px; background: #10B981;"></div>
-            <div class="logo-bar" style="height: 65px; background: #34D399;"></div>
-            <div class="logo-bar" style="height: 50px; background: #6EE7B7;"></div>
-            <div class="logo-bar" style="height: 80px; background: #A7F3D0;"></div>
+            <div class="logo-bar" id="lbar-1" style="height: 35px; background: #10B981;"></div>
+            <div class="logo-bar" id="lbar-2" style="height: 65px; background: #34D399;"></div>
+            <div class="logo-bar" id="lbar-3" style="height: 50px; background: #6EE7B7;"></div>
+            <div class="logo-bar" id="lbar-4" style="height: 80px; background: #A7F3D0;"></div>
           </div>
 
-          <h1 style="font-size: 88px; font-weight: 900; letter-spacing: -2px; margin-bottom: 6px; text-shadow: 0 10px 40px rgba(0,0,0,0.9);">
+          <h1 id="s5-brand-title" style="font-size: 88px; font-weight: 900; letter-spacing: -2px; margin-bottom: 6px; text-shadow: 0 10px 40px rgba(0,0,0,0.9);">
             TEMPUS
           </h1>
-          <div style="font-size: 24px; font-weight: 800; color: #10B981; letter-spacing: 5px; text-transform: uppercase; margin-bottom: 28px;">
+          <div id="s5-brand-sub" style="font-size: 24px; font-weight: 800; color: #10B981; letter-spacing: 5px; text-transform: uppercase; margin-bottom: 28px;">
             Wealth Management
           </div>
 
-          <p class="hero-subtitle" style="font-size: 30px; max-width: 820px; margin-bottom: 45px;">
+          <p class="hero-subtitle" id="s5-body" style="font-size: 30px; max-width: 820px; margin-bottom: 45px;">
             No improvises con tu futuro. <br />
             <b style="color: #6ee7b7;">Diseña y simula tu estrategia indexada gratis.</b>
           </p>
@@ -700,28 +676,47 @@
             <span style="font-size: 32px;">↗</span>
           </div>
         </div>
+      </div>
 
-        <div class="karaoke-pill" id="s5-karaoke">
+      <!-- Persistent Karaoke Bottom Pill (Text rows slide in/out without flashing) -->
+      <div class="karaoke-pill-fixed">
+        <div class="karaoke-text-row" id="k-row-1">
+          <span>🎯</span>
+          <span>"Si metes todo a una sola empresa, <span class="karaoke-highlight">estás jugando a la ruleta rusa</span>"</span>
+        </div>
+        <div class="karaoke-text-row" id="k-row-2">
+          <span>🌾</span>
+          <span>"No busques la aguja en el pajar: <span class="karaoke-highlight">¡Compra el pajar entero!</span>"</span>
+        </div>
+        <div class="karaoke-text-row" id="k-row-3">
+          <span>📊</span>
+          <span>"Si una quiebra, <span class="karaoke-highlight">las otras 499 tiran de ti hacia arriba</span>"</span>
+        </div>
+        <div class="karaoke-text-row" id="k-row-4">
+          <span>💎</span>
+          <span>"Convierte 24.000€ en <span class="karaoke-highlight">más de 75.000€ sin mirar noticias</span>"</span>
+        </div>
+        <div class="karaoke-text-row" id="k-row-5">
           <span>🏛️</span>
           <span>"Diseña y simula tu cartera indexada <span class="karaoke-highlight">hoy mismo en Tempus</span>"</span>
         </div>
       </div>
 
-      <!-- ================= AUDIO TRACKS (Exact timings calculated with ffprobe + breathing room) ================= -->
+      <!-- Audio Tracks -->
       <audio id="v1" src="assets/audio/slide1.mp3" data-start="0.3" data-duration="6.0"></audio>
-      <audio id="v2" src="assets/audio/slide2.mp3" data-start="7.3" data-duration="6.8"></audio>
-      <audio id="v3" src="assets/audio/slide3.mp3" data-start="14.8" data-duration="9.5"></audio>
-      <audio id="v4" src="assets/audio/slide4.mp3" data-start="25.4" data-duration="10.2"></audio>
-      <audio id="v5" src="assets/audio/slide5.mp3" data-start="36.8" data-duration="8.2"></audio>
-      <audio id="bgm" src="assets/audio/background_46s.wav" data-start="0" data-duration="46" data-volume="0.10"></audio>
+      <audio id="v2" src="assets/audio/slide2.mp3" data-start="7.1" data-duration="6.6"></audio>
+      <audio id="v3" src="assets/audio/slide3.mp3" data-start="14.6" data-duration="9.4"></audio>
+      <audio id="v4" src="assets/audio/slide4.mp3" data-start="24.9" data-duration="10.0"></audio>
+      <audio id="v5" src="assets/audio/slide5.mp3" data-start="35.8" data-duration="8.0"></audio>
+      <audio id="bgm" src="assets/audio/background_46s.wav" data-start="0" data-duration="45" data-volume="0.10"></audio>
     </div>
 
-    <!-- ================= GSAP TIMELINE ENGINE ================= -->
+    <!-- ================= GSAP CONTINUOUS MORPH ENGINE ================= -->
     <script>
       window.__timelines = window.__timelines || {};
       const tl = gsap.timeline({ paused: true });
 
-      // Configuración de curvatura SVG para animación
+      // Path length measurement for stroke animations
       const crashPath = document.getElementById('s1-crash-path');
       const chartCurve = document.getElementById('s3-curve');
       if (crashPath) {
@@ -735,79 +730,150 @@
         chartCurve.style.strokeDashoffset = len;
       }
 
-      // --- ESCENA 1: EL ERROR (0s - 7.0s | Audio: 0.3s a 6.13s | Pausa visual: 6.13s a 6.6s) ---
-      tl.set("#scene1", { opacity: 1 }, 0);
-      tl.fromTo("#bg1", { scale: 1.0 }, { scale: 1.15, duration: 7.0, ease: "none" }, 0);
+      // -------------------------------------------------------------
+      // ACTO 1: LA SOLA ACCIÓN (0.0s - 6.6s)
+      // -------------------------------------------------------------
+      tl.fromTo("#bg1", { scale: 1.0 }, { scale: 1.12, duration: 6.8, ease: "none" }, 0);
       tl.fromTo("#s1-badge", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.5)" }, 0.2);
       tl.fromTo("#s1-title", { opacity: 0, y: 35 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 0.4);
       tl.fromTo("#s1-sub", { opacity: 0, y: 25 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 0.6);
       tl.fromTo("#s1-card", { opacity: 0, y: 40, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "power3.out" }, 0.8);
-      tl.fromTo("#s1-karaoke", { opacity: 0, y: 25 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0.5);
-      
+      tl.fromTo("#k-row-1", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0.5);
+
       if (crashPath) {
         const len = crashPath.getTotalLength();
-        tl.fromTo(crashPath, { strokeDashoffset: len }, { strokeDashoffset: 0, duration: 2.0, ease: "power2.inOut" }, 1.2);
+        tl.fromTo(crashPath, { strokeDashoffset: len }, { strokeDashoffset: 0, duration: 1.8, ease: "power2.inOut" }, 1.2);
       }
-      tl.to("#scene1", { opacity: 0, duration: 0.4, ease: "power2.in" }, 6.6);
 
-      // --- ESCENA 2: COMPRA EL PAJAR (6.8s - 14.6s | Audio: 7.3s a 13.76s | Pausa visual: 13.76s a 14.2s) ---
-      tl.set("#scene2", { opacity: 1 }, 6.8);
-      tl.fromTo("#bg2", { scale: 1.15 }, { scale: 1.02, duration: 7.8, ease: "none" }, 6.8);
-      tl.fromTo("#s2-badge", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.5)" }, 7.0);
-      tl.fromTo("#s2-title", { opacity: 0, y: 35 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 7.2);
-      tl.fromTo("#s2-sub", { opacity: 0, y: 25 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 7.4);
-      tl.fromTo("#s2-card", { opacity: 0, scale: 0.92, y: 35 }, { opacity: 1, scale: 1, y: 0, duration: 0.8, ease: "back.out(1.4)" }, 7.6);
+      // -------------------------------------------------------------
+      // METAMORFOSIS 1 -> 2: DE LA TARJETA SOLA AL PAJAR DE 500 (6.2s - 7.0s)
+      // La tarjeta roja se contrae, cambia su borde a verde esmeralda y "estalla" en 6 nodos
+      // -------------------------------------------------------------
+      tl.to("#bg1", { opacity: 0, duration: 0.9, ease: "power2.inOut" }, 6.2);
+      tl.fromTo("#bg2", { opacity: 0, scale: 1.12 }, { opacity: 1, scale: 1.0, duration: 7.6, ease: "none" }, 6.2);
+
+      // Morph títulos
+      tl.to("#s1-badge, #s1-title, #s1-sub", { opacity: 0, y: -40, duration: 0.5, ease: "power2.in" }, 6.2);
+      tl.to("#k-row-1", { opacity: 0, y: -30, duration: 0.4, ease: "power2.in" }, 6.3);
+
+      // Metamorfosis de tarjeta
+      tl.to("#s1-card", {
+        scale: 0.85,
+        borderColor: "#10b981",
+        boxShadow: "0 0 40px rgba(16,185,129,0.4)",
+        duration: 0.5,
+        ease: "power2.in"
+      }, 6.2);
+      tl.set("#scene2", { opacity: 1 }, 6.5);
+      tl.to("#s1-card", { opacity: 0, scale: 1.2, duration: 0.35, ease: "power2.out" }, 6.55);
+
+      // Emerge el pajar como expansión directa
+      tl.fromTo("#s2-badge", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.5)" }, 6.6);
+      tl.fromTo("#s2-title", { opacity: 0, y: 35 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 6.7);
+      tl.fromTo("#s2-sub", { opacity: 0, y: 25 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 6.8);
+      tl.fromTo("#s2-card", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.7, ease: "back.out(1.4)" }, 6.6);
       tl.fromTo("#s2-nodes .stock-node", 
-        { opacity: 0, scale: 0.7, y: 25 }, 
-        { opacity: 1, scale: 1, y: 0, stagger: 0.14, duration: 0.6, ease: "back.out(1.6)" }, 7.8
+        { scale: 0, opacity: 0, rotation: -15 }, 
+        { scale: 1, opacity: 1, rotation: 0, stagger: 0.1, duration: 0.6, ease: "back.out(1.8)" }, 6.8
       );
-      tl.fromTo("#s2-karaoke", { opacity: 0, y: 25 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 7.5);
-      tl.to("#scene2", { opacity: 0, duration: 0.4, ease: "power2.in" }, 14.2);
+      tl.fromTo("#k-row-2", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 7.0);
 
-      // --- ESCENA 3: GRÁFICA INTERACTIVA S&P 500 (14.4s - 25.2s | Audio: 14.8s a 24.04s | Pausa: 24.04s a 24.8s) ---
-      tl.set("#scene3", { opacity: 1 }, 14.4);
-      tl.fromTo("#bg3", { scale: 1.0 }, { scale: 1.15, duration: 10.8, ease: "none" }, 14.4);
-      tl.fromTo("#s3-badge", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.5)" }, 14.6);
-      tl.fromTo("#s3-title", { opacity: 0, y: 35 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 14.8);
-      tl.fromTo("#s3-sub", { opacity: 0, y: 25 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 15.0);
-      tl.fromTo("#s3-card", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }, 15.2);
-      tl.fromTo("#s3-karaoke", { opacity: 0, y: 25 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 15.0);
+      // -------------------------------------------------------------
+      // METAMORFOSIS 2 -> 3: DE LOS NODOS A LA CURVA HISTÓRICA (13.8s - 14.6s)
+      // Los 6 nodos se aplanan horizontalmente y una línea láser los conecta curvándose
+      // -------------------------------------------------------------
+      tl.to("#bg2", { opacity: 0, duration: 0.9, ease: "power2.inOut" }, 13.8);
+      tl.fromTo("#bg3", { opacity: 0, scale: 1.0 }, { opacity: 1, scale: 1.12, duration: 10.6, ease: "none" }, 13.8);
 
-      // Trazado de la curva y áreas con tiempo holgado
+      tl.to("#s2-badge, #s2-title, #s2-sub", { opacity: 0, y: -40, duration: 0.5, ease: "power2.in" }, 13.8);
+      tl.to("#k-row-2", { opacity: 0, y: -30, duration: 0.4, ease: "power2.in" }, 13.9);
+
+      // Los nodos colapsan hacia una línea central
+      tl.to("#s2-nodes .stock-node", {
+        scaleY: 0.1,
+        scaleX: 0.8,
+        opacity: 0.6,
+        y: 40,
+        stagger: 0.05,
+        duration: 0.45,
+        ease: "power2.in"
+      }, 13.8);
+      tl.to("#s2-card", { opacity: 0, scale: 0.9, duration: 0.35 }, 14.1);
+
+      tl.set("#scene3", { opacity: 1 }, 14.15);
+      tl.fromTo("#s3-badge", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.5)" }, 14.2);
+      tl.fromTo("#s3-title", { opacity: 0, y: 35 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 14.3);
+      tl.fromTo("#s3-sub", { opacity: 0, y: 25 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 14.4);
+      tl.fromTo("#s3-card", { opacity: 0, scale: 0.92, y: 30 }, { opacity: 1, scale: 1, y: 0, duration: 0.7, ease: "power3.out" }, 14.2);
+
+      // Trazado de la curva continua emergiendo de los nodos anteriores
       if (chartCurve) {
         const len = chartCurve.getTotalLength();
-        tl.fromTo(chartCurve, { strokeDashoffset: len }, { strokeDashoffset: 0, duration: 3.5, ease: "power1.inOut" }, 15.8);
+        tl.fromTo(chartCurve, { strokeDashoffset: len }, { strokeDashoffset: 0, duration: 3.2, ease: "power1.inOut" }, 14.6);
       }
-      tl.fromTo("#s3-area", { opacity: 0 }, { opacity: 1, duration: 1.5, ease: "power2.out" }, 17.5);
-      tl.fromTo("#s3-p1", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.6)" }, 17.2);
-      tl.fromTo("#s3-p2", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.6)" }, 18.8);
-      tl.fromTo("#s3-p3", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.7, ease: "back.out(2)" }, 20.2);
-      tl.to("#scene3", { opacity: 0, duration: 0.4, ease: "power2.in" }, 24.8);
+      tl.fromTo("#s3-area", { opacity: 0 }, { opacity: 1, duration: 1.4, ease: "power2.out" }, 16.5);
+      tl.fromTo("#s3-p1", { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.6)" }, 16.2);
+      tl.fromTo("#s3-p2", { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.6)" }, 17.8);
+      tl.fromTo("#s3-p3", { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(2)" }, 19.4);
+      tl.fromTo("#k-row-3", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 14.6);
 
-      // --- ESCENA 4: EL CASO DE LOS 100€ AL MES (25.0s - 36.5s | Audio: 25.4s a 35.31s | Pausa: 35.31s a 36.1s) ---
-      tl.set("#scene4", { opacity: 1 }, 25.0);
-      tl.fromTo("#bg4", { scale: 1.15 }, { scale: 1.02, duration: 11.5, ease: "none" }, 25.0);
-      tl.fromTo("#s4-badge", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.5)" }, 25.2);
-      tl.fromTo("#s4-title", { opacity: 0, y: 35 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 25.4);
-      tl.fromTo("#s4-sub", { opacity: 0, y: 25 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 25.6);
-      tl.fromTo("#s4-card", { opacity: 0, y: 40, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "power3.out" }, 25.8);
-      tl.fromTo("#s4-karaoke", { opacity: 0, y: 25 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 25.6);
+      // -------------------------------------------------------------
+      // METAMORFOSIS 3 -> 4: DE LA CURVA AL ODÓMETRO Y BARRAS (24.2s - 25.0s)
+      // El pico de la curva se transforma en el cuadro del contador dorado y las barras
+      // -------------------------------------------------------------
+      tl.to("#bg3", { opacity: 0, duration: 0.9, ease: "power2.inOut" }, 24.2);
+      tl.fromTo("#bg4", { opacity: 0, scale: 1.12 }, { opacity: 1, scale: 1.0, duration: 11.2, ease: "none" }, 24.2);
 
-      // Crecimiento de barras animado
-      tl.fromTo("#s4-bar-contrib", { width: "0%" }, { width: "32%", duration: 2.2, ease: "power2.out" }, 26.6);
-      tl.fromTo("#s4-bar-interest", { width: "0%" }, { width: "68%", duration: 2.8, ease: "power3.out" }, 27.2);
-      tl.to("#scene4", { opacity: 0, duration: 0.4, ease: "power2.in" }, 36.1);
+      tl.to("#s3-badge, #s3-title, #s3-sub", { opacity: 0, y: -40, duration: 0.5, ease: "power2.in" }, 24.2);
+      tl.to("#k-row-3", { opacity: 0, y: -30, duration: 0.4, ease: "power2.in" }, 24.3);
 
-      // --- ESCENA 5: CIERRE DE MARCA TEMPUS (36.3s - 46.0s | Audio: 36.8s a 44.67s | Salida final: 46.0s) ---
-      tl.set("#scene5", { opacity: 1 }, 36.3);
-      tl.fromTo("#bg5", { scale: 1.0 }, { scale: 1.12, duration: 9.7, ease: "none" }, 36.3);
+      // La curva se proyecta hacia el frente
+      tl.to("#s3-card", { scale: 1.1, opacity: 0, duration: 0.45, ease: "power2.in" }, 24.3);
+
+      tl.set("#scene4", { opacity: 1 }, 24.5);
+      tl.fromTo("#s4-badge", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.5)" }, 24.6);
+      tl.fromTo("#s4-title", { opacity: 0, y: 35 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 24.7);
+      tl.fromTo("#s4-sub", { opacity: 0, y: 25 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 24.8);
+      tl.fromTo("#s4-card", { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, ease: "back.out(1.4)" }, 24.5);
+      tl.fromTo("#s4-counter-box", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.7, ease: "back.out(1.6)" }, 24.8);
+
+      // Llenado de barras
+      tl.fromTo("#s4-bar-contrib", { width: "0%" }, { width: "32%", duration: 2.0, ease: "power2.out" }, 25.8);
+      tl.fromTo("#s4-bar-interest", { width: "0%" }, { width: "68%", duration: 2.6, ease: "power3.out" }, 26.4);
+      tl.fromTo("#k-row-4", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 25.0);
+
+      // -------------------------------------------------------------
+      // METAMORFOSIS 4 -> 5: DE LAS BARRAS HORIZONTALES AL LOGOTIPO VERTICAL (35.2s - 36.0s)
+      // Las 2 barras giran y se dividen en las 4 barras del monograma de Tempus
+      // -------------------------------------------------------------
+      tl.to("#bg4", { opacity: 0, duration: 0.9, ease: "power2.inOut" }, 35.2);
+      tl.fromTo("#bg5", { opacity: 0, scale: 1.0 }, { opacity: 1, scale: 1.12, duration: 9.6, ease: "none" }, 35.2);
+
+      tl.to("#s4-badge, #s4-title, #s4-sub", { opacity: 0, y: -40, duration: 0.5, ease: "power2.in" }, 35.2);
+      tl.to("#k-row-4", { opacity: 0, y: -30, duration: 0.4, ease: "power2.in" }, 35.3);
+
+      // Las barras de Scene 4 giran 90 grados y se comprimen
+      tl.to("#s4-bars-box", {
+        rotation: 90,
+        scale: 0.4,
+        y: -120,
+        opacity: 0,
+        duration: 0.55,
+        ease: "power2.in"
+      }, 35.2);
+      tl.to("#s4-card", { opacity: 0, scale: 0.9, duration: 0.4 }, 35.4);
+
+      // Nacimiento de Scene 5 y el monograma de Tempus
+      tl.set("#scene5", { opacity: 1 }, 35.5);
       tl.fromTo("#s5-logo .logo-bar", 
-        { scaleY: 0, transformOrigin: "bottom" }, 
-        { scaleY: 1, stagger: 0.16, duration: 0.8, ease: "back.out(2)" }, 36.8
+        { scaleY: 0, rotation: -90, transformOrigin: "bottom center" }, 
+        { scaleY: 1, rotation: 0, stagger: 0.12, duration: 0.7, ease: "back.out(2)" }, 35.6
       );
-      tl.fromTo("#content5 h1", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 37.4);
-      tl.fromTo("#s5-btn", { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.8, ease: "back.out(2)" }, 38.0);
-      tl.fromTo("#s5-karaoke", { opacity: 0, y: 25 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 37.2);
+      tl.fromTo("#s5-brand-title", { opacity: 0, y: 30, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "power3.out" }, 36.0);
+      tl.fromTo("#s5-brand-sub", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 36.2);
+      tl.fromTo("#s5-body", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 36.4);
+      tl.fromTo("#s5-btn", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.7, ease: "back.out(2)" }, 36.8);
+      tl.fromTo("#k-row-5", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 36.0);
 
       window.__timelines["main"] = tl;
       tl.seek(0);

@@ -9,7 +9,7 @@ async function main() {
     process.exit(1);
   }
   const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-  const videoPath = path.join(rootDir, 'tempus-hyperframes', 'tempus_fondos_indexados_v2.mp4');
+  const videoPath = path.join(rootDir, 'tempus-hyperframes', 'tempus_fondos_indexados_v3.mp4');
 
   if (!fs.existsSync(videoPath)) {
     console.error('Vídeo no encontrado en:', videoPath);
@@ -28,30 +28,32 @@ async function main() {
   });
 
   const recipient = config.recipient || 'tempuswealthmanagement@gmail.com';
-  console.log(`[+] Enviando nuevo vídeo corregido (Voz Joven + Cero Cortes + Sin Solapamientos) a ${recipient}...`);
+  console.log(`[+] Enviando nuevo vídeo corregido (Voz más aguda + Metamorfosis Continua / Morphing) a ${recipient}...`);
 
   const info = await transporter.sendMail({
     from: `"Tempus Video Studio" <${config.smtpUser.trim()}>`,
     to: recipient,
-    subject: `🎙️ [VERSIÓN MEJORADA] Fondos Indexados: Voz Masculina Joven (Sin Cortes y Layout Limpio)`,
+    subject: `✨ [NUEVA VERSIÓN V3] Fondos Indexados: Transiciones con Metamorfosis Continua y Voz Más Aguda`,
     text: `¡Hola Jorge!\n\n` +
-          `Aquí tienes el nuevo vídeo con TODAS las correcciones solicitadas aplicadas:\n\n` +
-          `✅ 1. VOZ DE HOMBRE JOVEN Y ENÉRGICO:\n` +
-          `   - Locución cambiada a una voz masculina joven española (Álvaro Neural a 96 kbps con tono +1Hz y ritmo dinámico).\n` +
-          `   - Suena como un creador de contenido joven explicando finanzas de forma cercana y entusiasta.\n\n` +
-          `✅ 2. CERO CORTES DE VOZ:\n` +
-          `   - Duraciones medidas milisegundo a milisegundo con FFprobe.\n` +
-          `   - Añadido un margen de respiración visual de entre 0.8s y 1.2s DESPUÉS de que termina cada frase antes de que la imagen cambie.\n` +
-          `   - Ya no se corta ninguna sílaba ni resulta abrupto el paso entre escenas.\n\n` +
-          `✅ 3. SOLAPAMIENTOS ARREGLADOS:\n` +
-          `   - El HUD superior (la cabecera) se ha fijado a 60px y todo el contenido empieza a 170px.\n` +
-          `   - Hay un margen limpio de más de 60px entre la barra superior y cualquier título o etiqueta.\n` +
-          `   - Los textos y tarjetas de la gráfica SVG están ajustados dentro de sus márgenes sin salirse de la pantalla.\n\n` +
-          `Duración total: 46 segundos en 1080x1920 HD a 30 fps.\n\n` +
-          `¡Dime qué te parece el resultado con estos ajustes!`,
+          `Aquí tienes la NUEVA VERSIÓN V3 del vídeo con los cambios que me pediste:\n\n` +
+          `🌟 1. TRANSICIONES POR METAMORFOSIS CONTINUA (MORPHING):\n` +
+          `   - Ya NO se borra una pantalla para que aparezca otra.\n` +
+          `   - Los elementos se transforman directamente en los siguientes:\n` +
+          `     • La tarjeta roja de desplome se contrae en 3D, se vuelve esmeralda y se fragmenta abriéndose en la constelación de 6 empresas.\n` +
+          `     • Las 6 tarjetas colapsan en una línea base y proyectan un rayo láser curvo que dibuja la gráfica del S&P 500.\n` +
+          `     • El pico de la gráfica de 5.800 pts se expande y se transmuta en la caja dorada del contador multiplicador y sus barras de crecimiento.\n` +
+          `     • Las barras de crecimiento rotan 90° y se transforman directamente en las barras doradas del monograma de Tempus.\n\n` +
+          `🎙️ 2. VOZ MÁS AGUDA Y JUVENIL:\n` +
+          `   - Se ha ajustado el tono a +4Hz y la modulación a +4% de velocidad, logrando un timbre más juvenil, brillante y enérgico de hombre joven.\n` +
+          `   - Continúa con cero cortes de audio (con márgenes de respiración visual tras cada frase).\n\n` +
+          `🎯 3. SUBTÍTULOS ANCLADOS Y HUD LIMPIO:\n` +
+          `   - El pill inferior de karaoke se mantiene estable y las frases van deslizándose verticalmente con suavidad.\n` +
+          `   - El HUD superior permanece fijo sin ningún solapamiento.\n\n` +
+          `Duración: 46 segundos | Resolución: 1080x1920 (9:16 Vertical HD) a 30 fps.\n\n` +
+          `¡Échale un vistazo y dime qué te parece esta nueva dinámica de transformación fluida!`,
     attachments: [
       {
-        filename: 'TEMPUS_FONDOS_INDEXADOS_V2.mp4',
+        filename: 'TEMPUS_FONDOS_INDEXADOS_V3.mp4',
         path: videoPath
       }
     ]

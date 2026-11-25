@@ -41,19 +41,19 @@ async function main() {
   const targetDir = path.join(__dirname, '..', 'tempus-hyperframes', 'assets', 'audio');
   if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
 
-  // Voz de hombre joven (Álvaro de España) con ritmo entusiasta y fresco (+3% rate, +1Hz pitch)
+  // Voz de hombre joven con tono más agudo (+4Hz) y ritmo alegre y ágil (+4%)
   const voice = "es-ES-AlvaroNeural";
   const results = [];
 
   for (const s of scripts) {
-    console.log(`[+] Generando audio Escena ${s.num} con ${voice}: "${s.text.slice(0, 35)}..."`);
+    console.log(`[+] Generando audio Escena ${s.num} con tono más agudo: "${s.text.slice(0, 35)}..."`);
     const tts = new MsEdgeTTS();
     await tts.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3);
-    const tempDir = path.join(targetDir, `temp_male_${s.num}`);
+    const tempDir = path.join(targetDir, `temp_male_high_${s.num}`);
     if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
 
-    // Prosodia juvenil y dinámica: ritmo vivo (+3%) con tono brillante (+1Hz) para sonar como creador joven
-    await tts.toFile(tempDir, s.text, { rate: '+3%', pitch: '+1Hz' });
+    // Tono más agudo (+4Hz) para que suene más fresco, joven y brillante, con cadencia dinámica
+    await tts.toFile(tempDir, s.text, { rate: '+4%', pitch: '+4Hz' });
     const srcFile = path.join(tempDir, 'audio.mp3');
     const destFile = path.join(targetDir, `slide${s.num}.mp3`);
 
@@ -62,7 +62,7 @@ async function main() {
     try { fs.rmdirSync(tempDir); } catch (_) {}
 
     const exactDuration = getExactDurationWithFfprobe(destFile);
-    console.log(`   -> Escena ${s.num}: duración exacta = ${exactDuration.toFixed(3)}s`);
+    console.log(`   -> Escena ${s.num}: duración = ${exactDuration.toFixed(3)}s`);
     results.push({
       num: s.num,
       text: s.text,
@@ -71,9 +71,9 @@ async function main() {
     });
   }
 
-  const metaPath = path.join(targetDir, 'scene_timings_male.json');
+  const metaPath = path.join(targetDir, 'scene_timings_male_higher.json');
   fs.writeFileSync(metaPath, JSON.stringify(results, null, 2));
-  console.log('✅ Audios de voz masculina joven generados con éxito.');
+  console.log('✅ Audios con tono más agudo generados con éxito.');
 }
 
 main().catch(console.error);
