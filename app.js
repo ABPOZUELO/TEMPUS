@@ -2201,6 +2201,50 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
             }
         });
 
+        // ------------------ DATALIST NATIVO Y AUTOCOMPLETADO AUTOMÁTICO ------------------
+        const populateAssetDatalists = () => {
+            const nameDatalist = document.getElementById('asset-name-datalist');
+            const tickerDatalist = document.getElementById('asset-ticker-datalist');
+            if (!nameDatalist || !tickerDatalist) return;
+            
+            let nameOpts = '';
+            let tickerOpts = '';
+            for (const a of KNOWN_ASSETS) {
+                nameOpts += `<option value="${a.name}">${a.ticker} · ${a.category}</option>`;
+                tickerOpts += `<option value="${a.ticker}">${a.name}</option>`;
+            }
+            nameDatalist.innerHTML = nameOpts;
+            tickerDatalist.innerHTML = tickerOpts;
+        };
+
+        const setupAssetInputs = () => {
+            populateAssetDatalists();
+            const nameInput = document.getElementById('inv-name');
+            const tickerInput = document.getElementById('inv-ticker');
+
+            const handleAutoResolve = (val) => {
+                if (!val) return;
+                const q = normalizeStr(val);
+                const exact = KNOWN_ASSETS.find(a => normalizeStr(a.name) === q || normalizeStr(a.ticker) === q);
+                if (exact) {
+                    selectPredictedAsset(exact.name, exact.ticker, exact.defaultPrice);
+                }
+            };
+
+            if (nameInput) {
+                nameInput.addEventListener('change', (e) => handleAutoResolve(e.target.value));
+            }
+            if (tickerInput) {
+                tickerInput.addEventListener('change', (e) => handleAutoResolve(e.target.value));
+            }
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', setupAssetInputs);
+        } else {
+            setupAssetInputs();
+        }
+
         // ------------------ ESTADO DE MERCADO EN VIVO Y HORARIOS OFICIALES ------------------
         const getMarketStatus = (ticker) => {
             const now = new Date();

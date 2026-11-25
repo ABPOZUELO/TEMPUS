@@ -5,6 +5,7 @@ const { execSync } = require('child_process');
 const BASE_DIR = path.resolve(__dirname, '..');
 const VIDEO_DIR = path.join(BASE_DIR, 'tempus-video');
 const CALENDAR_FILE = path.join(__dirname, 'content_calendar.json');
+const HISTORY_FILE = path.join(__dirname, 'published_history.json');
 const OUTPUT_BASE = path.join(BASE_DIR, 'VIDEOS_DIARIOS');
 
 function getTodayString() {
@@ -15,17 +16,66 @@ function getTodayString() {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+function loadPublishedHistory() {
+  if (fs.existsSync(HISTORY_FILE)) {
+    try {
+      return JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8'));
+    } catch (e) {
+      console.warn('[!] Error leyendo published_history.json, inicializando nuevo:', e.message);
+    }
+  }
+  // Inicialización por defecto registrando el tema #1 ya publicado hoy por el usuario
+  return {
+    publishedIds: [1],
+    history: [
+      { id: 1, date: getTodayString(), title: "¿Qué es el Interés Compuesto y por qué Einstein lo llamó la octava maravilla?" }
+    ]
+  };
+}
+
+function savePublishedHistory(historyData) {
+  try {
+    fs.writeFileSync(HISTORY_FILE, JSON.stringify(historyData, null, 2), 'utf8');
+  } catch (e) {
+    console.warn('[!] Error guardando historial de publicaciones:', e.message);
+  }
+}
+
 async function main() {
   console.log('=== INICIANDO GENERADOR AUTOMÁTICO DE VÍDEO TEMPUS ===');
   const todayStr = getTodayString();
-  const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+  const historyData = loadPublishedHistory();
 
-  // 1. Cargar calendario y seleccionar tema del día (o por argumento CLI)
+  // 1. Cargar calendario y seleccionar tema sin repetir
   const calendar = JSON.parse(fs.readFileSync(CALENDAR_FILE, 'utf8'));
   const argTopicId = process.argv[2] ? parseInt(process.argv[2], 10) : null;
-  const topicIndex = argTopicId ? calendar.findIndex(t => t.id === argTopicId) : (dayOfYear % calendar.length);
-  const topic = { ...calendar[topicIndex >= 0 ? topicIndex : 0] };
-  console.log(`[+] Fecha: ${todayStr} | Tema #${topic.id}: "${topic.hookTitle}" (${topic.category})`);
+  
+  let topic = null;
+  if (argTopicId) {
+    topic = calendar.find(t => t.id === argTopicId);
+    if (!topic) {
+      console.warn(`[!] Tema ID #${argTopicId} no encontrado en calendario. Usando selector automático.`);
+    }
+  }
+
+  if (!topic) {
+    // Filtrar temas que no hayan sido publicados todavía
+    const unpublishedTopics = calendar.filter(t => !historyData.publishedIds.includes(t.id));
+    if (unpublishedTopics.length > 0) {
+      topic = unpublishedTopics[0];
+    } else {
+      console.log('[i] Todos los temas del calendario han sido publicados al menos una vez. Reiniciando ciclo de publicaciones.');
+      // Evitar el tema publicado hoy
+      const candidateTopics = calendar.filter(t => {
+        const lastEntry = historyData.history[historyData.history.length - 1];
+        return !lastEntry || lastEntry.id !== t.id;
+      });
+      topic = candidateTopics[0] || calendar[0];
+    }
+  }
+
+  topic = { ...topic };
+  console.log(`[+] Fecha: ${todayStr} | Tema Seleccionado #${topic.id}: "${topic.hookTitle}" (${topic.category})`);
 
   // 2. Crear carpeta de salida del día
   const dayOutputDir = path.join(OUTPUT_BASE, todayStr);
@@ -99,6 +149,19 @@ async function main() {
       console.error('[!] Error enviando email:', err.message);
     }
   }
+
+  // 8. Actualizar historial de publicaciones para no repetir jamás este tema
+  if (!historyData.publishedIds.includes(topic.id)) {
+    historyData.publishedIds.push(topic.id);
+  }
+  historyData.history.push({
+    id: topic.id,
+    date: todayStr,
+    title: topic.hookTitle,
+    category: topic.category
+  });
+  savePublishedHistory(historyData);
+  console.log(`[+] Historial actualizado: Tema #${topic.id} registrado para evitar repeticiones.`);
 
   console.log('=== PROCESO COMPLETADO CON ÉXITO ===');
 }

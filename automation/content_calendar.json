@@ -17,9 +17,21 @@
     },
     "featureTitle": "Las 3 leyes de este efecto",
     "points": [
-      { "icon": "⏳", "title": "El tiempo es el rey", "desc": "Empezar pronto importa mucho más que la cantidad aportada." },
-      { "icon": "📈", "title": "Crecimiento parabólico", "desc": "El 80% de los beneficios se concentran en los últimos años." },
-      { "icon": "⚡", "title": "Simúlalo en Tempus", "desc": "Ajusta tu aportación mensual y calcula tu curva en segundos." }
+      {
+        "icon": "⏳",
+        "title": "El tiempo es el rey",
+        "desc": "Empezar pronto importa mucho más que la cantidad aportada."
+      },
+      {
+        "icon": "📈",
+        "title": "Crecimiento parabólico",
+        "desc": "El 80% de los beneficios se concentran en los últimos años."
+      },
+      {
+        "icon": "⚡",
+        "title": "Simúlalo en Tempus",
+        "desc": "Ajusta tu aportación mensual y calcula tu curva en segundos."
+      }
     ],
     "voiceScripts": [
       "¿Cómo funciona realmente el interés compuesto y por qué todos los millonarios lo utilizan?",
@@ -69,9 +81,21 @@
     },
     "featureTitle": "Cómo proteger tu patrimonio",
     "points": [
-      { "icon": "🛡️", "title": "Bate a la inflación", "desc": "Tus ahorros deben rendir siempre por encima del IPC anual." },
-      { "icon": "💧", "title": "Mantén solo tu colchón", "desc": "Deja en la cuenta de 3 a 6 meses de gastos y pon a trabajar el resto." },
-      { "icon": "📊", "title": "Mídelo en Tempus", "desc": "Calcula tu rentabilidad neta descontando la inflación real." }
+      {
+        "icon": "🛡️",
+        "title": "Bate a la inflación",
+        "desc": "Tus ahorros deben rendir siempre por encima del IPC anual."
+      },
+      {
+        "icon": "💧",
+        "title": "Mantén solo tu colchón",
+        "desc": "Deja en la cuenta de 3 a 6 meses de gastos y pon a trabajar el resto."
+      },
+      {
+        "icon": "📊",
+        "title": "Mídelo en Tempus",
+        "desc": "Calcula tu rentabilidad neta descontando la inflación real."
+      }
     ],
     "voiceScripts": [
       "¿Sabías que dejar tu dinero quieto en el banco te garantiza perder una fortuna con el tiempo?",
@@ -97,16 +121,46 @@
       "centerText": "100%",
       "centerSubtext": "Tu Nómina",
       "slices": [
-        { "label": "Necesidades", "sublabel": "Casa, facturas y comida", "percentage": 50, "color": "#3B82F6", "icon": "🏠" },
-        { "label": "Estilo de Vida", "sublabel": "Cenas, ocio y viajes", "percentage": 30, "color": "#F59E0B", "icon": "☕" },
-        { "label": "Ahorro e Inversión", "sublabel": "Tu libertad a futuro", "percentage": 20, "color": "#10B981", "icon": "🚀" }
+        {
+          "label": "Necesidades",
+          "sublabel": "Casa, facturas y comida",
+          "percentage": 50,
+          "color": "#3B82F6",
+          "icon": "🏠"
+        },
+        {
+          "label": "Estilo de Vida",
+          "sublabel": "Cenas, ocio y viajes",
+          "percentage": 30,
+          "color": "#F59E0B",
+          "icon": "☕"
+        },
+        {
+          "label": "Ahorro e Inversión",
+          "sublabel": "Tu libertad a futuro",
+          "percentage": 20,
+          "color": "#10B981",
+          "icon": "🚀"
+        }
       ]
     },
     "featureTitle": "Por qué este método funciona",
     "points": [
-      { "icon": "🎯", "title": "Cero culpas al gastar", "desc": "El 30% está reservado para disfrutar de tu vida hoy." },
-      { "icon": "🔄", "title": "Págate a ti primero", "desc": "Aparta el 20% el mismo día que cobras la nómina." },
-      { "icon": "⚡", "title": "Diagnóstico Tempus", "desc": "Introduce tus ingresos y obtén tu desglose automático." }
+      {
+        "icon": "🎯",
+        "title": "Cero culpas al gastar",
+        "desc": "El 30% está reservado para disfrutar de tu vida hoy."
+      },
+      {
+        "icon": "🔄",
+        "title": "Págate a ti primero",
+        "desc": "Aparta el 20% el mismo día que cobras la nómina."
+      },
+      {
+        "icon": "⚡",
+        "title": "Diagnóstico Tempus",
+        "desc": "Introduce tus ingresos y obtén tu desglose automático."
+      }
     ],
     "voiceScripts": [
       "¿Cómo deberías repartir tu sueldo cada mes para no llegar ahogado a fin de mes?",
@@ -156,9 +210,21 @@
     },
     "featureTitle": "El poder de unos pocos puntos",
     "points": [
-      { "icon": "💡", "title": "Matemática simple", "desc": "Al 7% duplicas cada 10 años; al 10% duplicas cada 7 años." },
-      { "icon": "⚡", "title": "Acelera tus metas", "desc": "Un 2% extra en rentabilidad recorta años de trabajo." },
-      { "icon": "🔮", "title": "Calculadora Tempus", "desc": "Calcula tus años de duplicación con gráficos en vivo." }
+      {
+        "icon": "💡",
+        "title": "Matemática simple",
+        "desc": "Al 7% duplicas cada 10 años; al 10% duplicas cada 7 años."
+      },
+      {
+        "icon": "⚡",
+        "title": "Acelera tus metas",
+        "desc": "Un 2% extra en rentabilidad recorta años de trabajo."
+      },
+      {
+        "icon": "🔮",
+        "title": "Calculadora Tempus",
+        "desc": "Calcula tus años de duplicación con gráficos en vivo."
+      }
     ],
     "voiceScripts": [
       "¿Sabías que existe un truco mental para calcular en cuántos años vas a duplicar tu dinero?",
@@ -208,9 +274,21 @@
     },
     "featureTitle": "Cómo equilibrarlas en tu cartera",
     "points": [
-      { "icon": "🎯", "title": "Horizonte temporal", "desc": "A más de 10 años, la renta variable bate históricamente a cualquier activo." },
-      { "icon": "🛡️", "title": "Estabilidad emocional", "desc": "La renta fija te ayuda a soportar las caídas temporales de mercado." },
-      { "icon": "📊", "title": "Monitóralo en Tempus", "desc": "Comprueba el peso exacto de renta fija y variable en tu patrimonio." }
+      {
+        "icon": "🎯",
+        "title": "Horizonte temporal",
+        "desc": "A más de 10 años, la renta variable bate históricamente a cualquier activo."
+      },
+      {
+        "icon": "🛡️",
+        "title": "Estabilidad emocional",
+        "desc": "La renta fija te ayuda a soportar las caídas temporales de mercado."
+      },
+      {
+        "icon": "📊",
+        "title": "Monitóralo en Tempus",
+        "desc": "Comprueba el peso exacto de renta fija y variable en tu patrimonio."
+      }
     ],
     "voiceScripts": [
       "¿Cuál es la diferencia real entre renta fija y renta variable y cuál necesitas en tu cartera?",
@@ -236,16 +314,46 @@
       "centerText": "Global",
       "centerSubtext": "Multi-Activo",
       "slices": [
-        { "label": "Acciones Globales", "sublabel": "S&P 500 y MSCI World", "percentage": 60, "color": "#10B981", "icon": "🌍" },
-        { "label": "Bonos Soberanos", "sublabel": "Deuda pública de calidad", "percentage": 30, "color": "#3B82F6", "icon": "🏛️" },
-        { "label": "Oro y Liquidez", "sublabel": "Protección contra crisis", "percentage": 10, "color": "#F59E0B", "icon": "🥇" }
+        {
+          "label": "Acciones Globales",
+          "sublabel": "S&P 500 y MSCI World",
+          "percentage": 60,
+          "color": "#10B981",
+          "icon": "🌍"
+        },
+        {
+          "label": "Bonos Soberanos",
+          "sublabel": "Deuda pública de calidad",
+          "percentage": 30,
+          "color": "#3B82F6",
+          "icon": "🏛️"
+        },
+        {
+          "label": "Oro y Liquidez",
+          "sublabel": "Protección contra crisis",
+          "percentage": 10,
+          "color": "#F59E0B",
+          "icon": "🥇"
+        }
       ]
     },
     "featureTitle": "Las ventajas de la diversificación",
     "points": [
-      { "icon": "🛡️", "title": "Inmunidad ante quiebras", "desc": "Si una empresa quiebra, las otras 1.500 compensan el resultado." },
-      { "icon": "🌐", "title": "Exposición mundial", "desc": "Capturas el crecimiento de Estados Unidos, Europa y mercados emergentes." },
-      { "icon": "📈", "title": "Control en Tempus", "desc": "Rebalancea tu cartera visualmente con gráficos de asignación en vivo." }
+      {
+        "icon": "🛡️",
+        "title": "Inmunidad ante quiebras",
+        "desc": "Si una empresa quiebra, las otras 1.500 compensan el resultado."
+      },
+      {
+        "icon": "🌐",
+        "title": "Exposición mundial",
+        "desc": "Capturas el crecimiento de Estados Unidos, Europa y mercados emergentes."
+      },
+      {
+        "icon": "📈",
+        "title": "Control en Tempus",
+        "desc": "Rebalancea tu cartera visualmente con gráficos de asignación en vivo."
+      }
     ],
     "voiceScripts": [
       "Los premios Nobel llaman a la diversificación el único almuerzo gratis que existe en el mundo financiero.",
@@ -274,9 +382,21 @@
     },
     "featureTitle": "El secreto de la indexación",
     "points": [
-      { "icon": "💰", "title": "Comisiones mínimas", "desc": "Ahorras hasta un 2% anual en comisiones de bancos tradicionales." },
-      { "icon": "🏆", "title": "Bate a los expertos", "desc": "A 10 años, el 90% de los gestores activos pierde frente al índice." },
-      { "icon": "⚡", "title": "Radar Tempus", "desc": "Sigue las cotizaciones del S&P 500 y mercados en tiempo real." }
+      {
+        "icon": "💰",
+        "title": "Comisiones mínimas",
+        "desc": "Ahorras hasta un 2% anual en comisiones de bancos tradicionales."
+      },
+      {
+        "icon": "🏆",
+        "title": "Bate a los expertos",
+        "desc": "A 10 años, el 90% de los gestores activos pierde frente al índice."
+      },
+      {
+        "icon": "⚡",
+        "title": "Radar Tempus",
+        "desc": "Sigue las cotizaciones del S&P 500 y mercados en tiempo real."
+      }
     ],
     "voiceScripts": [
       "¿Por qué el noventa por ciento de los gestores profesionales pierde dinero contra los fondos indexados?",
@@ -286,5 +406,76 @@
       "Sigue la cotización de los índices y tu patrimonio en vivo dentro de Tempus. Pruébalo gratis en el enlace de la bio."
     ],
     "caption": "Por qué los fondos indexados baten a la mayoría de expertos de Wall Street 📈 Visualiza tus inversiones en Tempus (link en bio) ⚡\n.\n.\n#fondosindexados #sp500 #msciworld #inversiones #patrimonio #educacionfinanciera"
+  },
+  {
+    "id": 8,
+    "category": "Estrategia Global #8",
+    "hookBadge": "El Secreto del 1%",
+    "hookTitle": "¿Por qué el 99% de la gente pierde dinero ahorrando?",
+    "hookSubtitle": "El error de dejar tu capital quieto en el banco frente al poder de un sistema inteligente.",
+    "scene2Title": "La trampa del ahorro tradicional",
+    "scene2Text": "Trabajas 40 horas a la semana para que la inflación se coma un tercio de tu dinero mientras duermes.",
+    "chartType": "comparisonBars",
+    "chartData": {
+      "title": "Efecto a 10 Años (10.000 € iniciales)",
+      "subtitle": "Cuenta del banco vs Sistema Indexado 50/30/20",
+      "bars": [
+        {
+          "label": "Parado en el Banco",
+          "sublabel": "Inflación media (-3% anual)",
+          "value": "7.374 €",
+          "percentage": 35,
+          "color": "#EF4444",
+          "secondaryColor": "#991B1B",
+          "badge": "-26.3% Pérdida Real",
+          "badgeColor": "#F87171",
+          "isWinner": false
+        },
+        {
+          "label": "Inversión Indexada",
+          "sublabel": "Cartera global (+8.5% anual)",
+          "value": "21.589 €",
+          "percentage": 95,
+          "color": "#10B981",
+          "secondaryColor": "#059669",
+          "badge": "+115% Ganancia Real",
+          "badgeColor": "#34D399",
+          "isWinner": true
+        }
+      ]
+    },
+    "featureTitle": "El sistema que cambia las reglas",
+    "points": [
+      {
+        "icon": "🛡️",
+        "title": "Regla 50/30/20",
+        "desc": "El 20% de tu nómina trabaja para ti desde el primer día."
+      },
+      {
+        "icon": "🌍",
+        "title": "Indexación global",
+        "desc": "Invertir en las 1.500 mejores empresas del mundo bate al 90%."
+      },
+      {
+        "icon": "⚡",
+        "title": "Control en Tempus",
+        "desc": "Visualiza tu patrimonio y simula tu libertad sin excels."
+      }
+    ],
+    "showSpotlight": true,
+    "showFallingMoney": true,
+    "hudLabel": "TU SALDO ESTIMADO",
+    "hudAmount": "+21.589 €",
+    "hudIsPositive": true,
+    "hudRightBadge": "AÑO 2026",
+    "showCharacterComparison": true,
+    "voiceScripts": [
+      "¿Sabías que dejar tu dinero quieto en el banco es la forma más rápida de perder poder de compra sin darte cuenta?",
+      "Mientras la mayoría acumula ceros en su cuenta corriente, los que entienden el juego aplican dos sencillas reglas matemáticas.",
+      "Primero: la regla 50/30/20. Mitad a necesidades, treinta a ocio y un veinte por ciento obligatorio a invertir desde el día que cobras.",
+      "Segundo: ese veinte por ciento se invierte en el mercado global, batiendo al noventa por ciento de los gestores tradicionales.",
+      "Toma el control de tu patrimonio y calcula tu plan completo sin excels complicados. Pruébalo gratis en Tempus, enlace en la bio."
+    ],
+    "caption": "¿Por qué el 99% de la gente pierde dinero ahorrando? 📉 La inflación te quita poder de compra cada mes si dejas el dinero parado en el banco. Aplica la regla 50/30/20 y pon tu capital a trabajar en fondos indexados globales 🚀 Simula tu futuro en Tempus (enlace en bio) ⚡\n.\n.\n#finanzaspersonales #inflacion #fondosindexados #regla503020 #libertadfinanciera #patrimonio #tempus"
   }
 ]
