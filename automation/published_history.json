@@ -1,7 +1,8 @@
 {
   "publishedIds": [
     1,
-    8
+    8,
+    7
   ],
   "history": [
     {
@@ -17,16 +18,10 @@
       "category": "Estrategia Global #8"
     },
     {
-      "id": 8,
+      "id": 7,
       "date": "2026-11-25",
-      "title": "¿Por qué el 99% de la gente pierde dinero ahorrando?",
-      "category": "Estrategia Global #8"
-    },
-    {
-      "id": 8,
-      "date": "2026-11-25",
-      "title": "¿Por qué el 99% de la gente pierde dinero ahorrando?",
-      "category": "Estrategia Global #8"
+      "title": "¿Por qué los Fondos Indexados baten al 90% de los inversores?",
+      "category": "Estrategia Global #7"
     }
   ]
 }
