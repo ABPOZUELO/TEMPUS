@@ -81,19 +81,21 @@ function getMp3DurationInSeconds(buffer) {
   return totalDuration;
 }
 
-async function generateSlideAudio(slideNum, text, targetDir) {
+async function generateSlideAudio(slideNum, text, targetDir, voice = "es-ES-AlvaroNeural") {
   let attempts = 0;
   while (attempts < 3) {
     try {
       const tts = new MsEdgeTTS();
-      await tts.setMetadata("es-ES-AlvaroNeural", OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+      // Alta calidad a 96 kbps para eliminar artefactos metálicos
+      await tts.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3);
       
       const tempDir = path.join(targetDir, `temp_slide_${slideNum}`);
       if (!fs.existsSync(tempDir)) {
         fs.mkdirSync(tempDir, { recursive: true });
       }
       
-      await tts.toFile(tempDir, text);
+      // Prosodia ajustada: ritmo más dinámico (+6%) y natural para sonar conversacional y menos robótico
+      await tts.toFile(tempDir, text, { rate: '+6%', pitch: '+0Hz' });
       const srcFile = path.join(tempDir, 'audio.mp3');
       const destFile = path.join(targetDir, `slide${slideNum}.mp3`);
       
@@ -129,8 +131,8 @@ async function generateSlideAudio(slideNum, text, targetDir) {
   return { durationSec: 5.0, frames: 168 };
 }
 
-async function generateAllVoiceovers(scripts, targetDir) {
-  console.log(`[+] Generando locución por slide con voz española neuronal (Álvaro)...`);
+async function generateAllVoiceovers(scripts, targetDir, voice = "es-ES-AlvaroNeural") {
+  console.log(`[+] Generando locución por slide con voz española neuronal de alta definición (${voice})...`);
   const durations = [];
   const slideDurations = [];
 
@@ -138,7 +140,7 @@ async function generateAllVoiceovers(scripts, targetDir) {
     const slideNum = i + 1;
     const text = scripts[i];
     console.log(`  -> Slide ${slideNum}: "${text}"`);
-    const { durationSec, frames } = await generateSlideAudio(slideNum, text, targetDir);
+    const { durationSec, frames } = await generateSlideAudio(slideNum, text, targetDir, voice);
     durations.push(durationSec);
     slideDurations.push(frames);
   }

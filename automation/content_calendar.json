@@ -413,68 +413,57 @@
     "hookBadge": "El Secreto del 1%",
     "hookTitle": "¿Por qué el 99% de la gente pierde dinero ahorrando?",
     "hookSubtitle": "El error de dejar tu capital quieto en el banco frente al poder de un sistema inteligente.",
-    "scene2Title": "La trampa del ahorro tradicional",
-    "scene2Text": "Trabajas 40 horas a la semana para que la inflación se coma un tercio de tu dinero mientras duermes.",
-    "chartType": "comparisonBars",
-    "chartData": {
-      "title": "Efecto a 10 Años (10.000 € iniciales)",
-      "subtitle": "Cuenta del banco vs Sistema Indexado 50/30/20",
-      "bars": [
-        {
-          "label": "Parado en el Banco",
-          "sublabel": "Inflación media (-3% anual)",
-          "value": "7.374 €",
-          "percentage": 35,
-          "color": "#EF4444",
-          "secondaryColor": "#991B1B",
-          "badge": "-26.3% Pérdida Real",
-          "badgeColor": "#F87171",
-          "isWinner": false
-        },
-        {
-          "label": "Inversión Indexada",
-          "sublabel": "Cartera global (+8.5% anual)",
-          "value": "21.589 €",
-          "percentage": 95,
-          "color": "#10B981",
-          "secondaryColor": "#059669",
-          "badge": "+115% Ganancia Real",
-          "badgeColor": "#34D399",
-          "isWinner": true
-        }
-      ]
+    "scene2Title": "El ladrón silencioso",
+    "scene2Text": "Trabajas 40 horas a la semana para que la inflación devore tu esfuerzo mientras duermes.",
+    "scene2Visual": "meltdown",
+    "meltdownData": {
+      "initialCapital": "10.000 €",
+      "inflationLossPct": "-28.2%",
+      "inflationRemaining": "7.180 €",
+      "investedGainPct": "+126.1%",
+      "investedFinal": "22.610 €",
+      "yearsText": "10 Años (2026 - 2036)"
     },
-    "featureTitle": "El sistema que cambia las reglas",
+    "chartType": "sankeyWaterfall",
+    "chartData": {
+      "monthlySalary": "2.000 €",
+      "essentialsAmount": "1.000 €",
+      "lifestyleAmount": "600 €",
+      "investAmount": "400 €",
+      "tenYearReturn": "73.800 €",
+      "twentyYearReturn": "237.500 €"
+    },
+    "featureTitle": "El Motor Global de Inversión",
+    "scene4Visual": "allocationRadar",
     "points": [
       {
-        "icon": "🛡️",
-        "title": "Regla 50/30/20",
-        "desc": "El 20% de tu nómina trabaja para ti desde el primer día."
+        "icon": "🇺🇸",
+        "title": "S&P 500 (65%)",
+        "desc": "Las 500 mayores empresas de EE.UU. batiendo récords."
       },
       {
-        "icon": "🌍",
-        "title": "Indexación global",
-        "desc": "Invertir en las 1.500 mejores empresas del mundo bate al 90%."
+        "icon": "🇪🇺",
+        "title": "Europa (18%)",
+        "desc": "Gigantes líderes en tecnología, salud y lujo mundial."
       },
       {
         "icon": "⚡",
-        "title": "Control en Tempus",
-        "desc": "Visualiza tu patrimonio y simula tu libertad sin excels."
+        "title": "Tempus Radar",
+        "desc": "Automatiza y proyecta tu patrimonio sin costes ocultos."
       }
     ],
     "showSpotlight": true,
-    "showFallingMoney": true,
-    "hudLabel": "TU SALDO ESTIMADO",
+    "showFallingMoney": false,
+    "hudLabel": "CRECIMIENTO REAL",
     "hudAmount": "+21.589 €",
     "hudIsPositive": true,
-    "hudRightBadge": "AÑO 2026",
-    "showCharacterComparison": true,
+    "hudRightBadge": "SISTEMA 50/30/20",
     "voiceScripts": [
-      "¿Sabías que dejar tu dinero quieto en el banco es la forma más rápida de perder poder de compra sin darte cuenta?",
-      "Mientras la mayoría acumula ceros en su cuenta corriente, los que entienden el juego aplican dos sencillas reglas matemáticas.",
-      "Primero: la regla 50/30/20. Mitad a necesidades, treinta a ocio y un veinte por ciento obligatorio a invertir desde el día que cobras.",
-      "Segundo: ese veinte por ciento se invierte en el mercado global, batiendo al noventa por ciento de los gestores tradicionales.",
-      "Toma el control de tu patrimonio y calcula tu plan completo sin excels complicados. Pruébalo gratis en Tempus, enlace en la bio."
+      "Mira esto... Dejar tu dinero parado en la cuenta del banco parece seguro, ¿verdad? Pues es la forma más rápida de volverte más pobre cada año.",
+      "La inflación no te avisa, pero cada mes tus diez mil euros compran menos cosas en el supermercado, mientras que el mercado global bate récord tras récord.",
+      "Para protegerte no necesitas ser millonario: aplica la regla 50/30/20. Mitad a tus gastos básicos, treinta para disfrutar la vida, y un veinte por ciento obligatorio a invertir nada más cobrar.",
+      "Ese veinte por ciento se reparte automáticamente entre las dos mil mayores empresas del planeta, batiendo al noventa por ciento de los banqueros.",
+      "Simula tu propio plan y visualiza tu libertad financiera en segundos dentro de Tempus. Tienes el acceso gratuito en el enlace de la bio."
     ],
     "caption": "¿Por qué el 99% de la gente pierde dinero ahorrando? 📉 La inflación te quita poder de compra cada mes si dejas el dinero parado en el banco. Aplica la regla 50/30/20 y pon tu capital a trabajar en fondos indexados globales 🚀 Simula tu futuro en Tempus (enlace en bio) ⚡\n.\n.\n#finanzaspersonales #inflacion #fondosindexados #regla503020 #libertadfinanciera #patrimonio #tempus"
   }
