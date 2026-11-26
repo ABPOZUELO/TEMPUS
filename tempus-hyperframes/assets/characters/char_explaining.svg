@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="jacketGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#065F46"/>
+      <stop offset="100%" stop-color="#022C22"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCD34D"/>
+      <stop offset="100%" stop-color="#B45309"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Body -->
+  <g id="body">
+    <path d="M 150 300 L 250 300 L 260 490 L 140 490 Z" fill="#F8FAFC"/>
+    <path d="M 110 325 C 110 275, 155 265, 200 265 C 245 265, 290 275, 290 325 L 300 490 L 240 490 L 225 330 L 175 330 L 160 490 L 100 490 Z" fill="url(#jacketGrad)"/>
+    <circle cx="140" cy="330" r="7" fill="url(#goldGrad)"/>
+  </g>
+
+  <!-- Neck -->
+  <rect x="180" y="235" width="40" height="45" rx="10" fill="#EBB692"/>
+
+  <!-- Hands Open Explaining Gestures -->
+  <g id="arms-explaining">
+    <!-- Left Hand Palm Up -->
+    <path d="M 120 315 Q 80 360 70 380 Q 60 400 80 405 Q 110 400 135 340 Z" fill="url(#jacketGrad)"/>
+    <ellipse cx="65" cy="390" rx="16" ry="12" fill="#FCD5B5"/>
+
+    <!-- Right Hand Palm Up -->
+    <path d="M 280 315 Q 320 360 330 380 Q 340 400 320 405 Q 290 400 265 340 Z" fill="url(#jacketGrad)"/>
+    <ellipse cx="335" cy="390" rx="16" ry="12" fill="#FCD5B5"/>
+  </g>
+
+  <!-- Head -->
+  <g id="head">
+    <ellipse cx="200" cy="175" rx="72" ry="76" fill="#FCD5B5"/>
+    <ellipse cx="126" cy="180" rx="12" ry="16" fill="#EBB692"/>
+    <ellipse cx="274" cy="180" rx="12" ry="16" fill="#EBB692"/>
+
+    <!-- Hair -->
+    <path d="M 125 165 C 115 85, 160 65, 200 65 C 240 65, 285 85, 275 165 C 290 135, 285 85, 255 65 C 220 45, 180 45, 145 65 C 115 85, 110 135, 125 165 Z" fill="#1E293B"/>
+    <path d="M 125 140 C 140 95, 180 85, 220 90 C 260 95, 275 120, 275 140 C 265 115, 235 105, 205 107 C 175 109, 145 125, 125 140 Z" fill="#0F172A"/>
+
+    <!-- Eyebrows (Serious / Informative) -->
+    <path d="M 152 135 Q 168 128 182 132" stroke="#0F172A" stroke-width="5" stroke-linecap="round" fill="none"/>
+    <path d="M 218 132 Q 232 128 248 135" stroke="#0F172A" stroke-width="5" stroke-linecap="round" fill="none"/>
+
+    <!-- Direct Eyes -->
+    <g id="eyes">
+      <ellipse cx="165" cy="162" rx="14" ry="16" fill="#0F172A"/>
+      <circle cx="168" cy="157" r="4" fill="#FFFFFF"/>
+      <ellipse cx="235" cy="162" rx="14" ry="16" fill="#0F172A"/>
+      <circle cx="238" cy="157" r="4" fill="#FFFFFF"/>
+    </g>
+
+    <!-- Nose -->
+    <path d="M 197 175 Q 200 183 205 183" stroke="#EBB692" stroke-width="3" stroke-linecap="round" fill="none"/>
+
+    <!-- Talking Mouth -->
+    <ellipse cx="200" cy="210" rx="14" ry="10" fill="#991B1B"/>
+    <path d="M 190 205 Q 200 208 210 205" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/>
+  </g>
+</svg>

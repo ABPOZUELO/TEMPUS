@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="jacketGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#065F46"/>
+      <stop offset="100%" stop-color="#022C22"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCD34D"/>
+      <stop offset="100%" stop-color="#B45309"/>
+    </linearGradient>
+    <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Body -->
+  <g id="body">
+    <path d="M 150 300 L 250 300 L 260 490 L 140 490 Z" fill="#F8FAFC"/>
+    <path d="M 110 325 C 110 275, 155 265, 200 265 C 245 265, 290 275, 290 325 L 300 490 L 240 490 L 225 330 L 175 330 L 160 490 L 100 490 Z" fill="url(#jacketGrad)"/>
+    <path d="M 175 285 L 195 345 L 175 350 Z" fill="url(#goldGrad)"/>
+    <circle cx="140" cy="330" r="7" fill="url(#goldGrad)"/>
+  </g>
+
+  <!-- Neck -->
+  <rect x="180" y="235" width="40" height="45" rx="10" fill="#EBB692"/>
+
+  <!-- Left Arm: Holding Gold Card -->
+  <g id="card-hand">
+    <path d="M 120 310 Q 80 360 100 400 Q 115 410 135 390 Q 135 350 145 320 Z" fill="url(#jacketGrad)"/>
+    <rect x="85" y="380" width="55" height="35" rx="6" fill="url(#goldGrad)" transform="rotate(-15 110 395)" filter="url(#goldGlow)"/>
+    <text x="96" y="398" font-family="'Inter', sans-serif" font-weight="900" font-size="10" fill="#022C22" transform="rotate(-15 110 395)">TEMPUS</text>
+  </g>
+
+  <!-- Right Arm: Thumbs Up 👍 -->
+  <g id="thumbs-up">
+    <path d="M 280 310 Q 320 350 340 330 Q 350 310 330 290 Q 300 280 270 310 Z" fill="url(#jacketGrad)"/>
+    <!-- Thumbs up hand -->
+    <ellipse cx="345" cy="315" rx="16" ry="14" fill="#FCD5B5"/>
+    <!-- Thumb sticking up -->
+    <path d="M 345 315 L 345 285" stroke="#FCD5B5" stroke-width="14" stroke-linecap="round"/>
+    <circle cx="345" cy="285" r="7" fill="#FCD5B5"/>
+  </g>
+
+  <!-- Head -->
+  <g id="head">
+    <ellipse cx="200" cy="175" rx="72" ry="76" fill="#FCD5B5"/>
+    <ellipse cx="126" cy="180" rx="12" ry="16" fill="#EBB692"/>
+    <ellipse cx="274" cy="180" rx="12" ry="16" fill="#EBB692"/>
+
+    <!-- Hair -->
+    <path d="M 125 165 C 115 85, 160 65, 200 65 C 240 65, 285 85, 275 165 C 290 135, 285 85, 255 65 C 220 45, 180 45, 145 65 C 115 85, 110 135, 125 165 Z" fill="#1E293B"/>
+    <path d="M 125 140 C 140 95, 180 85, 220 90 C 260 95, 275 120, 275 140 C 265 115, 235 105, 205 107 C 175 109, 145 125, 125 140 Z" fill="#0F172A"/>
+
+    <!-- Eyebrows (Warm, Friendly) -->
+    <path d="M 150 130 Q 165 120 180 126" stroke="#0F172A" stroke-width="5" stroke-linecap="round" fill="none"/>
+    <path d="M 220 126 Q 235 120 250 130" stroke="#0F172A" stroke-width="5" stroke-linecap="round" fill="none"/>
+
+    <!-- Happy Eyes (Winking or Bright Warm) -->
+    <g id="eyes">
+      <ellipse cx="165" cy="160" rx="14" ry="16" fill="#0F172A"/>
+      <circle cx="168" cy="155" r="4.5" fill="#FFFFFF"/>
+      <ellipse cx="235" cy="160" rx="14" ry="16" fill="#0F172A"/>
+      <circle cx="238" cy="155" r="4.5" fill="#FFFFFF"/>
+    </g>
+
+    <!-- Nose -->
+    <path d="M 197 175 Q 200 183 205 183" stroke="#EBB692" stroke-width="3" stroke-linecap="round" fill="none"/>
+
+    <!-- Big Warm Smile -->
+    <path d="M 175 200 Q 200 230 225 200 Q 200 215 175 200 Z" fill="#991B1B"/>
+    <path d="M 180 202 Q 200 210 220 202" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>
