@@ -9,7 +9,7 @@ async function main() {
     process.exit(1);
   }
   const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-  const videoPath = path.join(rootDir, 'tempus-hyperframes', 'tempus_dato_curioso_01.mp4');
+  const videoPath = path.join(rootDir, 'tempus-hyperframes', 'tempus_dato_curioso_01_pro.mp4');
 
   if (!fs.existsSync(videoPath)) {
     console.error('Vídeo no encontrado en:', videoPath);
@@ -28,35 +28,33 @@ async function main() {
   });
 
   const recipient = config.recipient || 'tempuswealthmanagement@gmail.com';
-  console.log(`[+] Enviando vídeo de prueba (Datos Curiosos #1 - Fotos Reales + Personaje 2D) a ${recipient}...`);
+  console.log(`[+] Enviando vídeo PRO (Datos Curiosos #1 - Escenarios 2D Animados + Transiciones Morph + Fotos HD) a ${recipient}...`);
 
   const info = await transporter.sendMail({
     from: `"Tempus Video Studio" <${config.smtpUser.trim()}>`,
     to: recipient,
-    subject: `🔥 [DATO CURIOSO #01] Alemania 1923: Fotos Históricas + Personaje 2D Animado (TikTok & Reels)`,
+    subject: `🚀 [EDICIÓN PRO 2D] Dato Curioso #01: Escenarios 2D Animados + Fotos HD + Transiciones Chulas`,
     text: `¡Hola Jorge!\n\n` +
-          `Aquí tienes el nuevo vídeo de prueba para la serie diaria de DATOS CURIOSOS orientada a TikTok e Instagram Reels, creado con HyperFrames:\n\n` +
-          `📸 1. FOTOS HISTÓRICAS REALES (GOOGLE / ARCHIVOS):\n` +
-          `   - Billete auténtico de 500 Mil Millones de Marcos de 1923.\n` +
-          `   - Fotografía histórica de niños usando fajos de dinero real como bloques de construcción para castillos.\n` +
-          `   - Fotografía del ciudadano empapelando su salón con billetes porque salía más barato que la pintura.\n` +
-          `   - Bóvedas del Reichsbank abarrotadas de dinero devaluado.\n\n` +
-          `🎨 2. PERSONAJES 2D VECTORIALES CON EXPRESIONES DINÁMICAS:\n` +
-          `   - Personaje animado en 2D que interactúa con las fotos y datos en cada escena:\n` +
-          `     • Cara de asombro total (manos en mejillas y ojos abiertos) al ver el precio del pan.\n` +
-          `     • Apuntando con entusiasmo a la foto de los niños jugando.\n` +
-          `     • Tiritando de frío y con brazos cruzados mirando el fuego de billetes.\n` +
-          `     • Explicando con gestos la pérdida de valor por imprimir dinero sin respaldo.\n` +
-          `     • Pulgar arriba y tarjeta dorada de Tempus recomendando inversión en activos reales.\n\n` +
-          `✨ 3. TRANSICIONES POR METAMORFOSIS CONTINUA:\n` +
-          `   - Los elementos se transforman orgánicamente de una escena a otra sin cortes a negro ni saltos bruscos.\n\n` +
-          `🎙️ 4. VOZ JOVEN, ENÉRGICA Y SUBTÍTULOS ANCLADOS:\n` +
-          `   - Locución de Álvaro Neural calibrada con tono juvenil (+4Hz) y ritmo ágil (+4%), sin cortes de voz y con subtítulos de karaoke fijos en la zona inferior.\n\n` +
-          `Formato: 1080x1920 (9:16 Vertical HD) a 30 fps | Duración: 54 segundos (óptimo para retención en TikTok y Reels).\n\n` +
-          `¡Échale un vistazo y dime qué te parece este nuevo formato con personajes 2D y fotos reales!`,
+          `Aquí tienes la NUEVA VERSIÓN PRO del vídeo de Datos Curiosos (Alemania 1923) con un salto enorme de calidad visual, recreaciones completas con figuras 2D en movimiento y transiciones dinámicas:\n\n` +
+          `🎬 1. ESCENARIOS COMPLETOS CON PERSONAJES Y FIGURAS 2D ANIMADAS:\n` +
+          `   - Escena 1 (La Panadería): Alex empuja una carretilla cargada hasta arriba de fajos (con rueda giratoria, piernas en marcha y gotas de sudor) frente al panadero en 2D que señala el cartel de 200.000 Millones.\n` +
+          `   - Escena 2 (El Castillo de Dinero): Dos niños en 2D construyendo bloque a bloque una pirámide de billetes mientras saltan de alegría (junto al tren de juguete tachado por impagable).\n` +
+          `   - Escena 3 (Paredes y Chimenea): Un decorador en 2D pegando billetes en la pared con brocha y Alex con bufanda lanzando fajos a una chimenea con llamas vectoriales vivas y chispas.\n` +
+          `   - Escena 4 (La Imprenta del Banco Central): Máquina impresora 2D con engranajes girando, sirena roja y billetes saliendo disparados mientras la moneda de poder adquisitivo se encoge.\n` +
+          `   - Escena 5 (Fortaleza Tempus): 4 columnas crecientes de activos reales (Bonos, Oro, S&P 500, Tempus) con Alex en lo alto sosteniendo el escudo dorado de Tempus que rebota las flechas rojas de la inflación.\n\n` +
+          `⚡ 2. TRANSICIONES CHULAS CON METAMORFOSIS Y SONIDO (SFX):\n` +
+          `   - Transición 1 → 2: La carretilla vuelca hacia delante y los fajos salen volando en 3D para aterrizar convirtiéndose en los ladrillos del castillo de los niños.\n` +
+          `   - Transición 2 → 3: Un rodillo gigante de pintor barre toda la pantalla desenrollando una pared de billetes que abre el salón con chimenea.\n` +
+          `   - Transición 3 → 4: Zoom desde las chispas del fuego hacia un portal de engranajes gigantes de acero que conecta con la imprenta.\n` +
+          `   - Transición 4 → 5: Alquimia dorada con onda expansiva que funde el papel en las columnas doradas de Tempus.\n` +
+          `   - Incluye efectos de sonido sincronizados (golpe de sello, whooshes, pops de bloques, fuego crepitando y acorde dorado).\n\n` +
+          `📸 3. FOTOS HISTÓRICAS EN ALTA DEFINICIÓN (MUSEO / WIKIMEDIA HD):\n` +
+          `   - Sustituidas las miniaturas por escaneos nítidos en HD (incluyendo la foto restaurada a color de 1923 de los niños apilando fajos reales).\n\n` +
+          `Formato: 1080x1920 (9:16 Vertical Full HD, 30 fps) · Duración: 54 segundos.\n\n` +
+          `¡Dime qué te parece este nivel visual para la serie diaria!`,
     attachments: [
       {
-        filename: 'TEMPUS_DATO_CURIOSO_01.mp4',
+        filename: 'TEMPUS_DATO_CURIOSO_01_PRO.mp4',
         path: videoPath
       }
     ]

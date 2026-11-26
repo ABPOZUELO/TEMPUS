@@ -1,11 +1,25 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Tempus - Datos Curiosos: Alemania 1923</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1080, height=1920" />
+  <title>Tempus - Datos Curiosos #01: Alemania 1923 (Edición 2D Animada)</title>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;600;700;800;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800;900&display=swap');
+
+    :root {
+      --bg-deep: #04070d;
+      --card-glass: rgba(12, 19, 33, 0.90);
+      --emerald: #10b981;
+      --emerald-bright: #34d399;
+      --gold: #fbbf24;
+      --gold-deep: #d97706;
+      --crimson: #ef4444;
+      --crimson-soft: #fca5a5;
+      --ink: #f8fafc;
+      --muted: #cbd5e1;
+    }
 
     * {
       box-sizing: border-box;
@@ -14,993 +28,1507 @@
       user-select: none;
     }
 
-    body {
-      background-color: #030712;
-      color: #F8FAFC;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    html, body {
       width: 1080px;
       height: 1920px;
+      overflow: hidden;
+      background: var(--bg-deep);
+      color: var(--ink);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
     }
 
-    .root {
+    #root {
       position: relative;
       width: 1080px;
       height: 1920px;
-      background: radial-gradient(circle at 50% 25%, #0B1E19 0%, #030712 70%);
       overflow: hidden;
+      background: var(--bg-deep);
     }
 
-    /* Ambient Background Light Orbs */
-    .ambient-orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(120px);
-      pointer-events: none;
-      opacity: 0.35;
-    }
-    .orb-1 { width: 650px; height: 650px; background: #059669; top: -100px; left: -100px; }
-    .orb-2 { width: 550px; height: 550px; background: #D97706; bottom: 200px; right: -150px; }
-
-    /* Vignette & Grain Overlay */
-    .vignette {
+    /* ================= CINEMATIC ATMOSPHERIC BACKDROP ================= */
+    .bg-stage {
       position: absolute;
       inset: 0;
-      box-shadow: inset 0 0 160px rgba(0, 0, 0, 0.85);
+      z-index: 1;
+      overflow: hidden;
+    }
+    .bg-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+    }
+    .bg-scrim {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background: linear-gradient(
+        180deg,
+        rgba(4, 7, 13, 0.92) 0%,
+        rgba(4, 7, 13, 0.72) 26%,
+        rgba(5, 12, 22, 0.84) 68%,
+        rgba(4, 7, 13, 0.97) 100%
+      );
+    }
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      background-size: 54px 54px;
+      background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    }
+    .ambient-glow {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(110px);
+      z-index: 3;
       pointer-events: none;
-      z-index: 50;
+    }
+    .glow-top {
+      width: 620px;
+      height: 620px;
+      top: -120px;
+      left: -100px;
+      background: rgba(16, 185, 129, 0.24);
+    }
+    .glow-bottom {
+      width: 580px;
+      height: 580px;
+      bottom: 160px;
+      right: -120px;
+      background: rgba(245, 158, 11, 0.22);
     }
 
-    /* TOP HUD FIXED */
+    /* ================= FIXED TOP HUD ================= */
     .top-hud {
       position: absolute;
-      top: 60px;
+      top: 54px;
       left: 60px;
       right: 60px;
-      height: 64px;
+      height: 62px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      z-index: 100;
+      z-index: 90;
     }
-
-    .hud-badge-curioso {
-      display: flex;
+    .hud-live-pill {
+      display: inline-flex;
       align-items: center;
       gap: 12px;
-      background: rgba(185, 28, 28, 0.25);
-      border: 1.5px solid rgba(239, 68, 68, 0.6);
-      padding: 10px 22px;
-      border-radius: 9999px;
-      font-size: 19px;
-      font-weight: 800;
-      letter-spacing: 2px;
-      color: #FECACA;
-      backdrop-filter: blur(12px);
+      padding: 12px 26px;
+      border-radius: 999px;
+      background: rgba(239, 68, 68, 0.20);
+      border: 2px solid rgba(248, 113, 113, 0.55);
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      color: #fee2e2;
+      box-shadow: 0 8px 28px rgba(239, 68, 68, 0.25);
     }
-    .pulse-dot {
+    .live-dot {
       width: 12px;
       height: 12px;
-      background: #EF4444;
       border-radius: 50%;
-      box-shadow: 0 0 12px #EF4444;
+      background: #ef4444;
+      box-shadow: 0 0 14px #ef4444;
     }
-
-    .hud-tempus-brand {
-      display: flex;
+    .hud-brand-pill {
+      display: inline-flex;
       align-items: center;
       gap: 14px;
+      padding: 12px 28px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 2px solid rgba(251, 191, 36, 0.45);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
     }
-    .tempus-mini-logo {
+    .brand-bars-mini {
       display: flex;
-      gap: 4px;
       align-items: flex-end;
-      height: 28px;
+      gap: 4px;
+      height: 24px;
     }
-    .tempus-mini-bar {
+    .brand-bars-mini span {
       width: 5px;
       border-radius: 2px;
-      background: linear-gradient(180deg, #FCD34D, #D97706);
+      background: linear-gradient(180deg, #fde68a, #d97706);
     }
-    .bar-1 { height: 16px; }
-    .bar-2 { height: 26px; }
-    .bar-3 { height: 20px; }
-
-    .brand-title {
-      font-family: 'Cinzel', 'Times New Roman', serif;
-      font-size: 26px;
-      letter-spacing: 5px;
-      font-weight: 700;
-      color: #F8FAFC;
-    }
-
-    .hud-topic-tag {
-      background: rgba(217, 119, 6, 0.2);
-      border: 1.5px solid rgba(245, 158, 11, 0.5);
-      padding: 10px 20px;
-      border-radius: 9999px;
-      font-size: 17px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      color: #FDE68A;
-      backdrop-filter: blur(12px);
+    .brand-bars-mini .b1 { height: 13px; }
+    .brand-bars-mini .b2 { height: 23px; }
+    .brand-bars-mini .b3 { height: 17px; }
+    .brand-bars-mini .b4 { height: 26px; background: linear-gradient(180deg, #6ee7b7, #059669); }
+    .hud-brand-name {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 3.5px;
+      color: #ffffff;
     }
 
-    /* 3D STAGE FOR METAMORPHOSIS */
-    .stage-3d {
+    /* ================= MAIN SCENE VIEWPORT ================= */
+    .world-viewport {
       position: absolute;
-      top: 160px;
-      left: 60px;
-      right: 60px;
-      bottom: 270px;
-      perspective: 1400px;
-      transform-style: preserve-3d;
+      top: 138px;
+      left: 54px;
+      right: 54px;
+      bottom: 226px;
       z-index: 20;
+      perspective: 1400px;
     }
 
-    /* GENERAL SCENE CONTAINER (OVERLAPPING FOR FLUID MORPH) */
-    .scene-wrap {
+    .scene-layer {
       position: absolute;
       inset: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      transform-style: preserve-3d;
-      will-change: transform, opacity;
+      opacity: 0;
     }
 
-    /* HEADER TEXTS */
-    .scene-tagline {
-      font-size: 22px;
-      font-weight: 800;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      color: #F59E0B;
-      margin-bottom: 12px;
-      text-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
-    }
-
-    .scene-headline {
-      font-size: 50px;
-      font-weight: 900;
-      line-height: 1.15;
-      text-align: center;
-      max-width: 900px;
-      color: #F8FAFC;
-      margin-bottom: 24px;
-    }
-    .headline-highlight {
-      background: linear-gradient(90deg, #F59E0B, #10B981);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .headline-red {
-      color: #EF4444;
-      text-shadow: 0 0 25px rgba(239, 68, 68, 0.6);
-    }
-
-    /* MAIN STAGE CARDS & PHOTOS */
-    .card-photo-container {
-      position: relative;
-      width: 860px;
-      height: 600px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-top: 10px;
-    }
-
-    .polaroid-frame {
-      position: relative;
-      width: 780px;
-      height: 540px;
-      background: #FFFFFF;
-      padding: 16px 16px 56px 16px;
-      border-radius: 12px;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(245, 158, 11, 0.25);
-      transform-style: preserve-3d;
-    }
-    .polaroid-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 6px;
-      filter: contrast(1.1) saturate(0.9);
-    }
-    .polaroid-caption {
-      position: absolute;
-      bottom: 14px;
-      left: 24px;
-      right: 24px;
-      color: #1E293B;
-      font-family: 'Cinzel', serif;
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: 2px;
-      text-align: center;
-    }
-    .vintage-tape {
-      position: absolute;
-      top: -14px;
-      width: 130px;
-      height: 34px;
-      background: rgba(254, 240, 138, 0.55);
-      border: 1px dashed rgba(202, 138, 4, 0.5);
-      transform: rotate(-3deg);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    }
-
-    /* BANKNOTE 3D DISPLAY (SCENE 1) */
-    .banknote-box {
-      position: relative;
-      width: 860px;
-      height: 480px;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.9), 0 0 50px rgba(239, 68, 68, 0.4);
-      border: 3px solid #EF4444;
-      background: #0F172A;
-    }
-    .banknote-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      filter: contrast(1.15) brightness(0.95);
-    }
-    .banknote-stamp {
-      position: absolute;
-      top: 30px;
-      right: 35px;
-      padding: 12px 24px;
-      border: 4px solid #EF4444;
-      border-radius: 10px;
-      color: #EF4444;
-      font-weight: 900;
-      font-size: 26px;
-      letter-spacing: 3px;
-      transform: rotate(14deg);
-      background: rgba(15, 23, 42, 0.85);
-      box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
-    }
-    .banknote-price-badge {
-      position: absolute;
-      bottom: 24px;
-      left: 30px;
-      right: 30px;
-      background: rgba(3, 7, 18, 0.92);
-      border: 2px solid #F59E0B;
-      border-radius: 14px;
-      padding: 14px 28px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      backdrop-filter: blur(12px);
-    }
-    .badge-label {
-      font-size: 22px;
-      color: #94A3B8;
-      font-weight: 600;
-    }
-    .badge-price {
-      font-size: 32px;
-      font-weight: 900;
-      color: #FCD34D;
-      letter-spacing: 1px;
-    }
-
-    /* 2D CHARACTER CONTAINER */
-    .char-container {
-      position: absolute;
-      bottom: 0px;
-      right: 20px;
-      width: 320px;
-      height: 420px;
-      z-index: 40;
-      pointer-events: none;
-      filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.7));
-    }
-    .char-img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-
-    /* FLOATING PILL TAGS */
-    .pill-data-row {
-      display: flex;
-      gap: 16px;
-      margin-top: 24px;
-      justify-content: center;
-    }
-    .pill-stat {
-      background: rgba(15, 23, 42, 0.85);
-      border: 1.5px solid rgba(255, 255, 255, 0.15);
-      padding: 12px 24px;
-      border-radius: 9999px;
-      font-size: 20px;
-      font-weight: 700;
-      color: #E2E8F0;
-      display: flex;
+    .kicker-pill {
+      display: inline-flex;
       align-items: center;
       gap: 10px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-    }
-    .pill-gold {
-      border-color: rgba(245, 158, 11, 0.5);
-      color: #FDE68A;
-      background: rgba(217, 119, 6, 0.15);
-    }
-    .pill-emerald {
-      border-color: rgba(16, 185, 129, 0.5);
-      color: #A7F3D0;
-      background: rgba(5, 150, 105, 0.15);
-    }
-
-    /* SCENE 4: INFLATION GAUGE & DEVALUATION BAR */
-    .inflation-dashboard {
-      width: 860px;
-      background: rgba(15, 23, 42, 0.88);
-      border: 2px solid rgba(239, 68, 68, 0.5);
-      border-radius: 20px;
-      padding: 30px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
-    }
-    .gauge-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .gauge-title {
-      font-size: 24px;
-      font-weight: 800;
-      color: #F8FAFC;
-    }
-    .gauge-val {
-      font-size: 38px;
-      font-weight: 900;
-      color: #EF4444;
-      text-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
-    }
-    .gauge-track {
-      width: 100%;
-      height: 24px;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      overflow: hidden;
-      position: relative;
-    }
-    .gauge-fill {
-      height: 100%;
-      width: 10%;
-      background: linear-gradient(90deg, #10B981, #F59E0B 40%, #EF4444 80%);
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(239, 68, 68, 0.8);
-    }
-
-    /* SCENE 5: TEMPUS MONOGRAM & CTA */
-    .tempus-hero-shield {
-      width: 160px;
-      height: 160px;
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    .tempus-monogram-bars {
-      display: flex;
-      gap: 14px;
-      align-items: flex-end;
-      height: 110px;
-    }
-    .monogram-col {
-      width: 24px;
-      border-radius: 8px;
-      background: linear-gradient(180deg, #FDE68A 0%, #D97706 60%, #78350F 100%);
-      box-shadow: 0 0 30px rgba(245, 158, 11, 0.6);
-    }
-    .mono-1 { height: 60px; }
-    .mono-2 { height: 110px; }
-    .mono-3 { height: 85px; }
-
-    .cta-social-box {
-      width: 860px;
-      background: rgba(6, 78, 59, 0.35);
-      border: 2px solid rgba(16, 185, 129, 0.6);
-      border-radius: 20px;
-      padding: 26px 36px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 20px;
-      backdrop-filter: blur(16px);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-    }
-    .cta-text-left {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .cta-lead {
-      font-size: 26px;
-      font-weight: 800;
-      color: #A7F3D0;
-    }
-    .cta-sub {
-      font-size: 19px;
-      color: #E2E8F0;
-    }
-    .cta-pill-btn {
-      background: linear-gradient(135deg, #10B981, #059669);
-      color: #022C22;
+      padding: 8px 24px;
+      border-radius: 999px;
       font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      background: rgba(251, 191, 36, 0.16);
+      border: 1.5px solid rgba(251, 191, 36, 0.5);
+      color: #fde68a;
+    }
+    .kicker-red {
+      background: rgba(239, 68, 68, 0.18);
+      border-color: rgba(248, 113, 113, 0.55);
+      color: #fecaca;
+    }
+    .kicker-emerald {
+      background: rgba(16, 185, 129, 0.18);
+      border-color: rgba(52, 211, 153, 0.55);
+      color: #a7f3d0;
+    }
+
+    .scene-title {
+      font-size: 52px;
       font-weight: 900;
-      padding: 16px 32px;
-      border-radius: 9999px;
-      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.5);
+      line-height: 1.12;
+      letter-spacing: -1.2px;
+      text-align: center;
+      max-width: 940px;
+      color: #ffffff;
+      margin-bottom: 20px;
+      text-shadow: 0 10px 30px rgba(0, 0, 0, 0.85);
+    }
+    .hl-gold { color: #fcd34d; }
+    .hl-red { color: #f87171; }
+    .hl-emerald { color: #34d399; }
+
+    /* ================= REAL ARCHIVAL PHOTO SHOWCASE (TOP CARD) ================= */
+    .photo-showcase {
+      position: relative;
+      width: 940px;
+      height: 460px;
+      border-radius: 26px;
+      background: #0b1322;
+      border: 3px solid rgba(255, 255, 255, 0.20);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.82), 0 0 40px rgba(251, 191, 36, 0.14);
+      overflow: hidden;
+      margin-bottom: 22px;
+      flex-shrink: 0;
+    }
+    .photo-showcase img.main-photo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .photo-gradient-bottom {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(4,7,13,0.12) 0%, rgba(4,7,13,0.05) 52%, rgba(4,7,13,0.88) 100%);
+      pointer-events: none;
+    }
+    .archival-tag {
+      position: absolute;
+      top: 18px;
+      left: 20px;
+      padding: 8px 20px;
+      border-radius: 999px;
+      background: rgba(4, 7, 13, 0.86);
+      border: 1.5px solid rgba(251, 191, 36, 0.65);
+      font-size: 20px;
+      font-weight: 800;
+      color: #fde68a;
       letter-spacing: 1px;
     }
-
-    /* FIXED PERSISTENT BOTTOM KARAOKE PILL */
-    .bottom-karaoke-fixed {
+    .photo-caption-bar {
       position: absolute;
-      bottom: 70px;
-      left: 60px;
-      right: 60px;
-      height: 150px;
-      background: rgba(3, 7, 18, 0.92);
-      border: 2px solid rgba(245, 158, 11, 0.4);
-      border-radius: 24px;
+      bottom: 16px;
+      left: 24px;
+      right: 24px;
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
-      padding: 20px 40px;
-      z-index: 100;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(245, 158, 11, 0.15);
-      overflow: hidden;
     }
-    .karaoke-content {
-      position: relative;
+    .photo-caption-text {
+      font-size: 26px;
+      font-weight: 800;
+      color: #ffffff;
+      text-shadow: 0 4px 14px rgba(0,0,0,0.95);
+    }
+    .photo-stat-pill {
+      padding: 8px 20px;
+      border-radius: 12px;
+      background: rgba(239, 68, 68, 0.92);
+      color: #ffffff;
+      font-size: 24px;
+      font-weight: 900;
+      box-shadow: 0 8px 24px rgba(239, 68, 68, 0.45);
+    }
+    .photo-stat-emerald {
+      background: rgba(5, 150, 105, 0.94);
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45);
+    }
+
+    /* Inset Floating Banknote on Scene 1 Photo */
+    .inset-banknote {
+      position: absolute;
+      top: 18px;
+      right: 20px;
+      width: 330px;
+      height: 170px;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 3px solid #fcd34d;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
+      background: #fff;
+    }
+    .inset-banknote img {
       width: 100%;
       height: 100%;
+      object-fit: cover;
+    }
+
+    /* ================= 2D ANIMATED ILLUSTRATED DIORAMA STAGE ================= */
+    .diorama-card {
+      position: relative;
+      width: 940px;
+      height: 690px;
+      border-radius: 30px;
+      background: linear-gradient(180deg, #101c30 0%, #09111e 100%);
+      border: 2.5px solid rgba(52, 211, 153, 0.35);
+      box-shadow: 0 26px 65px rgba(0, 0, 0, 0.82), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .diorama-label {
+      position: absolute;
+      top: 16px;
+      left: 22px;
+      z-index: 10;
+      padding: 7px 18px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.22);
+      border: 1.5px solid rgba(52, 211, 153, 0.55);
+      color: #a7f3d0;
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+    }
+    .diorama-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* ================= SCENE 5 BRAND CTA CARD ================= */
+    .cta-master-card {
+      width: 940px;
+      padding: 32px 40px;
+      border-radius: 28px;
+      background: linear-gradient(135deg, rgba(6, 78, 59, 0.88) 0%, rgba(15, 23, 42, 0.95) 100%);
+      border: 2.5px solid rgba(251, 191, 36, 0.65);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 50px rgba(16, 185, 129, 0.25);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .cta-headline {
+      font-size: 38px;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+    }
+    .cta-subline {
+      font-size: 28px;
+      font-weight: 700;
+      color: #d1fae5;
+    }
+    .cta-button-pill {
+      margin-top: 6px;
+      padding: 20px 52px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 50%, #10b981 100%);
+      color: #030712;
+      font-size: 30px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      box-shadow: 0 14px 40px rgba(251, 191, 36, 0.48);
+    }
+
+    /* ================= TRANSITION MORPH OVERLAYS (GLOBAL 3D PORTALS) ================= */
+    .morph-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 65;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    /* ================= PERSISTENT KARAOKE SUBTITLE BAR ================= */
+    .karaoke-bar {
+      position: absolute;
+      bottom: 56px;
+      left: 54px;
+      right: 54px;
+      height: 146px;
+      border-radius: 26px;
+      background: rgba(6, 10, 20, 0.94);
+      border: 2.5px solid rgba(251, 191, 36, 0.48);
+      box-shadow: 0 20px 55px rgba(0, 0, 0, 0.9), 0 0 32px rgba(251, 191, 36, 0.14);
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 18px 36px;
+      z-index: 90;
+      overflow: hidden;
     }
-    .karaoke-phrase {
+    .karaoke-line {
       position: absolute;
-      font-size: 32px;
-      font-weight: 800;
-      line-height: 1.35;
+      left: 36px;
+      right: 36px;
       text-align: center;
-      color: #F8FAFC;
+      font-size: 33px;
+      font-weight: 800;
+      line-height: 1.3;
+      color: #f8fafc;
       opacity: 0;
-      transform: translateY(24px);
-    }
-    .k-word-highlight {
-      color: #FCD34D;
-      text-shadow: 0 0 16px rgba(245, 158, 11, 0.6);
-    }
-    .k-word-green {
-      color: #34D399;
-      text-shadow: 0 0 16px rgba(52, 211, 153, 0.6);
-    }
-    .k-word-red {
-      color: #F87171;
-      text-shadow: 0 0 16px rgba(248, 113, 113, 0.6);
     }
   </style>
 </head>
 <body>
+  <div id="root" data-composition-id="main" data-width="1080" data-height="1920" data-duration="54" data-fps="30">
 
-  <div id="root" class="root" data-composition-id="main" data-width="1080" data-height="1920" data-duration="54" data-fps="30">
+    <!-- ================= TIMED AUDIO & SFX CLIPS ================= -->
+    <audio id="v1" class="clip" src="assets/audio/curioso_s1.mp3" data-start="0.3" data-duration="10.90" data-track-index="0"></audio>
+    <audio id="v2" class="clip" src="assets/audio/curioso_s2.mp3" data-start="12.0" data-duration="9.65" data-track-index="0"></audio>
+    <audio id="v3" class="clip" src="assets/audio/curioso_s3.mp3" data-start="22.5" data-duration="9.34" data-track-index="0"></audio>
+    <audio id="v4" class="clip" src="assets/audio/curioso_s4.mp3" data-start="32.7" data-duration="8.00" data-track-index="0"></audio>
+    <audio id="v5" class="clip" src="assets/audio/curioso_s5.mp3" data-start="41.8" data-duration="11.04" data-track-index="0"></audio>
 
-    <!-- AUDIO TRACKS -->
-    <audio id="v1" src="assets/audio/curioso_s1.mp3" data-start="0.3" data-duration="10.92"></audio>
-    <audio id="v2" src="assets/audio/curioso_s2.mp3" data-start="11.8" data-duration="9.67"></audio>
-    <audio id="v3" src="assets/audio/curioso_s3.mp3" data-start="22.4" data-duration="9.36"></audio>
-    <audio id="v4" src="assets/audio/curioso_s4.mp3" data-start="32.6" data-duration="8.02"></audio>
-    <audio id="v5" src="assets/audio/curioso_s5.mp3" data-start="41.6" data-duration="11.06"></audio>
-    <audio id="bgm" src="assets/audio/background_56s.wav" data-start="0" data-duration="54" data-volume="0.18"></audio>
+    <audio id="bgm" class="clip" src="assets/audio/background_56s.wav" data-start="0" data-duration="54" data-volume="0.14" data-track-index="1"></audio>
 
-    <!-- AMBIENT GLOWS -->
-    <div class="ambient-orb orb-1" data-layout-allow-overflow></div>
-    <div class="ambient-orb orb-2" data-layout-allow-overflow></div>
-    <div class="vignette"></div>
+    <!-- Kinematic Sound Effects -->
+    <audio id="sfx-stamp" class="clip" src="assets/audio/sfx_stamp.wav" data-start="3.3" data-duration="0.54" data-volume="0.45" data-track-index="2"></audio>
+    <audio id="sfx-w1" class="clip" src="assets/audio/sfx_whoosh.wav" data-start="11.3" data-duration="0.64" data-volume="0.45" data-track-index="2"></audio>
+    <audio id="sfx-p1" class="clip" src="assets/audio/sfx_pop.wav" data-start="12.1" data-duration="0.21" data-volume="0.40" data-track-index="3"></audio>
+    <audio id="sfx-p2" class="clip" src="assets/audio/sfx_pop.wav" data-start="13.5" data-duration="0.21" data-volume="0.38" data-track-index="3"></audio>
+    <audio id="sfx-w2" class="clip" src="assets/audio/sfx_whoosh.wav" data-start="21.9" data-duration="0.64" data-volume="0.45" data-track-index="2"></audio>
+    <audio id="sfx-fire" class="clip" src="assets/audio/sfx_fire.wav" data-start="22.6" data-duration="1.38" data-volume="0.42" data-track-index="3"></audio>
+    <audio id="sfx-w3" class="clip" src="assets/audio/sfx_whoosh.wav" data-start="32.0" data-duration="0.64" data-volume="0.45" data-track-index="2"></audio>
+    <audio id="sfx-w4" class="clip" src="assets/audio/sfx_whoosh.wav" data-start="41.1" data-duration="0.64" data-volume="0.45" data-track-index="2"></audio>
+    <audio id="sfx-chime" class="clip" src="assets/audio/sfx_chime.wav" data-start="41.5" data-duration="1.18" data-volume="0.52" data-track-index="3"></audio>
 
-    <!-- TOP HUD (FIXED & NON-OVERLAPPING) -->
+    <!-- ================= ATMOSPHERIC BACKGROUND ================= -->
+    <div class="bg-stage" data-layout-allow-overflow>
+      <img id="bg-1" class="bg-layer" src="assets/images/slide1_bg.jpg" alt="" />
+      <img id="bg-2" class="bg-layer" src="assets/images/slide2_bg.jpg" alt="" />
+      <img id="bg-3" class="bg-layer" src="assets/images/slide3_bg.jpg" alt="" />
+      <img id="bg-4" class="bg-layer" src="assets/images/slide4_bg.jpg" alt="" />
+      <img id="bg-5" class="bg-layer" src="assets/images/slide5_bg.jpg" alt="" />
+      <div class="bg-scrim"></div>
+      <div class="bg-grid"></div>
+      <div class="ambient-glow glow-top" data-layout-allow-overflow></div>
+      <div class="ambient-glow glow-bottom" data-layout-allow-overflow></div>
+    </div>
+
+    <!-- ================= TOP PERSISTENT HUD ================= -->
     <header class="top-hud" data-layout-allow-safe-zone>
-      <div class="hud-badge-curioso" data-layout-allow-safe-zone>
-        <div class="pulse-dot"></div>
+      <div class="hud-live-pill" data-layout-ignore>
+        <div class="live-dot" id="hud-dot"></div>
         <span>DATO CURIOSO #01</span>
       </div>
-
-      <div class="hud-tempus-brand" data-layout-allow-safe-zone>
-        <div class="tempus-mini-logo">
-          <div class="tempus-mini-bar bar-1"></div>
-          <div class="tempus-mini-bar bar-2"></div>
-          <div class="tempus-mini-bar bar-3"></div>
+      <div class="hud-brand-pill" data-layout-ignore>
+        <div class="brand-bars-mini">
+          <span class="b1"></span>
+          <span class="b2"></span>
+          <span class="b3"></span>
+          <span class="b4"></span>
         </div>
-        <span class="brand-title">TEMPUS</span>
-      </div>
-
-      <div class="hud-topic-tag" data-layout-allow-safe-zone data-layout-ignore>
-        <span>HISTORIA ECONÓMICA</span>
+        <span class="hud-brand-name">TEMPUS</span>
       </div>
     </header>
 
-    <!-- 3D STAGE FOR FLUID METAMORPHOSIS -->
-    <main class="stage-3d">
+    <!-- ================= MAIN WORLD VIEWPORT ================= -->
+    <main class="world-viewport" data-layout-allow-overflow data-layout-allow-overlap>
 
-      <!-- SCENE 1: HOOK - 200 MIL MILLONES POR UN PAN -->
-      <section id="scene-1" class="scene-wrap" data-layout-allow-safe-zone>
-        <div class="scene-tagline" data-layout-allow-safe-zone>ALEMANIA 1923 · HIPERINFLACIÓN</div>
-        <h1 class="scene-headline" data-layout-allow-safe-zone>
-          ¿El día que el dinero valía <span class="headline-red">menos que el papel?</span>
+      <!-- =================================================================== -->
+      <!-- SCENE 1: 200 MIL MILLONES POR UNA BARRA DE PAN (0.0s - 11.7s)       -->
+      <!-- =================================================================== -->
+      <section id="scene-1" class="scene-layer" data-layout-allow-overlap>
+        <div class="kicker-pill kicker-red" id="s1-kicker" data-layout-ignore>⚡ ALEMANIA 1923 · HIPERINFLACIÓN</div>
+        <h1 class="scene-title" id="s1-title">
+          ¿<span class="hl-gold">200.000 Millones</span> por una sola <span class="hl-red">barra de pan</span>?
         </h1>
 
-        <div class="card-photo-container">
-          <!-- 3D Floating Banknote of 500 Billion -->
-          <div id="banknote-card" class="banknote-box">
-            <img class="banknote-img" src="assets/images/bill_500_billion.jpg" alt="Billete de 500 Mil Millones de Marcos">
-            <div class="banknote-stamp">¡VALOR: 0€!</div>
-            <div class="banknote-price-badge">
-              <span class="badge-label">1 BARRA DE PAN:</span>
-              <span class="badge-price">200.000.000.000 MARCOS</span>
-            </div>
+        <!-- Real Historical Photo + 500B Mark Banknote -->
+        <div class="photo-showcase" id="s1-photo-card">
+          <img id="s1-photo-img" class="main-photo" src="assets/images/bakery_crowd_hd.jpg" alt="Multitud comprando pan con millones de marcos en Berlín 1923" />
+          <div class="photo-gradient-bottom"></div>
+          <div class="archival-tag" data-layout-ignore>📸 ARCHIVO REAL · BERLÍN 1923</div>
+          <div class="inset-banknote" id="s1-inset-bill">
+            <img src="assets/images/bill_500_billion.jpg" alt="Billete real de 500 mil millones de marcos" />
           </div>
-
-          <!-- 2D Shocked Character -->
-          <div id="char-1" class="char-container">
-            <img class="char-img" src="assets/characters/char_shocked.svg" alt="Personaje Asombrado">
+          <div class="photo-caption-bar" data-layout-ignore>
+            <span class="photo-caption-text">Cola real frente a una panadería</span>
+            <span class="photo-stat-pill" id="s1-stamp">🥖 1 PAN = 200.000M</span>
           </div>
         </div>
 
-        <div class="pill-data-row">
-          <div class="pill-stat pill-gold">🥖 1 Barra de Pan = 200 Mil Millones</div>
-          <div class="pill-stat">📉 Pérdida 100% de Poder Adquisitivo</div>
+        <!-- 2D ANIMATED DIORAMA 1: ALEX CON CARRETILLA DE BILLETES EN LA PANADERÍA -->
+        <div class="diorama-card" id="s1-diorama">
+          <div class="diorama-label" data-layout-ignore>🎬 RECREACIÓN 2D · LA CARRETILLA DEL PAN</div>
+          <svg class="diorama-svg" viewBox="0 0 940 690" data-layout-ignore>
+            <defs>
+              <linearGradient id="sky1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#172554" />
+                <stop offset="100%" stop-color="#0f172a" />
+              </linearGradient>
+              <linearGradient id="emeraldJacket" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#10b981" />
+                <stop offset="100%" stop-color="#065f46" />
+              </linearGradient>
+              <linearGradient id="woodGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#b45309" />
+                <stop offset="100%" stop-color="#78350f" />
+              </linearGradient>
+            </defs>
+
+            <!-- Cobblestone Street & Streetlamp -->
+            <rect x="0" y="0" width="940" height="560" fill="url(#sky1)" />
+            <!-- Distant Berlin Silhouette -->
+            <path d="M0 560 L0 390 L70 390 L70 340 L140 340 L140 410 L210 410 L210 310 L250 270 L290 310 L290 400 L380 400 L380 560 Z" fill="#1e293b" opacity="0.65" />
+            <rect x="0" y="555" width="940" height="135" fill="#1e293b" />
+            <line x1="0" y1="558" x2="940" y2="558" stroke="#475569" stroke-width="5" />
+
+            <!-- 2D BAKERY SHOP (Right Side) -->
+            <g id="bakery-shop" transform="translate(555, 130)">
+              <!-- Shop Building -->
+              <rect x="0" y="60" width="345" height="370" rx="14" fill="#292524" stroke="#fbbf24" stroke-width="4" />
+              <!-- Warm Glowing Bakery Window -->
+              <rect x="28" y="125" width="290" height="165" rx="10" fill="#fef3c7" opacity="0.92" />
+              <!-- Striped Awning -->
+              <g>
+                <path d="M-15 60 L360 60 L345 120 L0 120 Z" fill="#ef4444" />
+                <rect x="30" y="60" width="42" height="60" fill="#fff7ed" />
+                <rect x="114" y="60" width="42" height="60" fill="#fff7ed" />
+                <rect x="198" y="60" width="42" height="60" fill="#fff7ed" />
+                <rect x="282" y="60" width="42" height="60" fill="#fff7ed" />
+              </g>
+              <!-- Signboard -->
+              <rect x="35" y="8" width="275" height="46" rx="10" fill="#0f172a" stroke="#fbbf24" stroke-width="3" />
+              <text x="172" y="39" text-anchor="middle" fill="#fde68a" font-size="24" font-weight="900" font-family="Inter">PANADERÍA 1923</text>
+
+              <!-- 2D BAKER CHARACTER inside window -->
+              <g id="s1-baker" transform="translate(195, 155)">
+                <!-- Chef Hat -->
+                <ellipse cx="45" cy="8" rx="34" ry="18" fill="#ffffff" />
+                <rect x="22" y="10" width="46" height="22" rx="4" fill="#f8fafc" />
+                <!-- Head -->
+                <circle cx="45" cy="48" r="26" fill="#fcd5b5" />
+                <circle cx="36" cy="44" r="4" fill="#0f172a" />
+                <circle cx="54" cy="44" r="4" fill="#0f172a" />
+                <!-- Mustache -->
+                <path d="M30 57 Q45 50 60 57 Q45 64 30 57 Z" fill="#451a03" />
+                <!-- Torso Apron -->
+                <rect x="16" y="75" width="58" height="62" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" />
+                <!-- Baker Arm Pointing at Price Board -->
+                <g id="s1-baker-arm">
+                  <path d="M18 86 L-34 55" stroke="#ffffff" stroke-width="16" stroke-linecap="round" />
+                  <circle cx="-38" cy="52" r="10" fill="#fcd5b5" />
+                </g>
+              </g>
+
+              <!-- Golden Bread Loaf on Counter -->
+              <g id="s1-bread" transform="translate(55, 246)">
+                <ellipse cx="52" cy="24" rx="48" ry="22" fill="#d97706" stroke="#78350f" stroke-width="3" />
+                <path d="M30 12 Q36 24 30 34 M52 10 Q58 24 52 36 M74 12 Q80 24 74 34" stroke="#fef3c7" stroke-width="4" stroke-linecap="round" fill="none" />
+              </g>
+
+              <!-- Wooden Counter Front -->
+              <rect x="-10" y="285" width="365" height="145" rx="8" fill="url(#woodGrad)" stroke="#451a03" stroke-width="3" />
+
+              <!-- Giant Flip Price Board on Counter -->
+              <g id="s1-price-sign" transform="translate(22, 310)">
+                <rect x="0" y="0" width="300" height="96" rx="14" fill="#090d16" stroke="#ef4444" stroke-width="4" />
+                <text x="150" y="34" text-anchor="middle" fill="#fca5a5" font-size="18" font-weight="800" font-family="Inter">PRECIO HOY (1 PAN):</text>
+                <text x="150" y="76" text-anchor="middle" fill="#fcd34d" font-size="34" font-weight="900" font-family="Inter">200.000M 💸</text>
+              </g>
+            </g>
+
+            <!-- 2D PROTAGONIST ALEX + OVERFLOWING WHEELBARROW OF MARKS -->
+            <g id="s1-alex-wheelbarrow">
+              <!-- ALEX CHARACTER -->
+              <g id="s1-alex" transform="translate(65, 215)">
+                <!-- Animated Legs -->
+                <path id="s1-leg-l" d="M72 235 L54 335" stroke="#0f172a" stroke-width="22" stroke-linecap="round" />
+                <path id="s1-leg-r" d="M104 235 L124 335" stroke="#1e293b" stroke-width="22" stroke-linecap="round" />
+                <rect x="36" y="325" width="38" height="18" rx="8" fill="#f8fafc" />
+                <rect x="110" y="325" width="38" height="18" rx="8" fill="#f8fafc" />
+
+                <!-- Emerald Tempus Jacket Torso -->
+                <path d="M45 120 C45 92 135 92 135 120 L145 245 L35 245 Z" fill="url(#emeraldJacket)" />
+                <path d="M78 105 L90 175 L102 105 Z" fill="#ffffff" />
+                <circle cx="114" cy="145" r="6" fill="#fbbf24" />
+
+                <!-- Shocked Head -->
+                <g id="s1-alex-head">
+                  <rect x="78" y="76" width="24" height="28" rx="8" fill="#ebb692" />
+                  <circle cx="92" cy="48" r="46" fill="#fcd5b5" />
+                  <!-- Stylish Dark Hair -->
+                  <path d="M46 44 C44 2 85 -8 118 4 C142 12 142 36 136 46 C122 24 92 18 52 36 Z" fill="#0f172a" />
+                  <!-- Wide Shocked Eyes -->
+                  <ellipse cx="78" cy="44" rx="10" ry="13" fill="#ffffff" />
+                  <circle cx="81" cy="44" r="6" fill="#0f172a" />
+                  <ellipse cx="110" cy="44" rx="10" ry="13" fill="#ffffff" />
+                  <circle cx="113" cy="44" r="6" fill="#0f172a" />
+                  <!-- High Eyebrows -->
+                  <path d="M65 24 Q78 14 90 24" stroke="#0f172a" stroke-width="4.5" fill="none" stroke-linecap="round" />
+                  <path d="M98 24 Q110 14 123 24" stroke="#0f172a" stroke-width="4.5" fill="none" stroke-linecap="round" />
+                  <!-- Dropping Jaw O-Mouth -->
+                  <ellipse id="s1-mouth" cx="96" cy="72" rx="11" ry="15" fill="#7f1d1d" />
+                  <!-- Sweat Drop -->
+                  <path id="s1-sweat" d="M40 24 C40 24 30 42 30 48 C30 55 36 59 41 59 C46 59 51 55 51 48 Z" fill="#38bdf8" />
+                </g>
+
+                <!-- Arms Pushing Wheelbarrow Handles -->
+                <path d="M110 135 L205 188" stroke="#059669" stroke-width="20" stroke-linecap="round" />
+                <circle cx="210" cy="190" r="12" fill="#fcd5b5" />
+              </g>
+
+              <!-- WHEELBARROW PILED SKY-HIGH WITH BANKNOTE BUNDLES -->
+              <g transform="translate(245, 330)">
+                <g id="s1-barrow">
+                  <!-- Huge Mountain of 2D Banknote Bricks inside Barrow -->
+                  <g id="s1-cash-pile">
+                    <g transform="translate(42, -92) rotate(-8)">
+                      <rect width="78" height="36" rx="5" fill="#34d399" stroke="#064e3b" stroke-width="3" />
+                      <rect x="28" y="0" width="16" height="36" fill="#fbbf24" />
+                    </g>
+                    <g transform="translate(115, -104) rotate(6)">
+                      <rect width="78" height="36" rx="5" fill="#10b981" stroke="#064e3b" stroke-width="3" />
+                      <rect x="28" y="0" width="16" height="36" fill="#fbbf24" />
+                    </g>
+                    <g transform="translate(76, -135) rotate(-3)">
+                      <rect width="78" height="36" rx="5" fill="#6ee7b7" stroke="#064e3b" stroke-width="3" />
+                      <rect x="28" y="0" width="16" height="36" fill="#fbbf24" />
+                    </g>
+                    <g transform="translate(22, -55) rotate(-4)">
+                      <rect width="84" height="38" rx="5" fill="#10b981" stroke="#064e3b" stroke-width="3" />
+                      <rect x="32" y="0" width="16" height="38" fill="#fbbf24" />
+                    </g>
+                    <g transform="translate(98, -60) rotate(5)">
+                      <rect width="84" height="38" rx="5" fill="#34d399" stroke="#064e3b" stroke-width="3" />
+                      <rect x="32" y="0" width="16" height="38" fill="#fbbf24" />
+                    </g>
+                    <g transform="translate(168, -50) rotate(11)">
+                      <rect width="84" height="38" rx="5" fill="#10b981" stroke="#064e3b" stroke-width="3" />
+                      <rect x="32" y="0" width="16" height="38" fill="#fbbf24" />
+                    </g>
+                    <g transform="translate(48, -22)">
+                      <rect width="175" height="36" rx="5" fill="#059669" stroke="#064e3b" stroke-width="3" />
+                    </g>
+                  </g>
+
+                  <!-- Wooden Handles & Legs -->
+                  <line x1="-22" y1="72" x2="235" y2="145" stroke="#d97706" stroke-width="14" stroke-linecap="round" />
+                  <line x1="48" y1="115" x2="36" y2="218" stroke="#92400e" stroke-width="12" stroke-linecap="round" />
+
+                  <!-- Barrow Tray -->
+                  <path d="M10 10 L265 -10 L225 125 L45 125 Z" fill="#ef4444" stroke="#991b1b" stroke-width="4" />
+                  <text x="136" y="68" text-anchor="middle" fill="#ffffff" font-size="22" font-weight="900" font-family="Inter">200.000M MARCOS</text>
+
+                  <!-- Spinning Wheel -->
+                  <g transform="translate(242, 178)">
+                    <g id="s1-wheel">
+                      <circle cx="0" cy="0" r="44" fill="#0f172a" stroke="#94a3b8" stroke-width="8" />
+                      <line x1="-38" y1="0" x2="38" y2="0" stroke="#fbbf24" stroke-width="5" />
+                      <line x1="0" y1="-38" x2="0" y2="38" stroke="#fbbf24" stroke-width="5" />
+                      <circle cx="0" cy="0" r="11" fill="#fbbf24" />
+                    </g>
+                  </g>
+                </g>
+              </g>
+
+              <!-- Floating Stray Bills -->
+              <rect id="s1-fly-bill-1" x="310" y="130" width="56" height="28" rx="4" fill="#6ee7b7" stroke="#065f46" stroke-width="2" />
+              <rect id="s1-fly-bill-2" x="425" y="105" width="56" height="28" rx="4" fill="#34d399" stroke="#065f46" stroke-width="2" />
+            </g>
+          </svg>
         </div>
       </section>
 
-      <!-- SCENE 2: NIÑOS JUGANDO CON FAJOS (MORPH FROM SCENE 1) -->
-      <section id="scene-2" class="scene-wrap" style="opacity: 0;" data-layout-allow-safe-zone>
-        <div class="scene-tagline" data-layout-allow-safe-zone>CURIOSIDAD REAL · BERLÍN 1923</div>
-        <h1 class="scene-headline" data-layout-allow-safe-zone>
-          Los niños hacían castillos con <span class="headline-highlight">fajos de billetes</span>
+      <!-- =================================================================== -->
+      <!-- SCENE 2: NIÑOS HACIENDO CASTILLOS DE BILLETES (11.8s - 22.3s)       -->
+      <!-- =================================================================== -->
+      <section id="scene-2" class="scene-layer" data-layout-allow-overlap>
+        <div class="kicker-pill" id="s2-kicker" data-layout-ignore>🧱 CURIOSIDAD HISTÓRICA · JUGUETES DE PAPEL</div>
+        <h1 class="scene-title" id="s2-title">
+          Los niños hacían castillos con <span class="hl-emerald">fajos reales de dinero</span>
         </h1>
 
-        <div class="card-photo-container">
-          <div id="polaroid-kids" class="polaroid-frame">
-            <div class="vintage-tape"></div>
-            <img class="polaroid-img" src="assets/images/kids_playing_money.jpg" alt="Niños jugando con bloques de dinero real">
-            <div class="polaroid-caption" data-layout-allow-occlusion data-layout-allow-safe-zone>FOTO HISTÓRICA: NIÑOS USANDO FAJOS COMO JUGUETES</div>
-          </div>
-
-          <!-- 2D Pointing Character -->
-          <div id="char-2" class="char-container" style="right: -30px; bottom: -30px;">
-            <img class="char-img" src="assets/characters/char_pointing.svg" alt="Personaje Apuntando">
+        <!-- Colorized Museum HD Photo -->
+        <div class="photo-showcase" id="s2-photo-card">
+          <img id="s2-photo-img" class="main-photo" src="assets/images/kids_playing_hd.jpg" style="object-position: center 22%;" alt="Niños alemanes apilando bloques de marcos en 1923" />
+          <div class="photo-gradient-bottom"></div>
+          <div class="archival-tag" data-layout-ignore>📸 FOTO REAL RESTAURADA · 1923</div>
+          <div class="photo-caption-bar" data-layout-ignore>
+            <span class="photo-caption-text">Fajos de 100.000 Marcos usados como Lego</span>
+            <span class="photo-stat-pill photo-stat-emerald">🧸 JUGUETE = IMPAGABLE</span>
           </div>
         </div>
 
-        <div class="pill-data-row">
-          <div class="pill-stat pill-gold">🧸 Juguetes = Inaccesibles</div>
-          <div class="pill-stat pill-emerald">📦 Dinero físico = Bloques de construcción</div>
+        <!-- 2D ANIMATED DIORAMA 2: DOS NIÑOS 2D + ALEX CONSTRUYENDO PIRÁMIDE DE BILLETES -->
+        <div class="diorama-card" id="s2-diorama">
+          <div class="diorama-label" data-layout-ignore>🎬 RECREACIÓN 2D · EL CASTILLO DE MILLONES</div>
+          <svg class="diorama-svg" viewBox="0 0 940 690" data-layout-ignore>
+            <rect x="0" y="0" width="940" height="550" fill="#132038" />
+            <rect x="0" y="550" width="940" height="140" fill="#27364f" />
+            <line x1="0" y1="550" x2="940" y2="550" stroke="#34d399" stroke-width="4" opacity="0.5" />
+
+            <!-- Crossed-Out Expensive Toy Display (Top Left) -->
+            <g id="s2-toy-box" transform="translate(44, 88)">
+              <rect x="0" y="0" width="225" height="125" rx="18" fill="#1e293b" stroke="#ef4444" stroke-width="3" />
+              <!-- Cute 2D Wooden Train Icon -->
+              <rect x="34" y="42" width="64" height="36" rx="6" fill="#f59e0b" />
+              <rect x="72" y="22" width="26" height="24" rx="4" fill="#ef4444" />
+              <circle cx="50" cy="84" r="11" fill="#94a3b8" />
+              <circle cx="84" cy="84" r="11" fill="#94a3b8" />
+              <text x="155" y="55" text-anchor="middle" fill="#fca5a5" font-size="18" font-weight="800" font-family="Inter">TREN:</text>
+              <text x="155" y="84" text-anchor="middle" fill="#ef4444" font-size="22" font-weight="900" font-family="Inter">900.000M</text>
+              <!-- Red X -->
+              <line x1="18" y1="18" x2="206" y2="108" stroke="#ef4444" stroke-width="6" stroke-linecap="round" opacity="0.8" />
+            </g>
+
+            <!-- 2D PYRAMID CASTLE OF BANKNOTE BUNDLES (Center Stage) -->
+            <g id="s2-castle" transform="translate(310, 250)">
+              <!-- Row 1 (Bottom 4 bricks) -->
+              <g transform="translate(0, 245)"><g id="b-r1-1">
+                <rect width="76" height="44" rx="6" fill="#10b981" stroke="#064e3b" stroke-width="3" />
+                <rect x="28" y="0" width="18" height="44" fill="#fbbf24" />
+              </g></g>
+              <g transform="translate(82, 245)"><g id="b-r1-2">
+                <rect width="76" height="44" rx="6" fill="#34d399" stroke="#064e3b" stroke-width="3" />
+                <rect x="28" y="0" width="18" height="44" fill="#fbbf24" />
+              </g></g>
+              <g transform="translate(164, 245)"><g id="b-r1-3">
+                <rect width="76" height="44" rx="6" fill="#10b981" stroke="#064e3b" stroke-width="3" />
+                <rect x="28" y="0" width="18" height="44" fill="#fbbf24" />
+              </g></g>
+              <g transform="translate(246, 245)"><g id="b-r1-4">
+                <rect width="76" height="44" rx="6" fill="#34d399" stroke="#064e3b" stroke-width="3" />
+                <rect x="28" y="0" width="18" height="44" fill="#fbbf24" />
+              </g></g>
+
+              <!-- Row 2 (3 bricks) -->
+              <g transform="translate(41, 196)"><g id="b-r2-1">
+                <rect width="76" height="44" rx="6" fill="#34d399" stroke="#064e3b" stroke-width="3" />
+                <rect x="28" y="0" width="18" height="44" fill="#fbbf24" />
+              </g></g>
+              <g transform="translate(123, 196)"><g id="b-r2-2">
+                <rect width="76" height="44" rx="6" fill="#6ee7b7" stroke="#064e3b" stroke-width="3" />
+                <rect x="28" y="0" width="18" height="44" fill="#fbbf24" />
+              </g></g>
+              <g transform="translate(205, 196)"><g id="b-r2-3">
+                <rect width="76" height="44" rx="6" fill="#34d399" stroke="#064e3b" stroke-width="3" />
+                <rect x="28" y="0" width="18" height="44" fill="#fbbf24" />
+              </g></g>
+
+              <!-- Row 3 (2 bricks) -->
+              <g transform="translate(82, 147)"><g id="b-r3-1">
+                <rect width="76" height="44" rx="6" fill="#10b981" stroke="#064e3b" stroke-width="3" />
+                <rect x="28" y="0" width="18" height="44" fill="#fbbf24" />
+              </g></g>
+              <g transform="translate(164, 147)"><g id="b-r3-2">
+                <rect width="76" height="44" rx="6" fill="#10b981" stroke="#064e3b" stroke-width="3" />
+                <rect x="28" y="0" width="18" height="44" fill="#fbbf24" />
+              </g></g>
+
+              <!-- Row 4 Crown Brick + Paper Flag -->
+              <g transform="translate(123, 96)"><g id="b-r4-top">
+                <rect width="76" height="44" rx="6" fill="#fde68a" stroke="#b45309" stroke-width="3" />
+                <rect x="28" y="0" width="18" height="44" fill="#ef4444" />
+                <line x1="38" y1="0" x2="38" y2="-46" stroke="#f8fafc" stroke-width="4" />
+                <polygon points="38,-46 88,-32 38,-18" fill="#10b981" />
+              </g></g>
+            </g>
+
+            <!-- 2D KID 1 (Left Boy Stacking Money Bundles) -->
+            <g transform="translate(125, 290)">
+              <path d="M55 175 L42 258 M85 175 L98 258" stroke="#1e293b" stroke-width="18" stroke-linecap="round" />
+              <rect x="38" y="96" width="64" height="86" rx="16" fill="#3b82f6" />
+              <circle cx="70" cy="54" r="36" fill="#fcd5b5" />
+              <path d="M34 46 C36 14 96 12 106 44 C86 28 54 28 34 46 Z" fill="#78350f" />
+              <circle cx="60" cy="52" r="5" fill="#0f172a" />
+              <circle cx="82" cy="52" r="5" fill="#0f172a" />
+              <path d="M58 68 Q70 80 84 68" stroke="#7f1d1d" stroke-width="4" fill="none" stroke-linecap="round" />
+              <!-- Articulated Arm Holding Bundle -->
+              <g id="s2-boy-arm">
+                <path d="M90 112 L152 84" stroke="#2563eb" stroke-width="16" stroke-linecap="round" />
+                <rect x="142" y="56" width="62" height="32" rx="5" fill="#6ee7b7" stroke="#064e3b" stroke-width="2.5" />
+              </g>
+            </g>
+
+            <!-- 2D KID 2 (Right Girl Cheering & Jumping) -->
+            <g transform="translate(658, 285)">
+              <g id="s2-kid-girl">
+                <path d="M48 180 L38 262 M78 180 L88 262" stroke="#1e293b" stroke-width="16" stroke-linecap="round" />
+                <path d="M26 185 L44 98 L82 98 L100 185 Z" fill="#f43f5e" />
+                <circle cx="63" cy="54" r="35" fill="#fcd5b5" />
+                <path d="M28 50 C28 14 98 14 98 50 C82 30 44 30 28 50 Z" fill="#451a03" />
+                <circle cx="52" cy="52" r="5" fill="#0f172a" />
+                <circle cx="74" cy="52" r="5" fill="#0f172a" />
+                <path d="M50 68 Q63 82 76 68" stroke="#7f1d1d" stroke-width="4" fill="none" stroke-linecap="round" />
+                <!-- Cheering Arms Up -->
+                <path d="M38 112 L10 62 M88 112 L116 62" stroke="#f43f5e" stroke-width="15" stroke-linecap="round" />
+              </g>
+            </g>
+
+            <!-- Alex Badge / Presenter Commenting Top-Right -->
+            <g transform="translate(680, 56)">
+              <g id="s2-alex-presenter">
+                <rect x="0" y="0" width="220" height="145" rx="22" fill="#0f172a" stroke="#fbbf24" stroke-width="3" />
+                <circle cx="58" cy="72" r="36" fill="#fcd5b5" />
+                <path d="M24 64 C24 32 88 28 94 60 C78 44 42 44 24 64 Z" fill="#0f172a" />
+                <circle cx="48" cy="70" r="4.5" fill="#0f172a" />
+                <circle cx="68" cy="70" r="4.5" fill="#0f172a" />
+                <path d="M48 86 Q58 96 70 86" stroke="#059669" stroke-width="4" fill="none" stroke-linecap="round" />
+                <text x="152" y="64" text-anchor="middle" fill="#fde68a" font-size="18" font-weight="900" font-family="Inter">¡MÁS BARATO</text>
+                <text x="152" y="90" text-anchor="middle" fill="#34d399" font-size="18" font-weight="900" font-family="Inter">QUE EL LEGO!</text>
+              </g>
+            </g>
+          </svg>
         </div>
       </section>
 
-      <!-- SCENE 3: EMPAPELAR PAREDES Y QUEMAR DINERO -->
-      <section id="scene-3" class="scene-wrap" style="opacity: 0;" data-layout-allow-safe-zone>
-        <div class="scene-tagline" data-layout-allow-safe-zone>DESPERDICIO HISTÓRICO</div>
-        <h1 class="scene-headline" data-layout-allow-safe-zone>
-          Empapelar paredes y <span class="headline-red">quemar dinero</span> para calentarse
+      <!-- =================================================================== -->
+      <!-- SCENE 3: EMPAPELANDO PAREDES Y QUEMANDO DINERO (22.4s - 32.4s)      -->
+      <!-- =================================================================== -->
+      <section id="scene-3" class="scene-layer" data-layout-allow-overlap>
+        <div class="kicker-pill kicker-red" id="s3-kicker" data-layout-ignore>🔥 EL EXTREMO DE 1923 · CERO VALOR</div>
+        <h1 class="scene-title" id="s3-title">
+          Empapelaban <span class="hl-gold">paredes</span> y quemaban billetes en la <span class="hl-red">chimenea</span>
         </h1>
 
-        <div class="card-photo-container">
-          <div id="polaroid-wallpaper" class="polaroid-frame">
-            <div class="vintage-tape"></div>
-            <img class="polaroid-img" src="assets/images/wallpaper_money.jpg" alt="Hombre empapelando pared con dinero">
-            <div class="polaroid-caption" data-layout-allow-occlusion data-layout-allow-safe-zone>FOTO HISTÓRICA: EMPAPELAR LA CASA CON BILLETES</div>
-          </div>
-
-          <!-- 2D Disbelief / Shivering Character -->
-          <div id="char-3" class="char-container" style="right: -30px; bottom: -30px;">
-            <img class="char-img" src="assets/characters/char_disbelief.svg" alt="Personaje en Descreimiento">
+        <!-- Real Historical Photo of Wallpapering with Marks -->
+        <div class="photo-showcase" id="s3-photo-card">
+          <img id="s3-photo-img" class="main-photo" src="assets/images/wallpaper_money_hd.jpg" style="object-position: center 24%;" alt=" Ciudadano alemán empapelando su pared con billetes en 1923" />
+          <div class="photo-gradient-bottom"></div>
+          <div class="archival-tag" data-layout-ignore>📸 BUNDESARCHIV · ALEMANIA 1923</div>
+          <div class="photo-caption-bar" data-layout-ignore>
+            <span class="photo-caption-text">Pegando billetes reales como papel pintado</span>
+            <span class="photo-stat-pill">🔥 MÁS BARATO QUE LA LEÑA</span>
           </div>
         </div>
 
-        <div class="pill-data-row">
-          <div class="pill-stat pill-gold">🎨 Más barato que la pintura</div>
-          <div class="pill-stat">🔥 Daban más calor que la leña</div>
+        <!-- 2D ANIMATED DIORAMA 3: SALÓN CON PARED DE BILLETES + CHIMENEA EN LLAMAS -->
+        <div class="diorama-card" id="s3-diorama">
+          <div class="diorama-label" data-layout-ignore>🎬 RECREACIÓN 2D · PAPEL PINTADO Y FUEGO</div>
+          <svg class="diorama-svg" viewBox="0 0 940 690" data-layout-ignore>
+            <!-- Cozy Living Room Wall & Wooden Floor -->
+            <rect x="0" y="0" width="940" height="555" fill="#1c1917" />
+            <rect x="0" y="555" width="940" height="135" fill="#451a03" />
+            <line x1="0" y1="555" x2="940" y2="555" stroke="#fbbf24" stroke-width="4" opacity="0.45" />
+
+            <!-- LEFT SIDE: BANKNOTE WALLPAPER GRID + PAINTER FIGURE -->
+            <g id="s3-wallpaper-grid" transform="translate(48, 86)">
+              <rect x="-10" y="-10" width="350" height="340" rx="12" fill="#292524" stroke="#57534e" stroke-width="3" />
+              <!-- Rows of Pasted Green Banknotes -->
+              <g fill="#34d399" stroke="#064e3b" stroke-width="2">
+                <rect x="6" y="6" width="76" height="42" rx="4" /><rect x="90" y="6" width="76" height="42" rx="4" /><rect x="174" y="6" width="76" height="42" rx="4" /><rect x="258" y="6" width="66" height="42" rx="4" />
+                <rect x="6" y="56" width="76" height="42" rx="4" /><rect x="90" y="56" width="76" height="42" rx="4" /><rect x="174" y="56" width="76" height="42" rx="4" /><rect x="258" y="56" width="66" height="42" rx="4" />
+                <rect x="6" y="106" width="76" height="42" rx="4" /><rect x="90" y="106" width="76" height="42" rx="4" /><rect x="174" y="106" width="76" height="42" rx="4" /><rect x="258" y="106" width="66" height="42" rx="4" />
+                <rect x="6" y="156" width="76" height="42" rx="4" /><rect x="90" y="156" width="76" height="42" rx="4" /><rect x="174" y="156" width="76" height="42" rx="4" />
+                <rect x="6" y="206" width="76" height="42" rx="4" /><rect x="90" y="206" width="76" height="42" rx="4" />
+              </g>
+            </g>
+
+            <!-- 2D Decorator Character Brushing Bills onto Wall -->
+            <g id="s3-painter" transform="translate(92, 250)">
+              <path d="M46 195 L38 302 M78 195 L88 302" stroke="#0f172a" stroke-width="20" stroke-linecap="round" />
+              <rect x="30" y="96" width="66" height="106" rx="16" fill="#fbbf24" />
+              <circle cx="63" cy="52" r="36" fill="#fcd5b5" />
+              <path d="M27 44 C29 12 95 12 99 44 Z" fill="#1e293b" />
+              <circle cx="54" cy="52" r="4.5" fill="#0f172a" />
+              <circle cx="76" cy="52" r="4.5" fill="#0f172a" />
+              <!-- Animated Brush Arm -->
+              <g id="s3-brush-arm">
+                <path d="M84 115 L146 60" stroke="#f59e0b" stroke-width="16" stroke-linecap="round" />
+                <rect x="142" y="34" width="22" height="34" rx="4" fill="#fde68a" />
+                <rect x="138" y="14" width="30" height="22" rx="2" fill="#f8fafc" />
+              </g>
+            </g>
+
+            <!-- RIGHT SIDE: BRICK FIREPLACE + ROARING 2D FLAMES + ALEX TOSSING CASH -->
+            <g id="s3-fireplace" transform="translate(575, 115)">
+              <!-- Chimney & Brick Mantel -->
+              <rect x="95" y="-115" width="140" height="135" fill="#7c2d12" stroke="#431407" stroke-width="4" />
+              <rect x="15" y="20" width="300" height="420" rx="12" fill="#9a3412" stroke="#431407" stroke-width="5" />
+              <rect x="0" y="10" width="330" height="32" rx="8" fill="#78350f" stroke="#fbbf24" stroke-width="2" />
+              <!-- Dark Hearth Opening -->
+              <path d="M62 440 L62 195 C62 125 268 125 268 195 L268 440 Z" fill="#090d16" stroke="#431407" stroke-width="6" />
+
+              <!-- Burning Banknotes Inside Hearth -->
+              <rect x="95" y="392" width="140" height="32" rx="6" fill="#10b981" transform="rotate(-6 165 408)" />
+              <rect x="108" y="378" width="120" height="30" rx="6" fill="#34d399" transform="rotate(8 168 393)" />
+
+              <!-- 3-Layer Animated 2D Vector Fire -->
+              <g transform="translate(165, 395)">
+                <path id="flame-outer" d="M-75 0 C-90 -95 -30 -165 0 -225 C35 -165 90 -95 75 0 Z" fill="#ef4444" opacity="0.92" />
+                <path id="flame-mid" d="M-52 0 C-62 -72 -18 -125 0 -172 C22 -125 62 -72 52 0 Z" fill="#f97316" />
+                <path id="flame-core" d="M-28 0 C-34 -46 -10 -84 0 -115 C12 -84 34 -46 28 0 Z" fill="#fde047" />
+              </g>
+
+              <!-- Rising Glowing Sparks -->
+              <circle id="spark-1" cx="145" cy="210" r="6" fill="#fde047" />
+              <circle id="spark-2" cx="188" cy="185" r="5" fill="#fb923c" />
+            </g>
+
+            <!-- 2D ALEX WITH WINTER SCARF TOSSING BANKNOTES INTO FIRE -->
+            <g transform="translate(395, 245)">
+              <g id="s3-alex-fire">
+                <path d="M52 205 L44 308 M84 205 L94 308" stroke="#0f172a" stroke-width="20" stroke-linecap="round" />
+                <rect x="34" y="102" width="68" height="108" rx="18" fill="url(#emeraldJacket)" />
+                <!-- Red Winter Scarf -->
+                <rect x="32" y="92" width="72" height="24" rx="10" fill="#ef4444" />
+                <rect x="76" y="108" width="20" height="48" rx="8" fill="#dc2626" />
+                <!-- Head -->
+                <circle cx="68" cy="52" r="38" fill="#fcd5b5" />
+                <path d="M30 44 C30 10 102 10 106 44 C88 26 48 26 30 44 Z" fill="#0f172a" />
+                <circle cx="58" cy="52" r="4.5" fill="#0f172a" />
+                <circle cx="80" cy="52" r="4.5" fill="#0f172a" />
+                <path d="M56 70 Q68 64 80 70" stroke="#7f1d1d" stroke-width="4" fill="none" stroke-linecap="round" />
+                <!-- Articulated Arm Tossing Bundle into Fire -->
+                <g id="s3-toss-arm">
+                  <path d="M92 126 L168 148" stroke="#10b981" stroke-width="18" stroke-linecap="round" />
+                  <rect x="160" y="132" width="62" height="30" rx="5" fill="#6ee7b7" stroke="#064e3b" stroke-width="2.5" />
+                </g>
+              </g>
+            </g>
+          </svg>
         </div>
       </section>
 
-      <!-- SCENE 4: LA LECCIÓN - POR QUÉ OCURRIÓ (REICHSBANK) -->
-      <section id="scene-4" class="scene-wrap" style="opacity: 0;" data-layout-allow-safe-zone>
-        <div class="scene-tagline" data-layout-allow-safe-zone>LA CAUSA ECONÓMICA</div>
-        <h1 class="scene-headline" data-layout-allow-safe-zone>
-          Imprimir dinero sin control <span class="headline-highlight">destruye su valor</span>
+      <!-- =================================================================== -->
+      <!-- SCENE 4: LA MÁQUINA DE IMPRIMIR Y EVAPORACIÓN DEL VALOR (32.5s-41.4s)-->
+      <!-- =================================================================== -->
+      <section id="scene-4" class="scene-layer" data-layout-allow-overlap>
+        <div class="kicker-pill kicker-red" id="s4-kicker" data-layout-ignore>⚙️ LA CAUSA ECONÓMICA · IMPRESIÓN MASIVA</div>
+        <h1 class="scene-title" id="s4-title">
+          Imprimir billetes de la nada <span class="hl-red">evapora su valor</span>
         </h1>
 
-        <div class="inflation-dashboard" data-layout-allow-safe-zone>
-          <div class="gauge-header">
-            <span class="gauge-title">MÁQUINA DE IMPRESIÓN DEL BANCO CENTRAL:</span>
-            <span id="gauge-number" class="gauge-val">+1.000.000%</span>
-          </div>
-          <div class="gauge-track">
-            <div id="gauge-bar" class="gauge-fill"></div>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-size: 18px; color: #94A3B8; font-weight: 700;" data-layout-ignore>
-            <span>ESTABLE</span>
-            <span>INFLACIÓN ALTA</span>
-            <span style="color: #EF4444;">💥 HIPERINFLACIÓN TOTAL</span>
+        <!-- Real Historical Photo of Reichsbank Cash Mountains -->
+        <div class="photo-showcase" id="s4-photo-card">
+          <img id="s4-photo-img" class="main-photo" src="assets/images/reichsbank_vault_hd.jpg" alt="Montañas de billetes acumulados en el Reichsbank en 1923" />
+          <div class="photo-gradient-bottom"></div>
+          <div class="archival-tag" data-layout-ignore>📸 BÓVEDA DEL REICHSBANK · OCT 1923</div>
+          <div class="photo-caption-bar" data-layout-ignore>
+            <span class="photo-caption-text">Toneladas de papel moneda recién impreso</span>
+            <span class="photo-stat-pill">📉 VALOR REAL: -99,99%</span>
           </div>
         </div>
 
-        <div class="card-photo-container" style="height: 380px; margin-top: 20px;">
-          <div style="width: 720px; height: 320px; border-radius: 14px; overflow: hidden; border: 2px solid rgba(255,255,255,0.2);">
-            <img style="width: 100%; height: 100%; object-fit: cover;" src="assets/images/bank_stacks.jpg" alt="Bóvedas del Reichsbank repletas de dinero devaluado">
-          </div>
+        <!-- 2D ANIMATED DIORAMA 4: IMPRENTA GIGANTE + BALANZA DE PODER ADQUISITIVO -->
+        <div class="diorama-card" id="s4-diorama">
+          <div class="diorama-label" data-layout-ignore>🎬 RECREACIÓN 2D · LA IMPRENTA SIN FRENO</div>
+          <svg class="diorama-svg" viewBox="0 0 940 690" data-layout-ignore>
+            <rect x="0" y="0" width="940" height="560" fill="#0f172a" />
+            <rect x="0" y="560" width="940" height="130" fill="#1e293b" />
 
-          <!-- 2D Explaining Character -->
-          <div id="char-4" class="char-container" style="right: 10px; bottom: -20px;">
-            <img class="char-img" src="assets/characters/char_explaining.svg" alt="Personaje Explicando">
-          </div>
+            <!-- INDUSTRIAL 2D PRINTING PRESS (Left) -->
+            <g id="s4-press" transform="translate(42, 135)">
+              <!-- Machine Body -->
+              <rect x="0" y="95" width="310" height="330" rx="20" fill="#334155" stroke="#94a3b8" stroke-width="4" />
+              <rect x="28" y="125" width="254" height="56" rx="10" fill="#090d16" stroke="#ef4444" stroke-width="3" />
+              <text x="155" y="161" text-anchor="middle" fill="#f87171" font-size="22" font-weight="900" font-family="Inter">IMPRENTA 24/7</text>
+
+              <!-- Flashing Red Siren -->
+              <circle id="s4-siren" cx="155" cy="58" r="26" fill="#ef4444" />
+              <rect x="122" y="78" width="66" height="18" rx="4" fill="#64748b" />
+
+              <!-- Spinning Gear 1 -->
+              <g transform="translate(95, 265)">
+                <g id="s4-gear-1">
+                  <circle cx="0" cy="0" r="46" fill="#475569" stroke="#cbd5e1" stroke-width="6" />
+                  <line x1="-54" y1="0" x2="54" y2="0" stroke="#cbd5e1" stroke-width="12" />
+                  <line x1="0" y1="-54" x2="0" y2="54" stroke="#cbd5e1" stroke-width="12" />
+                  <circle cx="0" cy="0" r="16" fill="#fbbf24" />
+                </g>
+              </g>
+
+              <!-- Spinning Gear 2 -->
+              <g transform="translate(215, 265)">
+                <g id="s4-gear-2">
+                  <circle cx="0" cy="0" r="46" fill="#475569" stroke="#cbd5e1" stroke-width="6" />
+                  <line x1="-54" y1="0" x2="54" y2="0" stroke="#cbd5e1" stroke-width="12" />
+                  <line x1="0" y1="-54" x2="0" y2="54" stroke="#cbd5e1" stroke-width="12" />
+                  <circle cx="0" cy="0" r="16" fill="#ef4444" />
+                </g>
+              </g>
+
+              <!-- Output Slot -->
+              <rect x="295" y="230" width="32" height="72" rx="6" fill="#090d16" stroke="#fbbf24" stroke-width="3" />
+            </g>
+
+            <!-- STREAM OF PRINTED BANKNOTES EVAPORATING INTO SMOKE -->
+            <g id="s4-bill-stream">
+              <rect id="stream-b1" x="370" y="378" width="82" height="40" rx="5" fill="#34d399" stroke="#064e3b" stroke-width="3" />
+              <rect id="stream-b2" x="475" y="352" width="82" height="40" rx="5" fill="#10b981" stroke="#064e3b" stroke-width="3" />
+              <rect id="stream-b3" x="580" y="330" width="82" height="40" rx="5" fill="#f87171" stroke="#991b1b" stroke-width="3" />
+            </g>
+
+            <!-- SHRINKING PURCHASING POWER COIN + ALEX EXPLAINING (Right) -->
+            <g transform="translate(650, 95)">
+              <!-- Shrinking Golden Euro/Value Coin -->
+              <g transform="translate(115, 72)">
+                <g id="s4-value-coin">
+                  <circle cx="0" cy="0" r="68" fill="#fbbf24" stroke="#fef08a" stroke-width="5" />
+                  <text x="0" y="-6" text-anchor="middle" fill="#451a03" font-size="20" font-weight="900" font-family="Inter">PODER DE</text>
+                  <text x="0" y="22" text-anchor="middle" fill="#451a03" font-size="22" font-weight="900" font-family="Inter">COMPRA</text>
+                </g>
+              </g>
+
+              <!-- 2D Alex Explaining -->
+              <g transform="translate(45, 225)">
+                <g id="s4-alex">
+                  <path d="M52 165 L44 240 M84 165 L92 240" stroke="#0f172a" stroke-width="18" stroke-linecap="round" />
+                  <rect x="34" y="78" width="68" height="94" rx="18" fill="url(#emeraldJacket)" />
+                  <circle cx="68" cy="36" r="36" fill="#fcd5b5" />
+                  <path d="M32 28 C32 -4 102 -4 104 28 C86 12 48 12 32 28 Z" fill="#0f172a" />
+                  <circle cx="58" cy="36" r="4.5" fill="#0f172a" />
+                  <circle cx="78" cy="36" r="4.5" fill="#0f172a" />
+                  <ellipse cx="68" cy="54" rx="9" ry="7" fill="#7f1d1d" />
+                  <!-- Open Explaining Arms -->
+                  <path d="M36 96 L-24 68 M100 96 L154 68" stroke="#10b981" stroke-width="16" stroke-linecap="round" />
+                </g>
+              </g>
+            </g>
+          </svg>
         </div>
       </section>
 
-      <!-- SCENE 5: CONCLUSIÓN Y TEMPUS CTA -->
-      <section id="scene-5" class="scene-wrap" style="opacity: 0;" data-layout-allow-safe-zone>
-        <div class="scene-tagline" data-layout-allow-safe-zone>LA SOLUCIÓN INTELIGENTE</div>
-        <h1 class="scene-headline" data-layout-allow-safe-zone>
-          No dejes tu dinero quieto: <span class="headline-highlight">invierte en activos reales</span>
+      <!-- =================================================================== -->
+      <!-- SCENE 5: EL ESCUDO DE ACTIVOS REALES · TEMPUS CTA (41.6s - 54.0s)   -->
+      <!-- =================================================================== -->
+      <section id="scene-5" class="scene-layer" data-layout-allow-overlap>
+        <div class="kicker-pill kicker-emerald" id="s5-kicker" data-layout-ignore>🛡️ LA SOLUCIÓN INTELIGENTE · TEMPUS</div>
+        <h1 class="scene-title" id="s5-title">
+          Protege tu dinero invirtiendo en <span class="hl-emerald">activos reales</span>
         </h1>
 
-        <div class="tempus-hero-shield">
-          <div class="tempus-monogram-bars">
-            <div id="cta-bar-1" class="monogram-col mono-1"></div>
-            <div id="cta-bar-2" class="monogram-col mono-2"></div>
-            <div id="cta-bar-3" class="monogram-col mono-3"></div>
-          </div>
+        <!-- 2D ANIMATED DIORAMA 5: COLUMNAS DE PATRIMONIO + ALEX CON ESCUDO TEMPUS -->
+        <div class="diorama-card" id="s5-diorama" style="height: 820px; border-color: rgba(251, 191, 36, 0.55);">
+          <div class="diorama-label" data-layout-ignore>🏛️ FORTALEZA PATRIMONIAL TEMPUS 2D</div>
+          <svg class="diorama-svg" viewBox="0 0 940 820" data-layout-ignore>
+            <defs>
+              <linearGradient id="goldCol" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#fde68a" />
+                <stop offset="50%" stop-color="#f59e0b" />
+                <stop offset="100%" stop-color="#92400e" />
+              </linearGradient>
+              <linearGradient id="emCol" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#6ee7b7" />
+                <stop offset="50%" stop-color="#10b981" />
+                <stop offset="100%" stop-color="#064e3b" />
+              </linearGradient>
+            </defs>
+
+            <rect x="0" y="0" width="940" height="720" fill="#071318" />
+            <circle cx="560" cy="300" r="280" fill="#10b981" opacity="0.12" />
+            <rect x="0" y="715" width="940" height="105" fill="#0f172a" />
+
+            <!-- 4 RISING WEALTH PILLARS (Morphed from Vortex!) -->
+            <g id="s5-pillars">
+              <g transform="translate(155, 545)"><g id="s5-col-1">
+                <rect width="135" height="170" rx="14" fill="url(#emCol)" stroke="#a7f3d0" stroke-width="3" />
+                <text x="67" y="52" text-anchor="middle" fill="#022c22" font-size="22" font-weight="900" font-family="Inter">BONOS</text>
+              </g></g>
+              <g transform="translate(315, 455)"><g id="s5-col-2">
+                <rect width="135" height="260" rx="14" fill="url(#emCol)" stroke="#a7f3d0" stroke-width="3" />
+                <text x="67" y="52" text-anchor="middle" fill="#022c22" font-size="22" font-weight="900" font-family="Inter">ORO REAL</text>
+              </g></g>
+              <g transform="translate(475, 365)"><g id="s5-col-3">
+                <rect width="135" height="350" rx="14" fill="url(#emCol)" stroke="#a7f3d0" stroke-width="3" />
+                <text x="67" y="52" text-anchor="middle" fill="#022c22" font-size="22" font-weight="900" font-family="Inter">S&amp;P 500</text>
+              </g></g>
+              <g transform="translate(635, 265)"><g id="s5-col-4">
+                <rect width="165" height="450" rx="16" fill="url(#goldCol)" stroke="#fef08a" stroke-width="4" />
+                <text x="82" y="56" text-anchor="middle" fill="#451a03" font-size="24" font-weight="900" font-family="Inter">TEMPUS</text>
+                <text x="82" y="88" text-anchor="middle" fill="#451a03" font-size="18" font-weight="800" font-family="Inter">INDEXADO</text>
+              </g></g>
+            </g>
+
+            <!-- HERO 2D ALEX ATOP THE GOLD TEMPUS PILLAR WITH SHIELD & THUMBS UP -->
+            <g transform="translate(652, 22)">
+              <g id="s5-hero-alex">
+                <path d="M52 168 L44 242 M86 168 L94 242" stroke="#0f172a" stroke-width="18" stroke-linecap="round" />
+                <rect x="34" y="82" width="70" height="94" rx="18" fill="url(#emeraldJacket)" stroke="#fbbf24" stroke-width="2.5" />
+                <circle cx="69" cy="40" r="36" fill="#fcd5b5" />
+                <path d="M33 32 C33 0 103 0 105 32 C87 16 49 16 33 32 Z" fill="#0f172a" />
+                <circle cx="58" cy="38" r="4.5" fill="#0f172a" />
+                <circle cx="80" cy="38" r="4.5" fill="#0f172a" />
+                <path d="M55 54 Q69 68 83 54" stroke="#065f46" stroke-width="4.5" fill="none" stroke-linecap="round" />
+
+                <!-- Thumbs Up Right Arm -->
+                <g id="s5-thumb-arm">
+                  <path d="M102 102 L148 76" stroke="#10b981" stroke-width="16" stroke-linecap="round" />
+                  <circle cx="154" cy="72" r="13" fill="#fcd5b5" />
+                  <path d="M154 72 L154 48" stroke="#fcd5b5" stroke-width="11" stroke-linecap="round" />
+                </g>
+
+                <!-- Glowing Golden Tempus Shield on Left Arm -->
+                <g transform="translate(-52, 68)">
+                  <g id="s5-shield">
+                    <path d="M0 0 L84 0 L84 58 C84 96 42 122 42 122 C42 122 0 96 0 58 Z" fill="url(#goldCol)" stroke="#ffffff" stroke-width="4" />
+                    <text x="42" y="66" text-anchor="middle" fill="#022c22" font-size="34" font-weight="900" font-family="Inter">T</text>
+                  </g>
+                </g>
+              </g>
+            </g>
+
+            <!-- RED INFLATION ARROWS BOUNCING OFF THE TEMPUS SHIELD -->
+            <g transform="translate(80, 145)">
+              <g id="s5-arrow-1">
+                <line x1="0" y1="0" x2="115" y2="0" stroke="#ef4444" stroke-width="10" stroke-linecap="round" />
+                <polygon points="115,-16 148,0 115,16" fill="#ef4444" />
+                <text x="55" y="-16" text-anchor="middle" fill="#fca5a5" font-size="18" font-weight="900" font-family="Inter">INFLACIÓN</text>
+              </g>
+            </g>
+            <g transform="translate(120, 215)">
+              <g id="s5-arrow-2">
+                <line x1="0" y1="0" x2="115" y2="0" stroke="#f87171" stroke-width="10" stroke-linecap="round" />
+                <polygon points="115,-16 148,0 115,16" fill="#f87171" />
+                <text x="55" y="-16" text-anchor="middle" fill="#fecaca" font-size="18" font-weight="900" font-family="Inter">IPC ANUAL</text>
+              </g>
+            </g>
+          </svg>
         </div>
 
-        <div class="card-photo-container" style="height: 360px;">
-          <div class="cta-social-box" data-layout-allow-safe-zone>
-            <div class="cta-text-left">
-              <span class="cta-lead">Protege tu patrimonio en Tempus</span>
-              <span class="cta-sub">Carteras indexadas que superan la inflación</span>
-            </div>
-            <div class="cta-pill-btn">SEGUIR @TEMPUSWEALTH</div>
-          </div>
-
-          <!-- 2D Thumbs Up Character -->
-          <div id="char-5" class="char-container" style="right: -10px; bottom: -30px;">
-            <img class="char-img" src="assets/characters/char_thumbsup.svg" alt="Personaje Tempus Pulgar Arriba">
-          </div>
-        </div>
-
-        <div class="pill-data-row" data-layout-allow-safe-zone>
-          <div class="pill-stat pill-emerald">🛡️ Activos Reales vs Inflación</div>
-          <div class="pill-stat pill-gold">⏳ Mañana otro Dato Curioso</div>
+        <!-- TEMPUS FOLLOW & BIO CTA -->
+        <div class="cta-master-card" id="s5-cta-card">
+          <div class="cta-headline">Invierte con Tempus · Link en la Bio ↗</div>
+          <div class="cta-subline">Síguenos para el Dato Curioso #02 de mañana</div>
+          <div class="cta-button-pill" id="s5-cta-btn">🚀 SEGUIR @TEMPUSWEALTH</div>
         </div>
       </section>
 
     </main>
 
-    <!-- FIXED PERSISTENT BOTTOM KARAOKE SUBTITLES -->
-    <footer class="bottom-karaoke-fixed" data-layout-allow-safe-zone>
-      <div class="karaoke-content">
-        <!-- SCENE 1 SUBTITLES -->
-        <p id="k-1a" class="karaoke-phrase" data-layout-allow-safe-zone>
-          ¿Sabías que en <span class="k-word-highlight">1923</span> una sola barra de pan...
-        </p>
-        <p id="k-1b" class="karaoke-phrase" data-layout-allow-safe-zone>
-          ...llegó a costar <span class="k-word-red">200.000 millones</span> de marcos?
-        </p>
-        <p id="k-1c" class="karaoke-phrase" data-layout-allow-safe-zone>
-          Sí, ¡has oído bien! <span class="k-word-gold">200.000 millones.</span>
-        </p>
+    <!-- ================= SPECTACULAR 2D MORPH TRANSITION PORTAL LAYER ================= -->
+    <svg class="morph-overlay" viewBox="0 0 1080 1920" data-layout-allow-overflow data-layout-ignore>
+      <!-- TRANSITION 1 -> 2: Flying Tumbled Banknote Bricks from Wheelbarrow to Kids' Castle -->
+      <g id="t12-bricks" opacity="0">
+        <g transform="translate(420, 1180)"><g id="t12-b1">
+          <rect width="150" height="76" rx="10" fill="#10b981" stroke="#fef08a" stroke-width="4" />
+          <rect x="58" y="0" width="32" height="76" fill="#fbbf24" />
+        </g></g>
+        <g transform="translate(560, 1140)"><g id="t12-b2">
+          <rect width="150" height="76" rx="10" fill="#34d399" stroke="#fef08a" stroke-width="4" />
+          <rect x="58" y="0" width="32" height="76" fill="#fbbf24" />
+        </g></g>
+        <g transform="translate(480, 1080)"><g id="t12-b3">
+          <rect width="150" height="76" rx="10" fill="#6ee7b7" stroke="#fef08a" stroke-width="4" />
+          <rect x="58" y="0" width="32" height="76" fill="#fbbf24" />
+        </g></g>
+      </g>
 
-        <!-- SCENE 2 SUBTITLES -->
-        <p id="k-2a" class="karaoke-phrase" data-layout-allow-safe-zone>
-          La inflación en Alemania se descontroló tanto...
-        </p>
-        <p id="k-2b" class="karaoke-phrase" data-layout-allow-safe-zone>
-          ...que los niños usaban <span class="k-word-highlight">fajos reales de billetes</span> como bloques...
-        </p>
-        <p id="k-2c" class="karaoke-phrase" data-layout-allow-safe-zone>
-          ...para construir castillos, ¡porque los juguetes costaban una fortuna!
-        </p>
+      <!-- TRANSITION 2 -> 3: Giant 2D Wallpaper Paint Roller Unrolling Banknote Sheet -->
+      <g id="t23-roller-wipe" opacity="0">
+        <rect id="t23-sheet" x="0" y="0" width="1080" height="1920" fill="#064e3b" opacity="0.92" />
+        <g id="t23-roller">
+          <rect x="60" y="-45" width="960" height="90" rx="30" fill="#fde68a" stroke="#b45309" stroke-width="8" />
+          <rect x="40" y="-15" width="1000" height="30" rx="10" fill="#10b981" />
+          <rect x="515" y="45" width="50" height="190" rx="16" fill="#d97706" />
+        </g>
+      </g>
 
-        <!-- SCENE 3 SUBTITLES -->
-        <p id="k-3a" class="karaoke-phrase" data-layout-allow-safe-zone>
-          Era tan absurdo que la gente <span class="k-word-highlight">empapelaba sus paredes</span> con billetes...
-        </p>
-        <p id="k-3b" class="karaoke-phrase" data-layout-allow-safe-zone>
-          ...porque salía más barato que comprar pintura...
-        </p>
-        <p id="k-3c" class="karaoke-phrase" data-layout-allow-safe-zone>
-          ...y otros los <span class="k-word-red">quemaban en la chimenea</span> para calentarse del frío.
-        </p>
+      <!-- TRANSITION 3 -> 4: Giant Interlocking Steel Gears Portal -->
+      <g id="t34-gear-portal" opacity="0">
+        <g transform="translate(540, 960)"><g id="t34-big-gear">
+          <circle cx="0" cy="0" r="280" fill="#1e293b" stroke="#fbbf24" stroke-width="18" />
+          <line x1="-330" y1="0" x2="330" y2="0" stroke="#fbbf24" stroke-width="36" />
+          <line x1="0" y1="-330" x2="0" y2="330" stroke="#fbbf24" stroke-width="36" />
+          <circle cx="0" cy="0" r="110" fill="#ef4444" />
+        </g></g>
+      </g>
 
-        <!-- SCENE 4 SUBTITLES -->
-        <p id="k-4a" class="karaoke-phrase" data-layout-allow-safe-zone>
-          El gobierno imprimió billetes <span class="k-word-red">sin parar de la nada.</span>
-        </p>
-        <p id="k-4b" class="karaoke-phrase" data-layout-allow-safe-zone>
-          Y cuando imprimes dinero sin respaldo...
-        </p>
-        <p id="k-4c" class="karaoke-phrase" data-layout-allow-safe-zone>
-          ...su poder adquisitivo <span class="k-word-red">se evapora por completo.</span>
-        </p>
+      <!-- TRANSITION 4 -> 5: Golden Alchemy Shockwave Ring -->
+      <g id="t45-alchemy" opacity="0">
+        <circle id="t45-ring" cx="540" cy="960" r="40" fill="none" stroke="#fde68a" stroke-width="32" />
+        <circle id="t45-core" cx="540" cy="960" r="65" fill="#fbbf24" />
+      </g>
+    </svg>
 
-        <!-- SCENE 5 SUBTITLES -->
-        <p id="k-5a" class="karaoke-phrase" data-layout-allow-safe-zone>
-          Por eso, dejar tu dinero quieto en el banco es una trampa.
-        </p>
-        <p id="k-5b" class="karaoke-phrase" data-layout-allow-safe-zone>
-          En <span class="k-word-green">Tempus</span> te ayudamos a invertirlo en <span class="k-word-highlight">activos reales.</span>
-        </p>
-        <p id="k-5c" class="karaoke-phrase" data-layout-allow-safe-zone>
-          ¡Síguenos para no perderte el <span class="k-word-gold">dato curioso de mañana!</span>
-        </p>
-      </div>
+    <!-- ================= PERSISTENT BOTTOM KARAOKE PILL ================= -->
+    <footer class="karaoke-bar" data-layout-allow-safe-zone>
+      <p id="k-1a" class="karaoke-line">¿Sabías que en <span class="hl-gold">1923</span> una sola barra de pan...</p>
+      <p id="k-1b" class="karaoke-line">...llegó a costar <span class="hl-red">200.000 millones</span> de marcos?</p>
+      <p id="k-1c" class="karaoke-line">Sí, ¡has oído bien! <span class="hl-gold">200.000 millones.</span></p>
+
+      <p id="k-2a" class="karaoke-line">La inflación en Alemania se descontroló tanto...</p>
+      <p id="k-2b" class="karaoke-line">...que los niños usaban <span class="hl-emerald">fajos reales de billetes</span> como bloques...</p>
+      <p id="k-2c" class="karaoke-line">...para hacer castillos, ¡porque los juguetes costaban una fortuna!</p>
+
+      <p id="k-3a" class="karaoke-line">La gente <span class="hl-gold">empapelaba sus paredes</span> con billetes...</p>
+      <p id="k-3b" class="karaoke-line">...porque salía más barato que comprar pintura...</p>
+      <p id="k-3c" class="karaoke-line">...y los <span class="hl-red">quemaban en la chimenea</span> para calentarse del frío.</p>
+
+      <p id="k-4a" class="karaoke-line">El gobierno imprimió billetes <span class="hl-red">sin parar de la nada.</span></p>
+      <p id="k-4b" class="karaoke-line">Y cuando imprimes dinero sin respaldo...</p>
+      <p id="k-4c" class="karaoke-line">...su poder adquisitivo <span class="hl-red">se evapora por completo.</span></p>
+
+      <p id="k-5a" class="karaoke-line">Por eso, dejar tu dinero quieto en el banco es una trampa.</p>
+      <p id="k-5b" class="karaoke-line">En <span class="hl-gold">Tempus</span> te ayudamos a invertirlo en <span class="hl-emerald">activos reales.</span></p>
+      <p id="k-5c" class="karaoke-line">¡Síguenos para no perderte el <span class="hl-gold">dato curioso de mañana!</span></p>
     </footer>
 
   </div>
 
+  <!-- ================= DETERMINISTIC GSAP ANIMATION ENGINE ================= -->
   <script>
     window.__timelines = window.__timelines || {};
-
     const tl = gsap.timeline({ paused: true });
 
-    // SCENE TIMINGS:
-    // Scene 1: 0.0s to 11.8s
-    // Scene 2: 11.8s to 22.4s
-    // Scene 3: 22.4s to 32.6s
-    // Scene 4: 32.6s to 41.6s
-    // Scene 5: 41.6s to 54.0s
+    // Helper for crisp karaoke subtitle transitions
+    function cueSub(id, tIn, tOut) {
+      tl.fromTo(id,
+        { opacity: 0, y: 24 },
+        { opacity: 1, y: 0, duration: 0.24, ease: "power2.out" },
+        tIn
+      );
+      tl.to(id,
+        { opacity: 0, y: -22, duration: 0.16, ease: "power2.in" },
+        tOut - 0.10
+      );
+    }
 
-    // INITIAL SETUP
-    tl.set("#scene-1", { opacity: 1, scale: 1, rotationY: 0, z: 0 });
-    tl.set(["#scene-2", "#scene-3", "#scene-4", "#scene-5"], { opacity: 0, scale: 0.92, z: -100 });
-
-    // Character 1 Shocked Bounce
-    tl.fromTo("#char-1", 
-      { y: 30, opacity: 0, scale: 0.8 }, 
-      { y: 0, opacity: 1, scale: 1, duration: 0.7, ease: "back.out(1.7)" }, 
-      0.3
-    );
-    // Subtle breathing / bobbing for character 1
-    tl.to("#char-1", { y: -12, duration: 1.2, ease: "sine.inOut", yoyo: true, repeat: 7 }, 1.0);
-
-    // Banknote Card 3D entrance
-    tl.fromTo("#banknote-card",
-      { rotateX: 25, rotateY: -15, scale: 0.85, opacity: 0 },
-      { rotateX: 0, rotateY: 0, scale: 1, opacity: 1, duration: 1.0, ease: "power3.out" },
-      0.2
+    // Top HUD subtle live pulse (deterministic finite repeats)
+    tl.fromTo("#hud-dot",
+      { scale: 0.85, opacity: 0.7 },
+      { scale: 1.25, opacity: 1, duration: 0.7, yoyo: true, repeat: 74, ease: "sine.inOut" },
+      0
     );
 
-    // Subtitles Scene 1
-    tl.to("#k-1a", { opacity: 1, y: 0, duration: 0.35 }, 0.2);
-    tl.to("#k-1a", { opacity: 0, y: -20, duration: 0.3 }, 3.5);
+    // =========================================================================
+    // SCENE 1: LA PANADERÍA DE LOS 200 MIL MILLONES (0.0s -> 11.5s)
+    // =========================================================================
+    tl.set("#scene-1", { opacity: 1 }, 0);
+    tl.fromTo("#bg-1", { opacity: 0.55, scale: 1.0 }, { opacity: 0.55, scale: 1.12, duration: 11.6, ease: "none" }, 0);
 
-    tl.to("#k-1b", { opacity: 1, y: 0, duration: 0.35 }, 3.7);
-    tl.to("#k-1b", { opacity: 0, y: -20, duration: 0.3 }, 7.5);
+    tl.fromTo("#s1-kicker", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(1.6)" }, 0.1);
+    tl.fromTo("#s1-title", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, 0.25);
+    tl.fromTo("#s1-photo-card", { opacity: 0, y: 35, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.65, ease: "power3.out" }, 0.4);
+    tl.fromTo("#s1-photo-img", { scale: 1.0 }, { scale: 1.10, duration: 11.2, ease: "none" }, 0.4);
+    tl.fromTo("#s1-inset-bill", { scale: 0, rotation: -14 }, { scale: 1, rotation: 3, duration: 0.6, ease: "back.out(1.8)" }, 1.2);
+    tl.fromTo("#s1-stamp", { scale: 2.2, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.38, ease: "back.out(2.2)" }, 3.3);
 
-    tl.to("#k-1c", { opacity: 1, y: 0, duration: 0.35 }, 7.7);
-    tl.to("#k-1c", { opacity: 0, y: -20, duration: 0.3 }, 11.2);
+    // 2D Diorama 1 Action: Alex rolls wheelbarrow in, wheel spins, baker points, jaw drops!
+    tl.fromTo("#s1-diorama", { opacity: 0, y: 45 }, { opacity: 1, y: 0, duration: 0.65, ease: "power3.out" }, 0.55);
+    tl.fromTo("#s1-alex-wheelbarrow", { x: -240 }, { x: 18, duration: 2.4, ease: "power2.out" }, 0.7);
+    tl.fromTo("#s1-wheel", { rotation: 0, svgOrigin: "0 0" }, { rotation: 720, duration: 2.4, ease: "power2.out" }, 0.7);
+    tl.fromTo("#s1-leg-l", { rotation: -18, transformOrigin: "top center" }, { rotation: 18, duration: 0.35, yoyo: true, repeat: 6, ease: "sine.inOut" }, 0.7);
+    tl.fromTo("#s1-leg-r", { rotation: 18, transformOrigin: "top center" }, { rotation: -18, duration: 0.35, yoyo: true, repeat: 6, ease: "sine.inOut" }, 0.7);
 
-    // ==========================================
-    // METAMORPHOSIS 1 -> 2 (at 11.4s to 12.2s)
-    // ==========================================
-    // Banknote card spins and flattens into the photo card
-    tl.to("#banknote-card", {
-      scale: 0.75,
-      rotateY: 90,
-      opacity: 0,
-      duration: 0.6,
-      ease: "power2.in"
-    }, 11.4);
+    // Baker waves arm at 200.000M price sign
+    tl.fromTo("#s1-baker-arm", { rotation: -12, transformOrigin: "18px 86px" }, { rotation: 18, duration: 0.45, yoyo: true, repeat: 20, ease: "sine.inOut" }, 1.0);
+    tl.fromTo("#s1-price-sign", { scale: 0.92, transformOrigin: "center center" }, { scale: 1.05, duration: 0.5, yoyo: true, repeat: 14, ease: "sine.inOut" }, 3.3);
 
-    tl.to("#char-1", {
-      x: -50,
-      opacity: 0,
-      duration: 0.5,
-      ease: "power2.in"
-    }, 11.5);
+    // Alex gasps & sweat drop bounces when price slams
+    tl.fromTo("#s1-mouth", { scaleY: 0.4, transformOrigin: "center center" }, { scaleY: 1.35, duration: 0.35, yoyo: true, repeat: 16, ease: "sine.inOut" }, 3.3);
+    tl.fromTo("#s1-sweat", { y: 0, opacity: 1 }, { y: 26, opacity: 0.2, duration: 0.85, repeat: 8, ease: "power1.in" }, 3.4);
+    tl.fromTo("#s1-fly-bill-1", { y: 0, rotation: -12 }, { y: -45, rotation: 22, duration: 1.5, yoyo: true, repeat: 6, ease: "sine.inOut" }, 1.0);
+    tl.fromTo("#s1-fly-bill-2", { y: 0, rotation: 15 }, { y: -38, rotation: -20, duration: 1.3, yoyo: true, repeat: 7, ease: "sine.inOut" }, 1.2);
 
-    tl.to("#scene-1", {
-      opacity: 0,
-      scale: 0.95,
-      duration: 0.6,
-      ease: "power2.inOut"
-    }, 11.5);
+    cueSub("#k-1a", 0.35, 3.35);
+    cueSub("#k-1b", 3.45, 7.45);
+    cueSub("#k-1c", 7.55, 11.20);
 
-    // Scene 2 emerges directly from the morph
+    // =========================================================================
+    // COOL MORPH TRANSITION 1 -> 2 (11.25s -> 12.15s):
+    // Wheelbarrow tilts forward & launches 2D banknote bundles into Scene 2 Castle!
+    // =========================================================================
+    tl.to("#s1-barrow", { rotation: 26, x: 60, transformOrigin: "242px 178px", duration: 0.45, ease: "power2.in" }, 11.25);
+    tl.set("#t12-bricks", { opacity: 1 }, 11.35);
+    tl.fromTo("#t12-b1",
+      { x: -80, y: 120, scale: 0.7, rotation: -25 },
+      { x: 30, y: -220, scale: 1.7, rotation: 180, duration: 0.42, ease: "power2.out" },
+      11.35
+    );
+    tl.to("#t12-b1", { x: -40, y: 220, scale: 0.65, rotation: 360, duration: 0.38, ease: "back.out(1.5)" }, 11.77);
+
+    tl.fromTo("#t12-b2",
+      { x: 0, y: 140, scale: 0.7, rotation: 15 },
+      { x: -60, y: -260, scale: 1.8, rotation: -160, duration: 0.42, ease: "power2.out" },
+      11.40
+    );
+    tl.to("#t12-b2", { x: 20, y: 220, scale: 0.65, rotation: -360, duration: 0.38, ease: "back.out(1.5)" }, 11.82);
+
+    tl.fromTo("#t12-b3",
+      { x: -40, y: 100, scale: 0.7, rotation: 5 },
+      { x: 0, y: -300, scale: 1.9, rotation: 190, duration: 0.42, ease: "power2.out" },
+      11.44
+    );
+    tl.to("#t12-b3", { x: 0, y: 180, scale: 0.65, rotation: 360, duration: 0.38, ease: "back.out(1.5)" }, 11.86);
+    tl.to("#t12-bricks", { opacity: 0, duration: 0.15 }, 12.15);
+
+    // Whip-slide Scene 1 left while Scene 2 enters from right
+    tl.to("#scene-1", { x: -1080, rotationY: -18, opacity: 0, duration: 0.62, ease: "power3.inOut" }, 11.45);
+    tl.to("#bg-1", { opacity: 0, duration: 0.7 }, 11.45);
+    tl.fromTo("#bg-2", { opacity: 0, scale: 1.1 }, { opacity: 0.52, scale: 1.0, duration: 10.6, ease: "none" }, 11.5);
+
+    // =========================================================================
+    // SCENE 2: CASTILLOS DE BILLETES CON NIÑOS 2D (11.75s -> 22.1s)
+    // =========================================================================
     tl.fromTo("#scene-2",
-      { opacity: 0, scale: 1.08, z: 80 },
-      { opacity: 1, scale: 1, z: 0, duration: 0.8, ease: "power2.out" },
-      11.8
+      { x: 1080, opacity: 0 },
+      { x: 0, opacity: 1, duration: 0.65, ease: "power3.out" },
+      11.65
+    );
+    tl.fromTo("#s2-photo-img", { scale: 1.0 }, { scale: 1.10, duration: 10.2, ease: "none" }, 11.7);
+
+    // 2D Castle bricks stack dynamically row by row!
+    tl.fromTo(["#b-r1-1", "#b-r1-2", "#b-r1-3", "#b-r1-4"],
+      { y: -120, opacity: 0, scale: 0.6 },
+      { y: 0, opacity: 1, scale: 1, stagger: 0.08, duration: 0.45, ease: "back.out(1.8)" },
+      11.95
+    );
+    tl.fromTo(["#b-r2-1", "#b-r2-2", "#b-r2-3"],
+      { y: -130, opacity: 0, scale: 0.6 },
+      { y: 0, opacity: 1, scale: 1, stagger: 0.10, duration: 0.45, ease: "back.out(1.8)" },
+      12.65
+    );
+    tl.fromTo(["#b-r3-1", "#b-r3-2"],
+      { y: -130, opacity: 0, scale: 0.6 },
+      { y: 0, opacity: 1, scale: 1, stagger: 0.12, duration: 0.45, ease: "back.out(1.8)" },
+      13.35
+    );
+    tl.fromTo("#b-r4-top",
+      { y: -160, opacity: 0, scale: 0.5 },
+      { y: 0, opacity: 1, scale: 1, duration: 0.55, ease: "back.out(2.1)" },
+      14.0
     );
 
-    tl.fromTo("#polaroid-kids",
-      { rotateY: -90, scale: 0.8 },
-      { rotateY: 0, scale: 1, duration: 0.8, ease: "back.out(1.4)" },
-      11.8
+    // 2D Boy stacks blocks & 2D Girl jumps for joy
+    tl.fromTo("#s2-boy-arm", { rotation: 22, transformOrigin: "90px 112px" }, { rotation: -22, duration: 0.65, yoyo: true, repeat: 13, ease: "sine.inOut" }, 12.0);
+    tl.fromTo("#s2-kid-girl", { y: 0 }, { y: -22, duration: 0.42, yoyo: true, repeat: 21, ease: "power1.inOut" }, 12.1);
+    tl.fromTo("#s2-alex-presenter", { scale: 0.7, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.55, ease: "back.out(1.7)" }, 13.0);
+
+    cueSub("#k-2a", 12.00, 14.70);
+    cueSub("#k-2b", 14.80, 18.45);
+    cueSub("#k-2c", 18.55, 21.80);
+
+    // =========================================================================
+    // COOL MORPH TRANSITION 2 -> 3 (21.90s -> 22.75s):
+    // Giant 2D Paint Roller sweeps from bottom to top unrolling banknote wallpaper!
+    // =========================================================================
+    tl.set("#t23-roller-wipe", { opacity: 1 }, 21.90);
+    tl.fromTo("#t23-roller",
+      { y: 1960 },
+      { y: -140, duration: 0.75, ease: "power2.inOut" },
+      21.90
     );
-
-    tl.fromTo("#char-2",
-      { x: 60, opacity: 0, scale: 0.85 },
-      { x: 0, opacity: 1, scale: 1, duration: 0.7, ease: "back.out(1.5)" },
-      12.0
+    tl.fromTo("#t23-sheet",
+      { scaleY: 0, transformOrigin: "bottom center" },
+      { scaleY: 1, duration: 0.42, ease: "power2.in" },
+      21.90
     );
-    tl.to("#char-2", { y: -10, duration: 1.1, ease: "sine.inOut", yoyo: true, repeat: 7 }, 12.7);
-
-    // Subtitles Scene 2
-    tl.to("#k-2a", { opacity: 1, y: 0, duration: 0.35 }, 11.8);
-    tl.to("#k-2a", { opacity: 0, y: -20, duration: 0.3 }, 14.5);
-
-    tl.to("#k-2b", { opacity: 1, y: 0, duration: 0.35 }, 14.7);
-    tl.to("#k-2b", { opacity: 0, y: -20, duration: 0.3 }, 18.4);
-
-    tl.to("#k-2c", { opacity: 1, y: 0, duration: 0.35 }, 18.6);
-    tl.to("#k-2c", { opacity: 0, y: -20, duration: 0.3 }, 22.0);
-
-    // ==========================================
-    // METAMORPHOSIS 2 -> 3 (at 22.0s to 22.8s)
-    // ==========================================
-    // The kids polaroid rotates slightly and transforms into wallpapering photo
-    tl.to("#polaroid-kids", {
-      rotateZ: 6,
-      scale: 0.85,
-      opacity: 0,
-      duration: 0.6,
-      ease: "power2.in"
-    }, 22.0);
-
-    tl.to("#char-2", {
-      y: 40,
-      opacity: 0,
-      duration: 0.5,
-      ease: "power2.in"
-    }, 22.1);
-
-    tl.to("#scene-2", {
-      opacity: 0,
-      duration: 0.6,
-      ease: "power2.inOut"
-    }, 22.1);
-
-    // Scene 3 blooms with warm amber glow
-    tl.fromTo("#scene-3",
-      { opacity: 0, scale: 1.05 },
-      { opacity: 1, scale: 1, duration: 0.8, ease: "power2.out" },
-      22.4
+    tl.set("#scene-2", { opacity: 0 }, 22.32);
+    tl.set("#scene-3", { opacity: 1 }, 22.32);
+    tl.to("#bg-2", { opacity: 0, duration: 0.4 }, 22.15);
+    tl.fromTo("#bg-3", { opacity: 0, scale: 1.0 }, { opacity: 0.52, scale: 1.12, duration: 10.2, ease: "none" }, 22.25);
+    tl.to("#t23-sheet",
+      { scaleY: 0, transformOrigin: "top center", duration: 0.40, ease: "power2.out" },
+      22.34
     );
+    tl.set("#t23-roller-wipe", { opacity: 0 }, 22.78);
 
-    tl.fromTo("#polaroid-wallpaper",
-      { rotateZ: -6, scale: 0.9, opacity: 0 },
-      { rotateZ: 0, scale: 1, opacity: 1, duration: 0.8, ease: "back.out(1.4)" },
-      22.4
+    // =========================================================================
+    // SCENE 3: EMPAPELAR PAREDES Y QUEMAR DINERO EN LA CHIMENEA (22.35s -> 32.2s)
+    // =========================================================================
+    tl.fromTo("#s3-photo-card", { scale: 0.92, y: 25 }, { scale: 1, y: 0, duration: 0.55, ease: "power3.out" }, 22.4);
+    tl.fromTo("#s3-photo-img", { scale: 1.0 }, { scale: 1.10, duration: 9.8, ease: "none" }, 22.4);
+    tl.fromTo("#s3-diorama", { scale: 0.95, y: 30 }, { scale: 1, y: 0, duration: 0.55, ease: "power3.out" }, 22.45);
+
+    // 2D Decorator brushes banknotes up and down on wall
+    tl.fromTo("#s3-brush-arm", { rotation: -18, transformOrigin: "84px 115px" }, { rotation: 24, duration: 0.55, yoyo: true, repeat: 16, ease: "sine.inOut" }, 22.5);
+
+    // 2D Roaring Fireplace Flames + Sparks + Alex tossing bundles into fire
+    tl.fromTo("#flame-outer", { scaleY: 0.85, scaleX: 0.94, transformOrigin: "bottom center" }, { scaleY: 1.16, scaleX: 1.06, duration: 0.24, yoyo: true, repeat: 38, ease: "sine.inOut" }, 22.4);
+    tl.fromTo("#flame-mid", { scaleY: 1.1, rotation: -4, transformOrigin: "bottom center" }, { scaleY: 0.86, rotation: 5, duration: 0.20, yoyo: true, repeat: 45, ease: "sine.inOut" }, 22.4);
+    tl.fromTo("#flame-core", { scaleY: 0.88, transformOrigin: "bottom center" }, { scaleY: 1.20, duration: 0.16, yoyo: true, repeat: 56, ease: "sine.inOut" }, 22.4);
+    tl.fromTo("#spark-1", { y: 0, opacity: 1 }, { y: -145, opacity: 0, duration: 0.9, repeat: 10, ease: "power1.out" }, 22.5);
+    tl.fromTo("#spark-2", { y: 0, opacity: 1 }, { y: -165, opacity: 0, duration: 1.1, repeat: 8, ease: "power1.out" }, 22.8);
+
+    tl.fromTo("#s3-toss-arm", { rotation: -24, transformOrigin: "92px 126px" }, { rotation: 16, duration: 0.65, yoyo: true, repeat: 13, ease: "power1.inOut" }, 22.6);
+    tl.fromTo("#s3-alex-fire", { x: -4 }, { x: 4, duration: 0.14, yoyo: true, repeat: 64, ease: "sine.inOut" }, 22.6);
+
+    cueSub("#k-3a", 22.55, 25.75);
+    cueSub("#k-3b", 25.85, 28.65);
+    cueSub("#k-3c", 28.75, 31.95);
+
+    // =========================================================================
+    // COOL MORPH TRANSITION 3 -> 4 (32.00s -> 32.85s):
+    // Fireplace zoom morphs into Giant Spinning Steel Gear Portal!
+    // =========================================================================
+    tl.to("#scene-3", { scale: 1.22, opacity: 0, duration: 0.48, ease: "power2.in" }, 32.00);
+    tl.set("#t34-gear-portal", { opacity: 1 }, 32.05);
+    tl.fromTo("#t34-big-gear",
+      { scale: 0.15, rotation: 0, svgOrigin: "0 0" },
+      { scale: 4.2, rotation: 240, duration: 0.78, ease: "power3.inOut" },
+      32.05
     );
+    tl.to("#t34-gear-portal", { opacity: 0, duration: 0.22 }, 32.65);
 
-    tl.fromTo("#char-3",
-      { scale: 0.8, opacity: 0 },
-      { scale: 1, opacity: 1, duration: 0.7, ease: "back.out(1.5)" },
-      22.6
-    );
-    tl.to("#char-3", { x: -6, duration: 0.2, ease: "sine.inOut", yoyo: true, repeat: 30 }, 23.0); // shivering!
+    tl.to("#bg-3", { opacity: 0, duration: 0.5 }, 32.15);
+    tl.fromTo("#bg-4", { opacity: 0, scale: 1.1 }, { opacity: 0.52, scale: 1.0, duration: 9.2, ease: "none" }, 32.25);
 
-    // Subtitles Scene 3
-    tl.to("#k-3a", { opacity: 1, y: 0, duration: 0.35 }, 22.4);
-    tl.to("#k-3a", { opacity: 0, y: -20, duration: 0.3 }, 25.8);
-
-    tl.to("#k-3b", { opacity: 1, y: 0, duration: 0.35 }, 26.0);
-    tl.to("#k-3b", { opacity: 0, y: -20, duration: 0.3 }, 28.8);
-
-    tl.to("#k-3c", { opacity: 1, y: 0, duration: 0.35 }, 29.0);
-    tl.to("#k-3c", { opacity: 0, y: -20, duration: 0.3 }, 32.2);
-
-    // ==========================================
-    // METAMORPHOSIS 3 -> 4 (at 32.2s to 33.0s)
-    // ==========================================
-    // Wallpaper photo zooms into the Reichsbank vault
-    tl.to("#polaroid-wallpaper", {
-      scale: 1.3,
-      opacity: 0,
-      duration: 0.6,
-      ease: "power2.in"
-    }, 32.2);
-
-    tl.to("#char-3", {
-      opacity: 0,
-      duration: 0.5
-    }, 32.3);
-
-    tl.to("#scene-3", {
-      opacity: 0,
-      duration: 0.6
-    }, 32.3);
-
-    // Scene 4 appears (Inflation dashboard & gauge)
+    // =========================================================================
+    // SCENE 4: LA IMPRENTA DEL REICHSBANK Y EVAPORACIÓN DEL VALOR (32.45s -> 41.3s)
+    // =========================================================================
     tl.fromTo("#scene-4",
-      { opacity: 0, scale: 0.92 },
-      { opacity: 1, scale: 1, duration: 0.8, ease: "power2.out" },
-      32.6
+      { scale: 0.86, opacity: 0 },
+      { scale: 1, opacity: 1, duration: 0.58, ease: "back.out(1.3)" },
+      32.42
     );
+    tl.fromTo("#s4-photo-img", { scale: 1.0 }, { scale: 1.10, duration: 8.8, ease: "none" }, 32.5);
 
-    // Gauge bar animation (surges to 100% into hyperinflation)
-    tl.fromTo("#gauge-bar",
-      { width: "10%" },
-      { width: "100%", duration: 3.5, ease: "power2.inOut" },
-      33.0
+    // 2D Printing Press Gears Spinning + Siren Flashing + Bills Shooting & Evaporating
+    tl.fromTo("#s4-gear-1", { rotation: 0, svgOrigin: "0 0" }, { rotation: 1080, duration: 8.8, ease: "none" }, 32.45);
+    tl.fromTo("#s4-gear-2", { rotation: 0, svgOrigin: "0 0" }, { rotation: -1080, duration: 8.8, ease: "none" }, 32.45);
+    tl.fromTo("#s4-siren", { opacity: 0.35, scale: 0.9, transformOrigin: "center center" }, { opacity: 1, scale: 1.2, duration: 0.3, yoyo: true, repeat: 26, ease: "sine.inOut" }, 32.5);
+
+    // Flying bills shoot out of slot and evaporate
+    tl.fromTo("#stream-b1", { x: 0, y: 0, opacity: 1, scale: 1 }, { x: 250, y: -95, opacity: 0, scale: 0.4, duration: 0.95, repeat: 8, ease: "power1.out" }, 32.6);
+    tl.fromTo("#stream-b2", { x: -90, y: 25, opacity: 1, scale: 1 }, { x: 210, y: -115, opacity: 0, scale: 0.35, duration: 0.95, repeat: 8, ease: "power1.out" }, 32.9);
+    tl.fromTo("#stream-b3", { x: -180, y: 45, opacity: 1, scale: 1 }, { x: 165, y: -130, opacity: 0, scale: 0.3, duration: 0.95, repeat: 8, ease: "power1.out" }, 33.2);
+
+    // Golden Purchasing Power Coin shrinks dramatically as money prints!
+    tl.fromTo("#s4-value-coin",
+      { scale: 1.15, svgOrigin: "0 0" },
+      { scale: 0.32, opacity: 0.45, duration: 6.5, ease: "power2.inOut" },
+      33.2
     );
+    tl.fromTo("#s4-alex", { y: 0 }, { y: -10, duration: 0.55, yoyo: true, repeat: 14, ease: "sine.inOut" }, 32.6);
 
-    tl.fromTo("#char-4",
-      { y: 50, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.7, ease: "back.out(1.4)" },
-      32.8
+    cueSub("#k-4a", 32.70, 35.45);
+    cueSub("#k-4b", 35.55, 38.05);
+    cueSub("#k-4c", 38.15, 40.95);
+
+    // =========================================================================
+    // COOL MORPH TRANSITION 4 -> 5 (41.05s -> 41.95s):
+    // Golden Alchemy Shockwave: Paper vortex compresses & bursts into Tempus Gold!
+    // =========================================================================
+    tl.to("#scene-4", { scale: 0.35, rotation: 14, opacity: 0, duration: 0.48, ease: "power3.in" }, 41.05);
+    tl.set("#t45-alchemy", { opacity: 1 }, 41.35);
+    tl.fromTo("#t45-core",
+      { scale: 0.2, opacity: 1, svgOrigin: "540 960" },
+      { scale: 5.5, opacity: 0, duration: 0.55, ease: "power2.out" },
+      41.35
     );
-    tl.to("#char-4", { y: -8, duration: 1.0, ease: "sine.inOut", yoyo: true, repeat: 6 }, 33.5);
+    tl.fromTo("#t45-ring",
+      { scale: 0.4, opacity: 1, svgOrigin: "540 960" },
+      { scale: 18, opacity: 0, duration: 0.65, ease: "power2.out" },
+      41.38
+    );
+    tl.set("#t45-alchemy", { opacity: 0 }, 42.05);
 
-    // Subtitles Scene 4
-    tl.to("#k-4a", { opacity: 1, y: 0, duration: 0.35 }, 32.6);
-    tl.to("#k-4a", { opacity: 0, y: -20, duration: 0.3 }, 35.5);
+    tl.to("#bg-4", { opacity: 0, duration: 0.5 }, 41.2);
+    tl.fromTo("#bg-5", { opacity: 0, scale: 1.0 }, { opacity: 0.58, scale: 1.12, duration: 12.6, ease: "none" }, 41.3);
 
-    tl.to("#k-4b", { opacity: 1, y: 0, duration: 0.35 }, 35.7);
-    tl.to("#k-4b", { opacity: 0, y: -20, duration: 0.3 }, 38.3);
-
-    tl.to("#k-4c", { opacity: 1, y: 0, duration: 0.35 }, 38.5);
-    tl.to("#k-4c", { opacity: 0, y: -20, duration: 0.3 }, 41.2);
-
-    // ==========================================
-    // METAMORPHOSIS 4 -> 5 (at 41.2s to 42.0s)
-    // ==========================================
-    // Vault stacks and inflation dashboard morph directly into Tempus golden columns
-    tl.to("#scene-4", {
-      scale: 0.92,
-      opacity: 0,
-      duration: 0.6,
-      ease: "power2.in"
-    }, 41.2);
-
+    // =========================================================================
+    // SCENE 5: FORTALEZA 2D DE ACTIVOS REALES · TEMPUS CTA (41.55s -> 54.0s)
+    // =========================================================================
     tl.fromTo("#scene-5",
-      { opacity: 0, scale: 1.06 },
-      { opacity: 1, scale: 1, duration: 0.8, ease: "power2.out" },
-      41.6
+      { opacity: 0, scale: 0.92 },
+      { opacity: 1, scale: 1, duration: 0.55, ease: "power3.out" },
+      41.52
     );
 
-    // Monogram columns rise with spring effect
-    tl.fromTo("#cta-bar-1", { scaleY: 0 }, { scaleY: 1, duration: 0.6, ease: "back.out(1.7)" }, 41.8);
-    tl.fromTo("#cta-bar-2", { scaleY: 0 }, { scaleY: 1, duration: 0.7, ease: "back.out(1.7)" }, 42.0);
-    tl.fromTo("#cta-bar-3", { scaleY: 0 }, { scaleY: 1, duration: 0.6, ease: "back.out(1.7)" }, 42.2);
+    // 4 Wealth Pillars extrude upward like steps!
+    tl.fromTo("#s5-col-1", { scaleY: 0, transformOrigin: "bottom center" }, { scaleY: 1, duration: 0.55, ease: "back.out(1.7)" }, 41.65);
+    tl.fromTo("#s5-col-2", { scaleY: 0, transformOrigin: "bottom center" }, { scaleY: 1, duration: 0.60, ease: "back.out(1.7)" }, 41.80);
+    tl.fromTo("#s5-col-3", { scaleY: 0, transformOrigin: "bottom center" }, { scaleY: 1, duration: 0.65, ease: "back.out(1.7)" }, 41.95);
+    tl.fromTo("#s5-col-4", { scaleY: 0, transformOrigin: "bottom center" }, { scaleY: 1, duration: 0.72, ease: "back.out(1.8)" }, 42.10);
 
-    tl.fromTo("#char-5",
-      { scale: 0.8, opacity: 0, rotateZ: 5 },
-      { scale: 1, opacity: 1, rotateZ: 0, duration: 0.8, ease: "back.out(1.6)" },
-      42.2
+    // Hero 2D Alex lands atop the Tempus Gold Pillar with Shield & Thumbs Up!
+    tl.fromTo("#s5-hero-alex",
+      { y: -120, opacity: 0, scale: 0.8 },
+      { y: 0, opacity: 1, scale: 1, duration: 0.65, ease: "back.out(1.8)" },
+      42.35
     );
-    tl.to("#char-5", { y: -8, duration: 1.2, ease: "sine.inOut", yoyo: true, repeat: 8 }, 43.0);
+    tl.fromTo("#s5-shield",
+      { scale: 0.88, transformOrigin: "center center" },
+      { scale: 1.08, duration: 0.75, yoyo: true, repeat: 13, ease: "sine.inOut" },
+      42.9
+    );
+    tl.fromTo("#s5-thumb-arm",
+      { rotation: -12, transformOrigin: "102px 102px" },
+      { rotation: 10, duration: 0.6, yoyo: true, repeat: 16, ease: "sine.inOut" },
+      42.9
+    );
 
-    // Subtitles Scene 5
-    tl.to("#k-5a", { opacity: 1, y: 0, duration: 0.35 }, 41.6);
-    tl.to("#k-5a", { opacity: 0, y: -20, duration: 0.3 }, 44.8);
+    // Red Inflation Arrows fly toward Alex and ricochet off the Golden Tempus Shield!
+    tl.fromTo("#s5-arrow-1",
+      { x: -180, y: 0, rotation: 0, opacity: 1 },
+      { x: 355, y: -15, rotation: 0, duration: 0.75, ease: "power2.in" },
+      43.3
+    );
+    tl.to("#s5-arrow-1",
+      { x: 140, y: -210, rotation: -55, opacity: 0, duration: 0.65, ease: "power2.out" },
+      44.05
+    );
 
-    tl.to("#k-5b", { opacity: 1, y: 0, duration: 0.35 }, 45.0);
-    tl.to("#k-5b", { opacity: 0, y: -20, duration: 0.3 }, 48.8);
+    tl.fromTo("#s5-arrow-2",
+      { x: -200, y: 0, rotation: 0, opacity: 1 },
+      { x: 315, y: -60, rotation: 0, duration: 0.75, ease: "power2.in" },
+      45.1
+    );
+    tl.to("#s5-arrow-2",
+      { x: 110, y: 180, rotation: 48, opacity: 0, duration: 0.65, ease: "power2.out" },
+      45.85
+    );
 
-    tl.to("#k-5c", { opacity: 1, y: 0, duration: 0.35 }, 49.0);
-    tl.to("#k-5c", { opacity: 0, y: -20, duration: 0.3 }, 53.6);
+    // CTA Card & Pulsing Follow Button
+    tl.fromTo("#s5-cta-card", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.65, ease: "power3.out" }, 42.5);
+    tl.fromTo("#s5-cta-btn", { scale: 0.96 }, { scale: 1.05, duration: 0.65, yoyo: true, repeat: 15, ease: "sine.inOut" }, 43.2);
 
-    // Register timeline
+    cueSub("#k-5a", 41.80, 45.05);
+    cueSub("#k-5b", 45.15, 49.05);
+    cueSub("#k-5c", 49.15, 53.60);
+
+    // Register deterministic timeline
     window.__timelines["main"] = tl;
   </script>
 </body>
