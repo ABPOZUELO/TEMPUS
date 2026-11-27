@@ -57,9 +57,11 @@ TEMPUS_APP_PC/
 *.zip
 *.mp4
 
-# Video pipeline y herramientas auxiliares
+# Video pipeline y herramientas auxiliares (solo local en PC, no subir a GitHub)
+automation/
 tempus-video/
-tempus-hyperframes/.hyperframes/
+tempus-hyperframes/
+scratch/
 guia-editar-videos-claude.pdf
 data/
 
