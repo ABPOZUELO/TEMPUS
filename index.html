@@ -7,6 +7,8 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.gstatic.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://api.coingecko.com https://www.alphavantage.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; worker-src 'self' blob: https://cdnjs.cloudflare.com; frame-src 'self' https://*.firebaseapp.com https://apis.google.com; object-src 'none'; base-uri 'self'; form-action 'self';">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -793,7 +795,7 @@
     </div>
 
     <!-- SCRIPT TIPO MODULE PARA FIREBASE -->
-    <script type="module" src="app.js?v=2.7.1"></script>
+    <script type="module" src="app.js?v=2.8.0"></script>
     <div id="api-key-modal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-sm hidden">
         <div class="apple-card p-6 sm:p-8 rounded-3xl w-full max-w-md mx-4">
             <div class="flex items-center gap-3 mb-3">
@@ -819,7 +821,7 @@
                 </div>
             </div>
             <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Tu Clave API</label>
-            <input type="text" id="user-api-key" placeholder="Pega aquí tu clave personal de Alpha Vantage" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500 font-mono text-xs">
+            <input type="password" id="user-api-key" autocomplete="off" placeholder="Pega aquí tu clave personal de Alpha Vantage" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500 font-mono text-xs">
             <div class="flex justify-end gap-3 mt-6">
                 <button type="button" onclick="document.getElementById('api-key-modal').classList.add('hidden')" class="apple-button px-4 py-2.5 rounded-xl text-zinc-400 hover:text-white text-xs">Cancelar</button>
                 <button type="button" onclick="saveAndSyncApi()" class="apple-button bg-white text-black font-bold px-4 py-2.5 rounded-xl text-xs">Guardar y Sincronizar</button>
@@ -891,12 +893,12 @@
                     <input type="password" id="profile-pwd-current" required placeholder="••••••••" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Nueva Contraseña (Mín. 6 caracteres)</label>
-                    <input type="password" id="profile-new-password" required minlength="6" placeholder="••••••••" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500">
+                    <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Nueva Contraseña (Mín. 8 caracteres)</label>
+                    <input type="password" id="profile-new-password" required minlength="8" placeholder="••••••••" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500">
                 </div>
                 <div>
                     <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Confirmar Nueva Contraseña</label>
-                    <input type="password" id="profile-confirm-password" required minlength="6" placeholder="••••••••" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500">
+                    <input type="password" id="profile-confirm-password" required minlength="8" placeholder="••••••••" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500">
                 </div>
                 <div class="grid grid-cols-2 gap-3 pt-3 border-t border-zinc-800/60 mt-5">
                     <button type="button" onclick="closeProfileModal()" class="apple-button w-full h-10 rounded-xl text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 flex items-center justify-center transition-all">Cancelar</button>

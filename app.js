@@ -33,6 +33,36 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
         let currentCalendarDate = new Date();
         let isLoginMode = true;
 
+        // ------------------ UTILIDADES DE SEGURIDAD Y SANITIZACIÓN (ANTI-XSS) ------------------
+        function escapeHtml(value) {
+            if (value === null || value === undefined) return '';
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function sanitizeText(value, maxLen = 160) {
+            return String(value || '').replace(/[\u0000-\u001F\u007F]/g, '').trim().slice(0, maxLen);
+        }
+
+        function sanitizeDateStr(value) {
+            const s = String(value || '').trim();
+            return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : new Date().toISOString().split('T')[0];
+        }
+
+        function sanitizeSafeUrl(url) {
+            try {
+                const parsed = new URL(String(url || ''), window.location.origin);
+                if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+                    return parsed.href;
+                }
+            } catch (_) {}
+            return '#';
+        }
+
         function updateAliasDisplay() {
             const display = userAlias || (currentUser ? currentUser.email.split('@')[0] : 'Usuario');
             const greeting = document.getElementById('user-alias-greeting');
@@ -116,19 +146,19 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
             if (isLoginMode) {
                 signInWithEmailAndPassword(auth, email, pass)
                     .catch((error) => {
-                        console.error("Login error:", error);
-                        if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
-                            alert("Credenciales incorrectas.\n\nRecuerda que la contraseña distingue mayúsculas y minúsculas: la primera letra 'A' debe ser mayúscula (Abella0406) y sin espacios.");
+                        console.error("Login error:", error.code || "auth_error");
+                        if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
+                            alert("Correo electrónico o contraseña incorrectos. Verifica las mayúsculas, minúsculas y que no haya espacios adicionales.");
                         } else if (error.code === 'auth/too-many-requests') {
-                            alert("Demasiados intentos fallidos seguidos. Por seguridad, Firebase ha bloqueado temporalmente el acceso. Espera un par de minutos e inténtalo de nuevo.");
+                            alert("Demasiados intentos fallidos seguidos. Por seguridad, el acceso se ha bloqueado temporalmente. Espera unos minutos e inténtalo de nuevo.");
                         } else {
-                            alert("Error al entrar (" + (error.code || error.message) + "). Revisa tus credenciales.");
+                            alert("No se pudo iniciar sesión en este momento. Revisa tu conexión e inténtalo de nuevo.");
                         }
                     });
             } else {
-                if(pass.length < 6) { alert("La contraseña debe tener al menos 6 caracteres"); return; }
+                if (pass.length < 8) { alert("Por seguridad, la contraseña debe tener al menos 8 caracteres."); return; }
                 const aliasInput = document.getElementById('register-alias');
-                const finalAlias = (aliasInput && aliasInput.value.trim()) || email.split('@')[0];
+                const finalAlias = sanitizeText((aliasInput && aliasInput.value) || email.split('@')[0], 50);
                 createUserWithEmailAndPassword(auth, email, pass)
                     .then(async (userCred) => {
                         userAlias = finalAlias;
@@ -142,7 +172,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                         document.getElementById('app-content').classList.add('hidden');
                         openLegalModal(true); // Bloqueo obligatorio de términos legales nada más registrarse
                     })
-                    .catch((error) => alert("Error al registrar: El correo ya existe o es inválido."));
+                    .catch((error) => {
+                        if (error.code === 'auth/weak-password') {
+                            alert("La contraseña elegida es demasiado débil. Usa al menos 8 caracteres combinando letras y números.");
+                        } else {
+                            alert("No se pudo completar el registro. Verifica que el correo sea válido o inicia sesión si ya tienes cuenta.");
+                        }
+                    });
             }
         });
 
@@ -297,12 +333,16 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                 } else {
                     filteredTx.forEach((t) => {
                         let originalIdx = transactions.indexOf(t);
+                        if (originalIdx < 0) return;
+                        const safeDesc = escapeHtml(t.desc);
+                        const safeCat = escapeHtml(t.category);
+                        const isIngreso = t.type === 'ingreso';
                         txBody.innerHTML += `
                         <tr class="hover:bg-zinc-900/50">
-                            <td class="py-3 text-zinc-500 text-xs">${formatDate(t.startDate)}</td>
-                            <td class="text-white">${t.desc}</td>
-                            <td class="text-zinc-400">${t.category}</td>
-                            <td class="text-right font-bold ${t.type==='ingreso'?'text-emerald-400':'text-rose-400'}">${t.type==='ingreso'?'+':'-'}${formatMoney(t.amount)}</td>
+                            <td class="py-3 text-zinc-500 text-xs">${escapeHtml(formatDate(t.startDate))}</td>
+                            <td class="text-white">${safeDesc}</td>
+                            <td class="text-zinc-400">${safeCat}</td>
+                            <td class="text-right font-bold ${isIngreso?'text-emerald-400':'text-rose-400'}">${isIngreso?'+':'-'}${escapeHtml(formatMoney(t.amount))}</td>
                             <td class="text-right"><button onclick="deleteTransaction(${originalIdx})" class="text-zinc-500 hover:text-rose-400 font-bold" title="Eliminar">✕</button></td>
                         </tr>`;
                     });
@@ -336,17 +376,20 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                 } else {
                     filteredInv.forEach((i) => {
                         let originalIdx = investments.indexOf(i);
-                        let p = ((i.currentPrice - i.buyPrice)/i.buyPrice)*100;
+                        if (originalIdx < 0) return;
+                        let p = i.buyPrice > 0 ? ((i.currentPrice - i.buyPrice)/i.buyPrice)*100 : 0;
+                        const safeName = escapeHtml(i.name);
+                        const safeTicker = escapeHtml(i.ticker || '-');
                         invBody.innerHTML += `
                         <tr onclick="openInvestmentDetail(${originalIdx})" class="hover:bg-zinc-900/60 cursor-pointer transition-colors" title="Haz clic para ver gráfica oficial 2026 y estado de mercado">
                             <td class="py-3 text-white font-medium flex items-center gap-2">
                                 <span class="w-1.5 h-1.5 rounded-full ${p>=0?'bg-emerald-400':'bg-rose-400'}"></span>
-                                <span>${i.name}</span>
+                                <span>${safeName}</span>
                             </td>
-                            <td class="text-zinc-400 font-mono text-xs">${i.ticker || '-'}</td>
-                            <td class="text-zinc-400 text-xs whitespace-nowrap">${i.buyDate ? formatDate(i.buyDate) : '-'}</td>
-                            <td class="text-right text-zinc-400">${formatMoney(i.buyPrice)}</td>
-                            <td class="text-right font-bold text-white">${formatMoney(i.currentPrice)}</td>
+                            <td class="text-zinc-400 font-mono text-xs">${safeTicker}</td>
+                            <td class="text-zinc-400 text-xs whitespace-nowrap">${i.buyDate ? escapeHtml(formatDate(i.buyDate)) : '-'}</td>
+                            <td class="text-right text-zinc-400">${escapeHtml(formatMoney(i.buyPrice))}</td>
+                            <td class="text-right font-bold text-white">${escapeHtml(formatMoney(i.currentPrice))}</td>
                             <td class="text-right ${p>=0?'text-emerald-400':'text-rose-400'}">${p>=0?'+':''}${p.toFixed(2)}%</td>
                             <td class="text-right" onclick="event.stopPropagation()"><button onclick="deleteInvestment(${originalIdx})" class="text-zinc-500 hover:text-rose-400 font-bold p-1" title="Eliminar">✕</button></td>
                         </tr>`;
@@ -373,7 +416,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                         investments.forEach((i, idx) => {
                             let pct = invCur > 0 ? ((i.currentPrice / invCur) * 100).toFixed(1) : 0;
                             let color = chartColors[idx % chartColors.length];
-                            carteraMenu.innerHTML += `<div class="flex items-center justify-between gap-3"><div class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${color};"></span><span class="text-zinc-300 font-medium truncate max-w-[90px]">${i.name}</span></div><span class="text-white font-bold">${pct}%</span></div>`;
+                            carteraMenu.innerHTML += `<div class="flex items-center justify-between gap-3"><div class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${color};"></span><span class="text-zinc-300 font-medium truncate max-w-[90px]">${escapeHtml(i.name)}</span></div><span class="text-white font-bold">${pct}%</span></div>`;
                         });
                     }
                 }
@@ -427,7 +470,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                             let val = gastoValues[idx];
                             let pct = totalGastos > 0 ? ((val / totalGastos) * 100).toFixed(1) : 0;
                             let color = chartColors[idx % chartColors.length];
-                            gastosMenu.innerHTML += `<div class="flex items-center justify-between gap-3"><div class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${color};"></span><span class="text-zinc-300 font-medium truncate max-w-[90px]">${key}</span></div><span class="text-white font-bold">${pct}%</span></div>`;
+                            gastosMenu.innerHTML += `<div class="flex items-center justify-between gap-3"><div class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${color};"></span><span class="text-zinc-300 font-medium truncate max-w-[90px]">${escapeHtml(key)}</span></div><span class="text-white font-bold">${pct}%</span></div>`;
                         });
                     }
                 }
@@ -638,8 +681,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
             if (impact) impact.textContent = item.impact;
 
             if (link) {
-                link.href = item.url;
-                link.innerHTML = `<span>Leer en ${item.source}</span> <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>`;
+                link.href = sanitizeSafeUrl(item.url);
+                link.innerHTML = `<span>Leer en ${escapeHtml(item.source)}</span> <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>`;
             }
 
             if (modal) modal.classList.remove('hidden');
@@ -879,19 +922,30 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                 const mainGasto = Object.keys(gastosMap).sort((a,b) => gastosMap[b] - gastosMap[a])[0];
                 if (mainGasto) {
                     let ahorroPotencial = gastosMap[mainGasto] * 0.15;
-                    recBox.innerHTML += `<div class="p-4 bg-zinc-900 border border-zinc-800 rounded-xl"><p class="text-white font-bold text-sm">✂️ Optimización Rápida</p><p class="text-zinc-400 text-sm mt-1">Tu mayor gasto es en <strong>${mainGasto}</strong>. Si lo reduces un 15%, ahorrarías <strong class="text-emerald-400">+${formatMoney(ahorroPotencial)}</strong> extra al mes.</p></div>`;
+                    recBox.innerHTML += `<div class="p-4 bg-zinc-900 border border-zinc-800 rounded-xl"><p class="text-white font-bold text-sm">✂️ Optimización Rápida</p><p class="text-zinc-400 text-sm mt-1">Tu mayor gasto es en <strong>${escapeHtml(mainGasto)}</strong>. Si lo reduces un 15%, ahorrarías <strong class="text-emerald-400">+${escapeHtml(formatMoney(ahorroPotencial))}</strong> extra al mes.</p></div>`;
                 }
             }
         }
 
         window.handleTransactionSubmit = async (e) => {
             e.preventDefault();
+            const typeVal = document.getElementById('tx-type').value === 'ingreso' ? 'ingreso' : 'gasto';
+            const descVal = sanitizeText(document.getElementById('tx-desc').value, 160);
+            const catVal = sanitizeText(document.getElementById('tx-category').value, 60) || 'Otros';
+            const amtVal = parseFloat(document.getElementById('tx-amount').value);
+            const dateVal = sanitizeDateStr(document.getElementById('tx-start-date').value);
+
+            if (!descVal || !Number.isFinite(amtVal) || amtVal <= 0 || amtVal > 1e12) {
+                alert("Por favor, introduce un concepto y un importe numérico válido mayor que 0.");
+                return;
+            }
+
             transactions.push({
-                type: document.getElementById('tx-type').value,
-                desc: document.getElementById('tx-desc').value,
-                category: document.getElementById('tx-category').value,
-                amount: parseFloat(document.getElementById('tx-amount').value),
-                startDate: document.getElementById('tx-start-date').value || new Date().toISOString().split('T')[0]
+                type: typeVal,
+                desc: descVal,
+                category: catVal,
+                amount: amtVal,
+                startDate: dateVal
             });
             e.target.reset();
             if(document.getElementById('tx-start-date')) document.getElementById('tx-start-date').value = new Date().toISOString().split('T')[0];
@@ -907,13 +961,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
             const curEl = document.getElementById('inv-current');
             const dateEl = document.getElementById('inv-date');
 
-            const name = nameEl.value.trim();
-            const ticker = (tickerEl ? tickerEl.value.trim().toUpperCase() : '');
+            const name = sanitizeText(nameEl.value, 120);
+            const ticker = (tickerEl ? tickerEl.value.trim().toUpperCase().replace(/[^A-Z0-9\.\-]/g, '').slice(0, 15) : '');
             const buyPrice = parseFloat(buyEl.value);
             const currentPrice = parseFloat(curEl.value);
-            const buyDate = (dateEl && dateEl.value) ? dateEl.value : new Date().toISOString().split('T')[0];
+            const buyDate = sanitizeDateStr(dateEl && dateEl.value);
 
-            if (!name || isNaN(buyPrice) || isNaN(currentPrice)) return;
+            if (!name || !Number.isFinite(buyPrice) || buyPrice < 0 || !Number.isFinite(currentPrice) || currentPrice < 0 || buyPrice > 1e12 || currentPrice > 1e12) return;
 
             investments.push({
                 name,
@@ -930,28 +984,75 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
             await saveDataToCloud();
         };
 
-        window.deleteTransaction = async (idx) => { transactions.splice(idx, 1); updateUI(); await saveDataToCloud(); };
-        window.deleteInvestment = async (idx) => { investments.splice(idx, 1); updateUI(); await saveDataToCloud(); };
+        window.deleteTransaction = async (idx) => {
+            if (typeof idx !== 'number' || idx < 0 || idx >= transactions.length) return;
+            transactions.splice(idx, 1);
+            updateUI();
+            await saveDataToCloud();
+        };
+        window.deleteInvestment = async (idx) => {
+            if (typeof idx !== 'number' || idx < 0 || idx >= investments.length) return;
+            investments.splice(idx, 1);
+            updateUI();
+            await saveDataToCloud();
+        };
 
         window.exportData = () => {
             if (!currentUser) return;
             const dataStr = JSON.stringify({ transactions, investments, goalConfig });
             const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
             const link = document.createElement('a');
-            link.setAttribute('href', dataUri); link.setAttribute('download', `tempus_${currentUser.email}_backup.json`);
+            const safeEmailSlug = String(currentUser.email || 'usuario').replace(/[^a-zA-Z0-9._@-]/g, '_');
+            link.setAttribute('href', dataUri); link.setAttribute('download', `tempus_${safeEmailSlug}_backup.json`);
             document.body.appendChild(link); link.click(); link.remove();
         };
 
         window.importData = (event) => {
             const file = event.target.files[0];
             if (!file) return;
+            if (file.size > 5 * 1024 * 1024) {
+                alert("El archivo de copia de seguridad supera el límite de seguridad (5 MB).");
+                return;
+            }
             const reader = new FileReader();
             reader.onload = async function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
-                    if (data.transactions) transactions = data.transactions;
-                    if (data.investments) investments = data.investments;
-                    if (data.goalConfig) { goalConfig = data.goalConfig; }
+                    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+                        throw new Error("Formato no válido");
+                    }
+                    if (Array.isArray(data.transactions)) {
+                        transactions = data.transactions
+                            .slice(0, 10000)
+                            .filter(t => t && typeof t === 'object' && Number.isFinite(Number(t.amount)) && Number(t.amount) > 0)
+                            .map(t => ({
+                                type: t.type === 'ingreso' ? 'ingreso' : 'gasto',
+                                desc: sanitizeText(t.desc, 160) || 'Movimiento',
+                                category: sanitizeText(t.category, 60) || 'Otros',
+                                amount: Math.min(1e12, Math.abs(Number(t.amount))),
+                                startDate: sanitizeDateStr(t.startDate)
+                            }));
+                    }
+                    if (Array.isArray(data.investments)) {
+                        investments = data.investments
+                            .slice(0, 2000)
+                            .filter(i => i && typeof i === 'object' && sanitizeText(i.name, 120))
+                            .map(i => ({
+                                name: sanitizeText(i.name, 120),
+                                ticker: String(i.ticker || '').toUpperCase().replace(/[^A-Z0-9\.\-]/g, '').slice(0, 15),
+                                buyPrice: Math.max(0, Math.min(1e12, Number(i.buyPrice) || 0)),
+                                currentPrice: Math.max(0, Math.min(1e12, Number(i.currentPrice) || 0)),
+                                buyDate: sanitizeDateStr(i.buyDate)
+                            }));
+                    }
+                    if (data.goalConfig && typeof data.goalConfig === 'object' && !Array.isArray(data.goalConfig)) {
+                        goalConfig = {
+                            name: sanitizeText(data.goalConfig.name, 80) || 'Mi Objetivo',
+                            amount: Math.max(0, Math.min(1e12, Number(data.goalConfig.amount) || 0)),
+                            source: data.goalConfig.source === 'liquidez' ? 'liquidez' : 'patrimonio',
+                            apiKey: sanitizeText(data.goalConfig.apiKey, 64)
+                        };
+                    }
 
                     if(document.getElementById('goal-name')) document.getElementById('goal-name').value = goalConfig.name;
                     if(document.getElementById('goal-amount')) document.getElementById('goal-amount').value = goalConfig.amount || '';
@@ -959,8 +1060,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 
                     updateUI();
                     await saveDataToCloud();
-                    alert("Backup restaurado con éxito.");
-                } catch (err) { alert("Archivo inválido."); }
+                    alert("Backup verificado y restaurado con éxito.");
+                } catch (err) { alert("El archivo no es una copia de seguridad válida de Tempus."); }
             };
             reader.readAsText(file);
         };
@@ -1150,7 +1251,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                     // 2. Alpha Vantage API si el usuario ha configurado su API key
                     if (!newUnitPrice && cleanTicker && goalConfig.apiKey && goalConfig.apiKey.trim() !== '') {
                         try {
-                            const res = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${cleanTicker}&apikey=${goalConfig.apiKey}`);
+                            const safeSymbol = encodeURIComponent(cleanTicker.replace(/[^A-Z0-9\.\-]/g, ''));
+                            const safeKey = encodeURIComponent(goalConfig.apiKey.trim());
+                            const res = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${safeSymbol}&apikey=${safeKey}`);
                             const data = await res.json();
                             if (data['Global Quote'] && data['Global Quote']['05. price']) {
                                 newUnitPrice = parseFloat(data['Global Quote']['05. price']);
@@ -1361,8 +1464,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                 showProfileMessage("Las contraseñas nuevas no coinciden.", false);
                 return;
             }
-            if (newPassword.length < 6) {
-                showProfileMessage("La nueva contraseña debe tener al menos 6 caracteres.", false);
+            if (newPassword.length < 8) {
+                showProfileMessage("Por seguridad, la nueva contraseña debe tener al menos 8 caracteres.", false);
                 return;
             }
 
@@ -1441,6 +1544,16 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
         window.handlePdfFileSelect = async (e) => {
             const file = e.target.files && e.target.files[0];
             if (!file) return;
+            if (file.size > 15 * 1024 * 1024) {
+                alert("El archivo PDF supera el límite máximo permitido de 15 MB.");
+                e.target.value = '';
+                return;
+            }
+            if (file.type && file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+                alert("Por seguridad, solo se admiten documentos en formato PDF.");
+                e.target.value = '';
+                return;
+            }
             await processUploadedPdf(file);
         };
 
@@ -1676,27 +1789,27 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                     </td>
                     <td class="py-2.5 px-3 whitespace-nowrap">
                         ${t.isDuplicate 
-                            ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-950 border border-amber-800 text-amber-300" title="${t.duplicateReason || ''}">⚠️ Duplicado</span>`
+                            ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-950 border border-amber-800 text-amber-300" title="${escapeHtml(t.duplicateReason || '')}">⚠️ Duplicado</span>`
                             : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950 border border-emerald-800 text-emerald-300">✓ Nuevo</span>`
                         }
                     </td>
                     <td class="py-2.5 px-3 whitespace-nowrap">
-                        <input type="date" value="${t.startDate}" style="color-scheme: dark;" onchange="updatePdfRowField(${idx}, 'startDate', this.value)" class="bg-black/50 border border-zinc-800 rounded-lg px-2 py-1 text-zinc-300 text-xs">
+                        <input type="date" value="${escapeHtml(t.startDate)}" style="color-scheme: dark;" onchange="updatePdfRowField(${idx}, 'startDate', this.value)" class="bg-black/50 border border-zinc-800 rounded-lg px-2 py-1 text-zinc-300 text-xs">
                     </td>
                     <td class="py-2.5 px-3">
-                        <input type="text" value="${t.desc}" onchange="updatePdfRowField(${idx}, 'desc', this.value)" class="w-full bg-black/50 border border-zinc-800 rounded-lg px-2 py-1 text-white text-xs">
-                        ${t.duplicateReason ? `<p class="text-[10px] text-amber-400/80 mt-0.5 italic">${t.duplicateReason}</p>` : ''}
+                        <input type="text" value="${escapeHtml(t.desc)}" onchange="updatePdfRowField(${idx}, 'desc', this.value)" class="w-full bg-black/50 border border-zinc-800 rounded-lg px-2 py-1 text-white text-xs">
+                        ${t.duplicateReason ? `<p class="text-[10px] text-amber-400/80 mt-0.5 italic">${escapeHtml(t.duplicateReason)}</p>` : ''}
                     </td>
                     <td class="py-2.5 px-3">
                         <select onchange="updatePdfRowField(${idx}, 'category', this.value)" class="bg-black/50 border border-zinc-800 rounded-lg px-2 py-1 text-zinc-300 text-xs">
-                            ${categoriesList.map(cat => `<option value="${cat}" ${t.category === cat ? 'selected' : ''}>${cat}</option>`).join('')}
+                            ${categoriesList.map(cat => `<option value="${escapeHtml(cat)}" ${t.category === cat ? 'selected' : ''}>${escapeHtml(cat)}</option>`).join('')}
                         </select>
                     </td>
                     <td class="py-2.5 px-3 whitespace-nowrap text-xs font-semibold ${t.type === 'ingreso' ? 'text-emerald-400' : 'text-rose-400'}">
                         ${t.type === 'ingreso' ? 'Ingreso' : 'Gasto'}
                     </td>
                     <td class="py-2.5 px-3 text-right font-bold whitespace-nowrap ${t.type === 'ingreso' ? 'text-emerald-400' : 'text-rose-400'}">
-                        ${t.type === 'ingreso' ? '+' : '-'}${formatMoney(t.amount)}
+                        ${t.type === 'ingreso' ? '+' : '-'}${escapeHtml(formatMoney(t.amount))}
                     </td>
                 </tr>
             `).join('');
@@ -2131,14 +2244,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
             const topMatches = scoredMatches.slice(0, 8).map(m => m.asset);
 
             let html = topMatches.map(m => `
-                <div onclick="selectPredictedAsset('${m.name.replace(/'/g, "\\'")}', '${m.ticker}', ${m.defaultPrice || 0})" 
+                <div data-asset-name="${escapeHtml(m.name)}" data-asset-ticker="${escapeHtml(m.ticker)}" data-asset-price="${Number(m.defaultPrice) || 0}" onclick="selectPredictedAssetFromEl(this)" 
                      class="px-4 py-2.5 hover:bg-zinc-800 cursor-pointer flex items-center justify-between transition-colors border-b border-zinc-800/50 last:border-0">
                     <div>
-                        <span class="text-xs font-bold text-white block">${m.name}</span>
-                        <span class="text-[10px] text-zinc-400 font-mono">${m.ticker} · ${m.category}</span>
+                        <span class="text-xs font-bold text-white block">${escapeHtml(m.name)}</span>
+                        <span class="text-[10px] text-zinc-400 font-mono">${escapeHtml(m.ticker)} · ${escapeHtml(m.category)}</span>
                     </div>
                     <div class="text-right">
-                        <span class="text-xs font-semibold text-emerald-400 block">${m.defaultPrice ? formatMoney(m.defaultPrice) : ''}</span>
+                        <span class="text-xs font-semibold text-emerald-400 block">${m.defaultPrice ? escapeHtml(formatMoney(m.defaultPrice)) : ''}</span>
                         <span class="text-[9px] uppercase tracking-wider text-zinc-500">Sugerido</span>
                     </div>
                 </div>
@@ -2146,14 +2259,15 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 
             // Opción personalizada para permitir añadir CUALQUIER acción, empresa pequeña o ticker
             if (raw.length >= 2) {
-                const cleanTickerCandidate = raw.toUpperCase().replace(/[^A-Z0-9\.\-]/g, '').slice(0, 10);
+                const safeRaw = sanitizeText(raw, 100);
+                const cleanTickerCandidate = safeRaw.toUpperCase().replace(/[^A-Z0-9\.\-]/g, '').slice(0, 10);
                 html += `
-                    <div onclick="selectPredictedAsset('${raw.replace(/'/g, "\\'")}', '${cleanTickerCandidate}', 0)"
+                    <div data-asset-name="${escapeHtml(safeRaw)}" data-asset-ticker="${escapeHtml(cleanTickerCandidate)}" data-asset-price="0" onclick="selectPredictedAssetFromEl(this)"
                          class="px-4 py-2.5 hover:bg-zinc-800 cursor-pointer flex items-center justify-between transition-colors border-t border-zinc-700 bg-zinc-900/80">
                         <div class="flex items-center gap-2">
                             <span class="text-xs text-emerald-400 font-bold">➕</span>
                             <div>
-                                <span class="text-xs font-bold text-white block">Usar "${raw}"</span>
+                                <span class="text-xs font-bold text-white block">Usar "${escapeHtml(safeRaw)}"</span>
                                 <span class="text-[10px] text-zinc-400 font-mono">Activo / Empresa personalizada</span>
                             </div>
                         </div>
@@ -2172,6 +2286,15 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 
             dropdown.innerHTML = html;
             dropdown.classList.remove('hidden');
+        };
+
+        window.selectPredictedAssetFromEl = (el) => {
+            if (!el) return;
+            window.selectPredictedAsset(
+                el.getAttribute('data-asset-name') || '',
+                el.getAttribute('data-asset-ticker') || '',
+                parseFloat(el.getAttribute('data-asset-price') || '0') || 0
+            );
         };
 
         window.selectPredictedAsset = (name, ticker, defaultPrice) => {
@@ -2210,11 +2333,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
             let nameOpts = '';
             let tickerOpts = '';
             for (const a of KNOWN_ASSETS) {
-                // Sugerencias múltiples para que coincida tanto si el usuario escribe el ticker (ej: PPG) como el nombre completo
-                nameOpts += `<option value="${a.ticker}">${a.name} (${a.category})</option>`;
-                nameOpts += `<option value="${a.name}">${a.ticker} · ${a.category}</option>`;
-                nameOpts += `<option value="${a.ticker} - ${a.name}">${a.category}</option>`;
-                tickerOpts += `<option value="${a.ticker}">${a.name}</option>`;
+                const sTicker = escapeHtml(a.ticker);
+                const sName = escapeHtml(a.name);
+                const sCat = escapeHtml(a.category);
+                nameOpts += `<option value="${sTicker}">${sName} (${sCat})</option>`;
+                nameOpts += `<option value="${sName}">${sTicker} · ${sCat}</option>`;
+                nameOpts += `<option value="${sTicker} - ${sName}">${sCat}</option>`;
+                tickerOpts += `<option value="${sTicker}">${sName}</option>`;
             }
             nameDatalist.innerHTML = nameOpts;
             tickerDatalist.innerHTML = tickerOpts;
@@ -2651,8 +2776,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                     console.warn("Error borrando datos en Firestore:", e);
                 }
 
-                // 2. Limpiar almacenamiento local
-                localStorage.clear();
+                // 2. Limpiar únicamente claves locales de Tempus (sin afectar otros proyectos del mismo dominio)
+                Object.keys(localStorage)
+                    .filter(k => k.startsWith('tempus_') || k.startsWith('firebase:'))
+                    .forEach(k => localStorage.removeItem(k));
 
                 // 3. Suprimir usuario en Firebase Auth si la sesión lo permite
                 try {
